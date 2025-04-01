@@ -12,17 +12,13 @@ export class MockService {
         id: 1,
         username: 'admin',
         email: 'admin@example.com',
-        role: 'admin',
-        fullName: 'Administrator',
-        avatar: 'assets/images/users/avatar-1.jpg'
+        role: 'admin'
       },
       {
         id: 2,
         username: 'user',
         email: 'user@example.com',
-        role: 'user',
-        fullName: 'User',
-        avatar: 'assets/images/users/avatar-2.jpg'
+        role: 'user'
       }
     ],
     employees: [
@@ -91,10 +87,6 @@ export class MockService {
 
   // Mock get user profile
   getUserProfile(): Observable<any> {
-    // Luôn trả về user admin
-    return of({
-      isSuccess: true,
-      data: this.mockData.users[0]
-    }).pipe(delay(500));
+    return of(this.mockData.users[0]).pipe(delay(500));
   }
 } 

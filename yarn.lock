@@ -240,7 +240,7 @@
   dependencies:
     tslib "^2.3.0"
 
-"@angular/router@16.1.4":
+"@angular/router@^16.1.4":
   version "16.1.4"
   resolved "https://registry.npmjs.org/@angular/router/-/router-16.1.4.tgz"
   integrity sha512-ooAK7XsY7fLW80htej9jHmct37biK77aNApCdiY+KlLdd45x//ObGxRYXcSSyvs7mRS0AMTGuA/G7/5AMcqcZg==
@@ -2077,6 +2077,13 @@
   version "2.0.4"
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
+
+"@ng-bootstrap/ng-bootstrap@^15.1.2":
+  version "15.1.2"
+  resolved "https://registry.npmjs.org/@ng-bootstrap/ng-bootstrap/-/ng-bootstrap-15.1.2.tgz"
+  integrity sha512-mM2yiGnt9o7KZLIFp8K1vjfmVfu7HR3d8dhH5SszfArbgn9DvvQ4P5D5TDGygzyBSzeyZe18p7I8rX8vgA6DKw==
+  dependencies:
+    tslib "^2.3.0"
 
 "@ng-select/ng-select@^11.0.0":
   version "11.0.0"

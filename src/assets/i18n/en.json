@@ -74,7 +74,8 @@
     "SYSTEM": {
       "TEXT": "Hệ thống",
       "MANAGESYSTEM": "Quản trị hệ thống",
-      "MANAGESYSTEM.DEPARTMENT": "Quản lý phòng ban"
+      "MANAGESYSTEM.DEPARTMENT": "Quản lý phòng ban",
+      "MANAGESYSTEM.SALARY": "Xem chi tiết lương thưởng của nhân viên"
     },
     "MENU": {
       "TEXT": "Hệ thống"
@@ -149,6 +150,7 @@
       "LIST": {
         "INBOX": "Inbox",
         "READEMAIL": "Read Email",
+        "GENERATE": "Generate Email",
         "TEMPLATE": {
           "BADGE": "New",
           "TEXT": "Template",
