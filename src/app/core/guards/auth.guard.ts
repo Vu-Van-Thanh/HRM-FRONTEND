@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+/*import { Injectable } from '@angular/core';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 import { Observable, of } from 'rxjs';
@@ -47,5 +47,32 @@ export class AuthGuard {
 
     this.router.navigate(['/account/login'], { queryParams: { returnUrl: state.url } });
     return of(false);
+  }
+}
+*/
+import { Injectable } from '@angular/core';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+
+import { AuthenticationService } from '../services/auth.service';
+
+import { ConfigService } from '../services/config.service';
+import { AUTH_MODE } from '../constants/config-values.constant';
+import { MockService } from '../services/mock.service';
+
+@Injectable({ providedIn: 'root' })
+export class AuthGuard {
+  constructor(
+    private router: Router,
+    private authenticationService: AuthenticationService,
+    private configService: ConfigService,
+    private mockService: MockService
+  ) { }
+
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+    // Luôn cho phép truy cập
+    return of(true);
   }
 }

@@ -63,8 +63,8 @@ export function createTranslateLoader(http: HttpClient): any {
   ],
   bootstrap: [AppComponent],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: HttpInterceptor, multi: true },
-    { provide: APP_INITIALIZER, useFactory: appInitializerFactory, deps: [ConfigService], multi: true}
+    { provide: HTTP_INTERCEPTORS, useClass: HttpInterceptor, multi: true }
+    /*{ provide: APP_INITIALIZER, useFactory: appInitializerFactory, deps: [ConfigService], multi: true}*/
   ],
 })
 export class AppModule { }
