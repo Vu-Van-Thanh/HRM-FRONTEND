@@ -13,6 +13,10 @@ const routes: Routes = [
     component: SalaryListComponent
   },
   {
+    path: 'employee',
+    loadChildren: () => import('../pages/employee/employee.module').then(m => m.EmployeeModule)
+  },
+  {
     path: '',
     redirectTo: 'department',
     pathMatch: 'prefix'

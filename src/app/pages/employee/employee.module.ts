@@ -41,13 +41,19 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatTableExporterModule } from 'mat-table-exporter';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { SystemRoutingModule } from './system-routing.module';
-import { DepartmentComponent } from './department/department.component';
-import { DepartmentService } from './department/department.service';
+import { EmployeeListComponent } from './employee-list/employee-list.component';
+import { EmployeeDetailDialogComponent } from './employee-detail-dialog/employee-detail-dialog.component';
+import { EmployeeRoutingModule } from './employee-routing.module';
+import { ContractDialogComponent } from './contract-dialog/contract-dialog.component';
+import { RelativeDialogComponent } from './relative-dialog/relative-dialog.component';
+import { EmployeeService } from './employee.service';
 
 @NgModule({
   declarations: [
-    DepartmentComponent
+    EmployeeListComponent,
+    EmployeeDetailDialogComponent,
+    ContractDialogComponent,
+    RelativeDialogComponent
   ],
   imports: [
     CommonModule,
@@ -92,9 +98,11 @@ import { DepartmentService } from './department/department.service';
     MatRippleModule,
     MatTableExporterModule,
     NgbModule,
-    SystemRoutingModule
+    EmployeeRoutingModule
   ],
-  providers: [DepartmentService],
-  exports: [DepartmentComponent]
+  providers: [EmployeeService],
+  exports: [
+    EmployeeListComponent
+  ]
 })
-export class SystemModule { }
+export class EmployeeModule { } 

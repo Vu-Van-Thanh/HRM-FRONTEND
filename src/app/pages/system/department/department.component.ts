@@ -1,88 +1,78 @@
 import { Component, OnInit } from '@angular/core';
-import { SystemService } from 'src/app/core/services/system.service';
-import { STATUS_INFO } from './department.constant';
+import { DepartmentService } from './department.service';
+import { Department } from './department.model';
 
 @Component({
-  selector: 'app-bloglist',
+  selector: 'app-department',
   templateUrl: './department.component.html',
   styleUrls: ['./department.component.scss']
 })
 export class DepartmentComponent implements OnInit {
-
-  // Ui
+  departments: Department[] = [];
+  loading = false;
+  error: string | null = null;
   breadCrumbItems: Array<{}>;
-  items: any = [];
-  pagedInfo: any = {};
+  searchParams = {
+    keyword: '',
+    status: null,
+    page: 1,
+    pageSize: 10
+  };
 
-  DEFAULT_PER_PAGE_OPTIONS = [
-    {
-        label: 10,
-        value: 10
-    },
-    {
-        label: 25,
-        value: 25
-    },
-    {
-        label: 50,
-        value: 50
-    },
-    {
-        label: 100,
-        value: 100
-    }
-  ];
-
-  DEFAULT_STATUS_OPTIONS = [
-    {
-      label: 'Hoàn tất',
-      value: ''
-    },
-    {
-        label: 'Hoạt động',
-        value: 'A'
-    },
-    {
-        label: 'Chờ duyệt',
-        value: 'P'
-    }
-  ]
-
-  searchParams: any = {
-    pageIndex: 1,
-    pageSize: 10,
-    name: '',
-    status: ''
-  }
-
-  constructor(private systemService: SystemService) { }
+  constructor(private departmentService: DepartmentService) { }
 
   ngOnInit(): void {
     this.breadCrumbItems = [{ label: 'Quản trị hệ thống' }, { label: 'Quản lý phòng ban', active: true }];
-    this.getItems({ ...this.searchParams });
+    this.loadDepartments();
   }
 
-  // Data
-  getItems(request: any){
-    this.systemService.getDepartmentPaging(request).subscribe((result: any) => {
-      console.log(result);
-      if(result.isSuccess){
-        const { items, ...pagedInfo } = result.data;
-        this.items = items;
-        this.pagedInfo = pagedInfo;
+  loadDepartments(): void {
+    this.loading = true;
+    this.error = null;
+    
+    this.departmentService.getDepartments().subscribe({
+      next: (data) => {
+        this.departments = data;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.error = 'Có lỗi xảy ra khi tải dữ liệu';
+        this.loading = false;
+        console.error('Error loading departments:', error);
       }
     });
   }
 
-  searchPaging(event: any){
-    this.getItems(event);
+  onSearch(): void {
+    this.loadDepartments();
   }
 
-  getStatusText(status: number): string {
-    return STATUS_INFO[status]?.text || 'Unknown';
+  onReset(): void {
+    this.searchParams = {
+      keyword: '',
+      status: null,
+      page: 1,
+      pageSize: 10
+    };
+    this.loadDepartments();
   }
 
-  getStatusClass(status: number): string {
-    return STATUS_INFO[status]?.class || '';
+  onDelete(id: number): void {
+    if (confirm('Bạn có chắc chắn muốn xóa phòng ban này?')) {
+      this.departmentService.deleteDepartment(id).subscribe({
+        next: (success) => {
+          if (success) {
+            this.loadDepartments();
+          }
+        },
+        error: (error) => {
+          console.error('Error deleting department:', error);
+        }
+      });
+    }
+  }
+
+  getStatusClass(status: boolean): string {
+    return status ? 'success' : 'danger';
   }
 }

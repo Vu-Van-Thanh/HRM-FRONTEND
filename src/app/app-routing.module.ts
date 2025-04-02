@@ -14,6 +14,10 @@ const routes: Routes = [
     component: LayoutComponent, 
     children: [
       {
+        path: 'employee',
+        loadChildren: () => import('./pages/employee/employee.module').then(m => m.EmployeeModule)
+      },
+      {
         path: 'system',
         loadChildren: () => import('./system/system.module').then(m => m.SystemModule)
       },

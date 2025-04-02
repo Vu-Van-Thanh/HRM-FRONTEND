@@ -68,6 +68,12 @@ export const MENU: MenuItem[] = [
                 label: 'MENUITEMS.SYSTEM.MANAGESYSTEM.SALARY',
                 link: '/system/salary',
                 parentId: 13
+            },
+            {
+                id: 16,
+                label: 'MENUITEMS.SYSTEM.MANAGESYSTEM.EMPLOYEE',
+                link: '/system/employee',
+                parentId: 13
             }
         ]
     },

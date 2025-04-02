@@ -1,0 +1,179 @@
+// Add your styles here 
+
+.container {
+  padding: 24px;
+  max-width: 100%;
+  background-color: #f5f5f5;
+  min-height: calc(100vh - 64px);
+  display: block;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  background-color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    h2 {
+      margin: 0;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .total-count {
+      color: #666;
+      font-size: 14px;
+    }
+  }
+
+  .header-right {
+    button {
+      height: 40px;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+}
+
+.filter-section {
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 24px;
+
+  .filter-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+
+    .search-field {
+      flex: 2;
+      min-width: 300px;
+    }
+
+    .filter-field {
+      flex: 1;
+      min-width: 200px;
+    }
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+
+    button {
+      height: 40px;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+}
+
+.table-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+
+  table {
+    width: 100%;
+
+    th.mat-header-cell {
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+      padding: 16px;
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    td.mat-cell {
+      padding: 16px;
+      color: #444;
+      font-size: 14px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .mat-row:hover {
+      background-color: #f8f9fa;
+    }
+
+    .mat-column-actions {
+      width: 120px;
+      text-align: center;
+    }
+
+    .action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      justify-content: flex-start;
+      min-width: 120px;
+
+      button {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        padding: 0;
+      }
+    }
+  }
+
+  mat-progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  mat-paginator {
+    border-top: 1px solid #dee2e6;
+  }
+}
+
+::ng-deep {
+  .success-snackbar {
+    background: #4caf50;
+    color: white;
+  }
+
+  .error-snackbar {
+    background: #f44336;
+    color: white;
+  }
+
+  .mat-simple-snackbar-action {
+    color: white;
+  }
+
+  .mat-form-field-appearance-outline .mat-form-field-outline {
+    color: #dee2e6;
+  }
+
+  .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: #1976d2;
+  }
+
+  .mat-select-value-text {
+    color: #444;
+  }
+
+  .mat-option {
+    font-size: 14px;
+  }
+} 
