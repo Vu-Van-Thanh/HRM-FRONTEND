@@ -1,0 +1,82 @@
+<h2 mat-dialog-title>{{isEdit ? 'Chỉnh sửa thông tin nội bộ' : 'Thêm mới thông tin nội bộ'}}</h2>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <div class="row">
+      <div class="col-12 mb-3">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Tiêu đề</mat-label>
+          <input matInput formControlName="title" placeholder="Nhập tiêu đề">
+          <mat-error *ngIf="form.get('title').hasError('required')">
+            Tiêu đề là bắt buộc
+          </mat-error>
+          <mat-error *ngIf="form.get('title').hasError('minlength')">
+            Tiêu đề phải có ít nhất 3 ký tự
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 mb-3">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Nội dung</mat-label>
+          <textarea matInput formControlName="content" rows="5" placeholder="Nhập nội dung"></textarea>
+          <mat-error *ngIf="form.get('content').hasError('required')">
+            Nội dung là bắt buộc
+          </mat-error>
+          <mat-error *ngIf="form.get('content').hasError('minlength')">
+            Nội dung phải có ít nhất 10 ký tự
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 mb-3">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Phòng ban</mat-label>
+          <mat-select formControlName="departmentName" (selectionChange)="form.patchValue({departmentId: $event.value})">
+            <mat-option *ngFor="let dept of departments" [value]="dept">
+              {{dept}}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('departmentName').hasError('required')">
+            Phòng ban là bắt buộc
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="col-12 mb-3">
+        <div class="file-upload-container">
+          <label class="file-upload-label">
+            <span class="file-upload-text">Đính kèm tài liệu Word</span>
+            <input type="file" (change)="onFileSelected($event)" accept=".doc,.docx" class="file-input" #fileInput>
+          </label>
+          
+          <div *ngIf="fileName" class="selected-file">
+            <mat-icon>description</mat-icon>
+            <span class="file-name">{{fileName}}</span>
+            <button type="button" mat-icon-button color="warn" (click)="removeFile()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          
+          <div *ngIf="isUploading" class="upload-progress">
+            <mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+            <span class="progress-text">Đang tải lên: {{uploadProgress}}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <mat-checkbox formControlName="isActive" color="primary">
+          Hiển thị
+        </mat-checkbox>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Hủy</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!form.valid || isUploading">
+      {{isEdit ? 'Cập nhật' : 'Thêm mới'}}
+    </button>
+  </mat-dialog-actions>
+</form> 

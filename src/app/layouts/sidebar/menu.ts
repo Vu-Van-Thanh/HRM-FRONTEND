@@ -65,46 +65,28 @@ export const MENU: MenuItem[] = [
             },
             {
                 id: 15,
-                label: 'MENUITEMS.ECOMMERCE.LIST.PRODUCTDETAIL',
-                link: '/ecommerce/product-detail/1',
+                label: 'MENUITEMS.SYSTEM.MANAGESYSTEM.SALARY',
+                link: '/system/salary',
                 parentId: 13
             },
             {
                 id: 16,
-                label: 'MENUITEMS.ECOMMERCE.LIST.ORDERS',
-                link: '/ecommerce/orders',
+                label: 'MENUITEMS.SYSTEM.MANAGESYSTEM.EMPLOYEE',
+                link: '/system/employee',
                 parentId: 13
             },
             {
                 id: 17,
-                label: 'MENUITEMS.ECOMMERCE.LIST.CUSTOMERS',
-                link: '/ecommerce/customers',
+                label: 'MENUITEMS.SYSTEM.MANAGESYSTEM.ACTIVITY',
+                link: '/system/activity',
                 parentId: 13
             },
             {
                 id: 18,
-                label: 'MENUITEMS.ECOMMERCE.LIST.CART',
-                link: '/ecommerce/cart',
+                label: 'MENUITEMS.SYSTEM.MANAGESYSTEM.INTERNALINFO',
+                link: '/system/internal-info',
                 parentId: 13
-            },
-            {
-                id: 19,
-                label: 'MENUITEMS.ECOMMERCE.LIST.CHECKOUT',
-                link: '/ecommerce/checkout',
-                parentId: 13
-            },
-            {
-                id: 20,
-                label: 'MENUITEMS.ECOMMERCE.LIST.SHOPS',
-                link: '/ecommerce/shops',
-                parentId: 13
-            },
-            {
-                id: 21,
-                label: 'MENUITEMS.ECOMMERCE.LIST.ADDPRODUCT',
-                link: '/ecommerce/add-product',
-                parentId: 13
-            },
+            }
         ]
     },
     {
@@ -275,91 +257,97 @@ export const MENU: MenuItem[] = [
                         parentId:30
                     }
                 ]
+            },
+            {
+                id: 37,
+                label: 'MENUITEMS.EMAIL.LIST.GENERATE',
+                link: '/email/generate',
+                parentId: 30
             }
         ]
     },
     {
-        id: 37,
+        id: 38,
         label: 'MENUITEMS.INVOICES.TEXT',
         icon: 'bx-receipt',
         subItems: [
             {
-                id: 38,
+                id: 39,
                 label: 'MENUITEMS.INVOICES.LIST.INVOICELIST',
                 link: '/invoices/list',
-                parentId: 37
+                parentId: 38
             },
             {
-                id: 39,
+                id: 40,
                 label: 'MENUITEMS.INVOICES.LIST.INVOICEDETAIL',
                 link: '/invoices/detail',
-                parentId: 37
+                parentId: 38
             },
         ]
     },
     {
-        id: 40,
+        id: 41,
         label: 'MENUITEMS.PROJECTS.TEXT',
         icon: 'bx-briefcase-alt-2',
         subItems: [
             {
-                id: 41,
+                id: 42,
                 label: 'MENUITEMS.PROJECTS.LIST.GRID',
                 link: '/projects/grid',
-                parentId: 40
-            },
-            {
-                id: 42,
-                label: 'MENUITEMS.PROJECTS.LIST.PROJECTLIST',
-                link: '/projects/list',
-                parentId: 40
+                parentId: 41
             },
             {
                 id: 43,
-                label: 'MENUITEMS.PROJECTS.LIST.OVERVIEW',
-                link: '/projects/overview',
-                parentId: 40
+                label: 'MENUITEMS.PROJECTS.LIST.PROJECTLIST',
+                link: '/projects/list',
+                parentId: 41
             },
             {
                 id: 44,
+                label: 'MENUITEMS.PROJECTS.LIST.OVERVIEW',
+                link: '/projects/overview',
+                parentId: 41
+            },
+            {
+                id: 45,
                 label: 'MENUITEMS.PROJECTS.LIST.CREATE',
                 link: '/projects/create',
-                parentId: 40
+                parentId: 41
             }
         ]
     },
     {
-        id: 45,
+        id: 46,
         label: 'MENUITEMS.TASKS.TEXT',
         icon: 'bx-task',
         subItems: [
             {
-                id: 46,
+                id: 47,
                 label: 'MENUITEMS.TASKS.LIST.TASKLIST',
                 link: '/tasks/list',
-                parentId: 45
-            },
-            {
-                id: 47,
-                label: 'MENUITEMS.TASKS.LIST.KANBAN',
-                link: '/tasks/kanban',
-                parentId: 45
+                parentId: 46
             },
             {
                 id: 48,
+                label: 'MENUITEMS.TASKS.LIST.KANBAN',
+                link: '/tasks/kanban',
+                parentId: 46
+            },
+            {
+                id: 49,
                 label: 'MENUITEMS.TASKS.LIST.CREATETASK',
                 link: '/tasks/create',
-                parentId: 45
+                parentId: 46
             }
         ]
     },
     {
-        id: 49,
+        id: 50,
         label: 'MENUITEMS.CONTACTS.TEXT',
         icon: 'bxs-user-detail',
         subItems: [
             {
-                id: 50,
+                id: 51,
                 label: 'MENUITEMS.CONTACTS.LIST.USERGRID',
                 link: '/contacts/grid',
                 parentId: 49

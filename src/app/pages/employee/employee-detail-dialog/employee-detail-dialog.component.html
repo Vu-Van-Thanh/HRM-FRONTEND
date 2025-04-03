@@ -1,0 +1,426 @@
+<div class="employee-detail-dialog">
+  <div class="dialog-header d-flex justify-content-between align-items-center p-3">
+    <h2 class="mb-0">{{isEditMode ? 'Chỉnh sửa thông tin nhân viên' : 'Chi tiết nhân viên'}}</h2>
+    <div>
+      <button mat-icon-button *ngIf="!isEditMode" (click)="onEdit()" matTooltip="Chỉnh sửa">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button *ngIf="isEditMode" (click)="onSave()" matTooltip="Lưu">
+        <mat-icon>save</mat-icon>
+      </button>
+      <button mat-icon-button *ngIf="isEditMode" (click)="onCancel()" matTooltip="Hủy">
+        <mat-icon>cancel</mat-icon>
+      </button>
+      <button mat-icon-button (click)="onClose()" matTooltip="Đóng">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="dialog-content p-3">
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" animationDuration="0ms">
+      <!-- Thông tin nhân viên -->
+      <mat-tab label="Thông tin nhân viên">
+        <div class="tab-content">
+          <form [formGroup]="employeeForm" class="edit-form">
+            <!-- Thông tin cơ bản -->
+            <div class="info-section">
+              <h3>Thông tin cơ bản</h3>
+              <div class="employee-avatar mb-4">
+                <div class="avatar-container">
+                  <img [src]="employee?.photo || 'assets/images/default-avatar.png'" alt="Ảnh nhân viên" class="employee-image">
+                  <div class="avatar-upload" *ngIf="isEditMode">
+                    <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none">
+                    <button mat-raised-button color="primary" (click)="fileInput.click()">
+                      <mat-icon>photo_camera</mat-icon>
+                      Đổi ảnh
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="info-grid">
+                <!-- Mã nhân viên -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Mã nhân viên:</label>
+                  <span>{{employee?.code}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Mã nhân viên</mat-label>
+                  <input matInput formControlName="code">
+                </mat-form-field>
+
+                <!-- Họ và tên -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Họ và tên:</label>
+                  <span>{{employee?.fullName}}</span>
+                </div>
+                <div class="info-grid" *ngIf="isEditMode">
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <mat-label>Họ</mat-label>
+                    <input matInput formControlName="firstName">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <mat-label>Tên</mat-label>
+                    <input matInput formControlName="lastName">
+                  </mat-form-field>
+                </div>
+
+                <!-- Giới tính -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Giới tính:</label>
+                  <span>{{employee?.gender === 'male' ? 'Nam' : 'Nữ'}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Giới tính</mat-label>
+                  <mat-select formControlName="gender">
+                    <mat-option value="male">Nam</mat-option>
+                    <mat-option value="female">Nữ</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- Ngày sinh -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Ngày sinh:</label>
+                  <span>{{employee?.dateOfBirth | date:'dd/MM/yyyy'}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Ngày sinh</mat-label>
+                  <input matInput [matDatepicker]="picker" formControlName="dateOfBirth">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+
+                <!-- Email -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Email:</label>
+                  <span>{{employee?.email}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Email</mat-label>
+                  <input matInput formControlName="email">
+                </mat-form-field>
+
+                <!-- Số điện thoại -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Số điện thoại:</label>
+                  <span>{{employee?.phone}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Số điện thoại</mat-label>
+                  <input matInput formControlName="phone">
+                </mat-form-field>
+
+                <!-- Địa chỉ -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Địa chỉ:</label>
+                  <span>{{employee?.address}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Địa chỉ</mat-label>
+                  <input matInput formControlName="address">
+                </mat-form-field>
+
+                <!-- Phòng ban -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Phòng ban:</label>
+                  <span>{{employee?.departmentName}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Phòng ban</mat-label>
+                  <mat-select formControlName="departmentId">
+                    <mat-option *ngFor="let dept of departments" [value]="dept">{{dept}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- Chức vụ -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Chức vụ:</label>
+                  <span>{{employee?.positionName}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Chức vụ</mat-label>
+                  <mat-select formControlName="positionId">
+                    <mat-option *ngFor="let pos of positions" [value]="pos">{{pos}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- Trạng thái -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Trạng thái:</label>
+                  <span>{{employee?.status ? 'Đang làm việc' : 'Nghỉ việc'}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
+                  <mat-label>Trạng thái</mat-label>
+                  <mat-select formControlName="status">
+                    <mat-option [value]="true">Đang làm việc</mat-option>
+                    <mat-option [value]="false">Nghỉ việc</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Thông tin công việc -->
+            <div class="info-section">
+              <h3>Thông tin công việc</h3>
+              <div class="info-grid">
+                <!-- Ngày vào làm -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Ngày vào làm:</label>
+                  <span>{{employee?.joinDate | date:'dd/MM/yyyy'}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Ngày vào làm</mat-label>
+                  <input matInput [matDatepicker]="joinDatePicker" formControlName="joinDate">
+                  <mat-datepicker-toggle matSuffix [for]="joinDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #joinDatePicker></mat-datepicker>
+                </mat-form-field>
+
+                <!-- Mức lương -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Mức lương:</label>
+                  <span>{{employee?.salary | currency:'VND':'symbol-narrow':'1.0-0'}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Mức lương</mat-label>
+                  <input matInput type="number" formControlName="salary">
+                  <span matSuffix>VND</span>
+                </mat-form-field>
+
+                <!-- Loại hợp đồng -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Loại hợp đồng:</label>
+                  <span>{{employee?.contractType}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Loại hợp đồng</mat-label>
+                  <mat-select formControlName="contractType">
+                    <mat-option *ngFor="let type of contractTypes" [value]="type">{{type}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Thông tin học vấn -->
+            <div class="info-section">
+              <h3>Thông tin học vấn</h3>
+              <div class="info-grid">
+                <!-- Học vấn -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Học vấn:</label>
+                  <span>{{employee?.education}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Học vấn</mat-label>
+                  <mat-select formControlName="education">
+                    <mat-option *ngFor="let edu of educationLevels" [value]="edu">{{edu}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- Chuyên ngành -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Chuyên ngành:</label>
+                  <span>{{employee?.major}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Chuyên ngành</mat-label>
+                  <input matInput formControlName="major">
+                </mat-form-field>
+
+                <!-- Trường học -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Trường học:</label>
+                  <span>{{employee?.school}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Trường học</mat-label>
+                  <input matInput formControlName="school">
+                </mat-form-field>
+
+                <!-- Năm tốt nghiệp -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Năm tốt nghiệp:</label>
+                  <span>{{employee?.graduationYear}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Năm tốt nghiệp</mat-label>
+                  <input matInput type="number" formControlName="graduationYear">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Thông tin khác -->
+            <div class="info-section">
+              <h3>Thông tin khác</h3>
+              <div class="info-grid">
+                <!-- CMND/CCCD -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>CMND/CCCD:</label>
+                  <span>{{employee?.idCard}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>CMND/CCCD</mat-label>
+                  <input matInput formControlName="idCard">
+                </mat-form-field>
+
+                <!-- Ngày cấp -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Ngày cấp:</label>
+                  <span>{{employee?.idCardIssueDate | date:'dd/MM/yyyy'}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Ngày cấp</mat-label>
+                  <input matInput [matDatepicker]="idCardIssueDatePicker" formControlName="idCardIssueDate">
+                  <mat-datepicker-toggle matSuffix [for]="idCardIssueDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #idCardIssueDatePicker></mat-datepicker>
+                </mat-form-field>
+
+                <!-- Nơi cấp -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Nơi cấp:</label>
+                  <span>{{employee?.idCardIssuePlace}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Nơi cấp</mat-label>
+                  <input matInput formControlName="idCardIssuePlace">
+                </mat-form-field>
+
+                <!-- Mã số thuế -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Mã số thuế:</label>
+                  <span>{{employee?.taxCode}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Mã số thuế</mat-label>
+                  <input matInput formControlName="taxCode">
+                </mat-form-field>
+
+                <!-- Người liên hệ khẩn cấp -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Người liên hệ khẩn cấp:</label>
+                  <span>{{employee?.emergencyContact}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Người liên hệ khẩn cấp</mat-label>
+                  <input matInput formControlName="emergencyContact">
+                </mat-form-field>
+
+                <!-- Số điện thoại liên hệ khẩn cấp -->
+                <div class="info-item" *ngIf="!isEditMode">
+                  <label>Số điện thoại liên hệ khẩn cấp:</label>
+                  <span>{{employee?.emergencyPhone}}</span>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                  <mat-label>Số điện thoại liên hệ khẩn cấp</mat-label>
+                  <input matInput formControlName="emergencyPhone">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Nút lưu/hủy khi ở chế độ chỉnh sửa -->
+            <div class="form-actions" *ngIf="isEditMode">
+              <button mat-stroked-button type="button" (click)="onCancel()">Hủy</button>
+              <button mat-raised-button color="primary" type="submit" (click)="onSave()" [disabled]="!employeeForm.valid">
+                Lưu thay đổi
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Thông tin người thân -->
+      <mat-tab label="Thông tin người thân">
+        <div class="py-3">
+          <div class="text-center">
+            <button mat-raised-button color="primary" (click)="onAddRelative()" [disabled]="!isEditMode">
+              <mat-icon>add</mat-icon>
+              Thêm người thân
+            </button>
+          </div>
+
+          <table mat-table [dataSource]="relatives" class="w-100 mt-3">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef> Họ tên </th>
+              <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="relationship">
+              <th mat-header-cell *matHeaderCellDef> Quan hệ </th>
+              <td mat-cell *matCellDef="let element"> {{element.relationship}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="phone">
+              <th mat-header-cell *matHeaderCellDef> Số điện thoại </th>
+              <td mat-cell *matCellDef="let element"> {{element.phone}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef> Thao tác </th>
+              <td mat-cell *matCellDef="let element">
+                <button mat-icon-button color="accent" (click)="onEditRelative(element)" [disabled]="!isEditMode">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="onDeleteRelative(element.id)" [disabled]="!isEditMode">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="relativesColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: relativesColumns;"></tr>
+          </table>
+        </div>
+      </mat-tab>
+
+      <!-- Thông tin hợp đồng -->
+      <mat-tab label="Thông tin hợp đồng">
+        <div class="py-3">
+          <div class="text-center">
+            <button mat-raised-button color="primary" (click)="onAddContract()" [disabled]="!isEditMode">
+              <mat-icon>add</mat-icon>
+              Thêm hợp đồng
+            </button>
+          </div>
+
+          <table mat-table [dataSource]="contracts" class="w-100 mt-3">
+            <ng-container matColumnDef="contractNo">
+              <th mat-header-cell *matHeaderCellDef> Số hợp đồng </th>
+              <td mat-cell *matCellDef="let element"> {{element.contractNo}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef> Loại hợp đồng </th>
+              <td mat-cell *matCellDef="let element"> {{element.type}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="startDate">
+              <th mat-header-cell *matHeaderCellDef> Ngày bắt đầu </th>
+              <td mat-cell *matCellDef="let element"> {{element.startDate | date}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="endDate">
+              <th mat-header-cell *matHeaderCellDef> Ngày kết thúc </th>
+              <td mat-cell *matCellDef="let element"> {{element.endDate | date}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef> Thao tác </th>
+              <td mat-cell *matCellDef="let element">
+                <button mat-icon-button color="accent" (click)="onEditContract(element)" [disabled]="!isEditMode">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="onDeleteContract(element.id)" [disabled]="!isEditMode">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['contractNo', 'type', 'startDate', 'endDate', 'actions']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['contractNo', 'type', 'startDate', 'endDate', 'actions'];"></tr>
+          </table>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div> 

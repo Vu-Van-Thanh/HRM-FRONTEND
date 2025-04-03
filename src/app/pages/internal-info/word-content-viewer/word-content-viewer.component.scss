@@ -1,0 +1,50 @@
+.word-content-container {
+  margin-bottom: 20px;
+  
+  .word-content {
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    
+    .content-wrapper {
+      font-family: 'Times New Roman', Times, serif;
+      line-height: 1.6;
+      
+      h1, h2, h3, h4, h5, h6 {
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+      }
+      
+      p {
+        margin-bottom: 1em;
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1em;
+        
+        th, td {
+          border: 1px solid #dee2e6;
+          padding: 8px;
+        }
+        
+        th {
+          background-color: #f8f9fa;
+        }
+      }
+      
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      
+      ul, ol {
+        padding-left: 2em;
+        margin-bottom: 1em;
+      }
+    }
+  }
+} 

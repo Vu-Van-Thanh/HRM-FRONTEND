@@ -335,6 +335,14 @@
           }
         }
       }
+    },
+    "SYSTEM": {
+      "TEXT": "Sistema",
+      "MANAGESYSTEM": "Gestión del sistema",
+      "MANAGESYSTEM.DEPARTMENT": "Gestión de departamentos",
+      "MANAGESYSTEM.SALARY": "Gestión de salarios/bonos",
+      "MANAGESYSTEM.EMPLOYEE": "Gestión de empleados",
+      "MANAGESYSTEM.ACTIVITY": "Gestión de registro de actividades"
     }
   }
 }

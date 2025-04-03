@@ -1,0 +1,139 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="card-title">Chi tiết nhân viên</h4>
+          <div>
+            <button mat-raised-button color="primary" *ngIf="!isEditMode" (click)="onEdit()">
+              <mat-icon>edit</mat-icon>
+              Chỉnh sửa
+            </button>
+            <button mat-raised-button color="accent" *ngIf="isEditMode" (click)="onSave()">
+              <mat-icon>save</mat-icon>
+              Lưu
+            </button>
+            <button mat-raised-button color="warn" *ngIf="isEditMode" (click)="onCancel()">
+              <mat-icon>cancel</mat-icon>
+              Hủy
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="employeeForm">
+            <div class="row">
+              <!-- Basic Information -->
+              <div class="col-md-6">
+                <mat-card>
+                  <mat-card-header>
+                    <mat-card-title>Thông tin cơ bản</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Mã nhân viên</mat-label>
+                          <input matInput formControlName="id" [readonly]="!isEditMode">
+                        </mat-form-field>
+                      </div>
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Họ tên</mat-label>
+                          <input matInput formControlName="name" [readonly]="!isEditMode">
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Phòng ban</mat-label>
+                          <mat-select formControlName="department" [disabled]="!isEditMode">
+                            <mat-option *ngFor="let dept of departments" [value]="dept">
+                              {{dept}}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Chức vụ</mat-label>
+                          <input matInput formControlName="position" [readonly]="!isEditMode">
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Email</mat-label>
+                          <input matInput formControlName="email" [readonly]="!isEditMode">
+                        </mat-form-field>
+                      </div>
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Số điện thoại</mat-label>
+                          <input matInput formControlName="phone" [readonly]="!isEditMode">
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <!-- Additional Information -->
+              <div class="col-md-6">
+                <mat-card>
+                  <mat-card-header>
+                    <mat-card-title>Thông tin bổ sung</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Địa chỉ</mat-label>
+                          <input matInput formControlName="address" [readonly]="!isEditMode">
+                        </mat-form-field>
+                      </div>
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Ngày sinh</mat-label>
+                          <input matInput [matDatepicker]="picker" formControlName="dateOfBirth" [readonly]="!isEditMode">
+                          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                          <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Giới tính</mat-label>
+                          <mat-select formControlName="gender" [disabled]="!isEditMode">
+                            <mat-option *ngFor="let gender of genders" [value]="gender">
+                              {{gender}}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-md-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Trạng thái</mat-label>
+                          <mat-select formControlName="status" [disabled]="!isEditMode">
+                            <mat-option *ngFor="let status of statuses" [value]="status">
+                              {{status}}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

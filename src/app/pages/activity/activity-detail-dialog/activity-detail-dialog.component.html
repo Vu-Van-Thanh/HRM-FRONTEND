@@ -1,0 +1,104 @@
+<div class="activity-detail-dialog">
+  <div class="dialog-header d-flex justify-content-between align-items-center p-3">
+    <h2 class="mb-0">{{isReject ? 'Từ chối đăng ký' : 'Chi tiết đăng ký'}}</h2>
+    <button mat-icon-button (click)="onClose()" matTooltip="Đóng">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="dialog-content p-3">
+    <ng-container *ngIf="!isReject">
+      <!-- Thông tin cơ bản -->
+      <div class="info-section">
+        <h3>Thông tin cơ bản</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nhân viên:</label>
+            <span>{{activity.employeeName}}</span>
+          </div>
+          <div class="info-item">
+            <label>Phòng ban:</label>
+            <span>{{activity.departmentName}}</span>
+          </div>
+          <div class="info-item">
+            <label>Loại hoạt động:</label>
+            <span>
+              {{activity.type === 'LEAVE' ? 'Nghỉ phép' :
+                activity.type === 'REMOTE' ? 'Làm việc từ xa' :
+                activity.type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
+            </span>
+          </div>
+          <div class="info-item">
+            <label>Trạng thái:</label>
+            <span [class]="'badge ' + 
+              (activity.status === 'PENDING' ? 'bg-warning' :
+               activity.status === 'APPROVED' ? 'bg-success' : 'bg-danger')">
+              {{activity.status === 'PENDING' ? 'Chờ phê duyệt' :
+                activity.status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thời gian -->
+      <div class="info-section">
+        <h3>Thời gian</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Ngày bắt đầu:</label>
+            <span>{{activity.startDate | date:'dd/MM/yyyy'}}</span>
+          </div>
+          <div class="info-item">
+            <label>Ngày kết thúc:</label>
+            <span>{{activity.endDate | date:'dd/MM/yyyy'}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lý do -->
+      <div class="info-section">
+        <h3>Lý do</h3>
+        <p>{{activity.reason}}</p>
+      </div>
+
+      <!-- Thông tin phê duyệt -->
+      <ng-container *ngIf="activity.status !== 'PENDING'">
+        <div class="info-section">
+          <h3>Thông tin phê duyệt</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Người phê duyệt:</label>
+              <span>{{activity.approvedByName}}</span>
+            </div>
+            <div class="info-item">
+              <label>Thời gian phê duyệt:</label>
+              <span>{{activity.approvedAt | date:'dd/MM/yyyy HH:mm'}}</span>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <!-- Form từ chối -->
+    <ng-container *ngIf="isReject">
+      <form [formGroup]="rejectForm" class="reject-form">
+        <div class="form-section">
+          <h3>Lý do từ chối</h3>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Lý do</mat-label>
+            <textarea matInput formControlName="reason" rows="4"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-button (click)="onClose()">Hủy</button>
+          <button mat-raised-button color="warn" (click)="onReject()" [disabled]="!rejectForm.valid">
+            Từ chối
+          </button>
+        </div>
+      </form>
+    </ng-container>
+  </div>
+</div> 

@@ -6,6 +6,7 @@ import { EmailreadComponent } from './emailread/emailread.component';
 import { BasicComponent } from './basic/basic.component';
 import { BillingComponent } from './billing/billing.component';
 import { AlertComponent } from './alert/alert.component';
+import { GenerateComponent } from './generate/generate.component';
 
 const routes: Routes = [
     {
@@ -27,6 +28,10 @@ const routes: Routes = [
     {
         path: 'alert',
         component: AlertComponent
+    },
+    {
+        path: 'generate',
+        component: GenerateComponent
     }
 ];
 

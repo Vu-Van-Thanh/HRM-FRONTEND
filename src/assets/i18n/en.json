@@ -74,7 +74,11 @@
     "SYSTEM": {
       "TEXT": "Hệ thống",
       "MANAGESYSTEM": "Quản trị hệ thống",
-      "MANAGESYSTEM.DEPARTMENT": "Quản lý phòng ban"
+      "MANAGESYSTEM.DEPARTMENT": "Quản lý phòng ban",
+      "MANAGESYSTEM.SALARY": "Quản lý lương/thưởng",
+      "MANAGESYSTEM.EMPLOYEE": "Quản lý nhân viên",
+      "MANAGESYSTEM.ACTIVITY": "Quản lý đăng ký hoạt động",
+      "MANAGESYSTEM.INTERNALINFO": "Quản lý thông tin nội bộ"
     },
     "MENU": {
       "TEXT": "Hệ thống"
@@ -149,6 +153,7 @@
       "LIST": {
         "INBOX": "Inbox",
         "READEMAIL": "Read Email",
+        "GENERATE": "Generate Email",
         "TEMPLATE": {
           "BADGE": "New",
           "TEXT": "Template",

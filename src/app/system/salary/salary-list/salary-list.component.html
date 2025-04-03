@@ -1,0 +1,85 @@
+<div class="container-fluid">
+  <!-- Page Title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-flex align-items-center justify-content-between">
+        <h4 class="mb-0">Quản lý lương/thưởng</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <form [formGroup]="filterForm" (ngSubmit)="applyFilter()">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">Phòng ban</label>
+                  <select class="form-select" formControlName="department">
+                    <option value="">Tất cả</option>
+                    <option *ngFor="let dept of departments" [value]="dept.id">
+                      {{dept.name}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">Tìm kiếm</label>
+                  <input type="text" class="form-control" formControlName="search" placeholder="Tìm theo tên nhân viên...">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">&nbsp;</label>
+                  <button type="submit" class="btn btn-primary w-100">Lọc</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee List -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0">
+              <thead>
+                <tr>
+                  <th>Mã nhân viên</th>
+                  <th>Họ và tên</th>
+                  <th>Phòng ban</th>
+                  <th>Chức vụ</th>
+                  <th>Lương cơ bản</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let employee of employees">
+                  <td>{{employee.code}}</td>
+                  <td>{{employee.name}}</td>
+                  <td>{{employee.department}}</td>
+                  <td>{{employee.position}}</td>
+                  <td>{{employee.baseSalary | currency:'VND'}}</td>
+                  <td>
+                    <button class="btn btn-primary btn-sm" (click)="viewSalaryDetails(employee)">
+                      Xem chi tiết
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

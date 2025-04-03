@@ -15,9 +15,17 @@ import { UIModule } from '../../shared/ui/ui.module';
 import { BasicComponent } from './basic/basic.component';
 import { BillingComponent } from './billing/billing.component';
 import { AlertComponent } from './alert/alert.component';
+import { GenerateComponent } from './generate/generate.component';
 
 @NgModule({
-  declarations: [InboxComponent, EmailreadComponent, BasicComponent, BillingComponent, AlertComponent],
+  declarations: [
+    InboxComponent, 
+    EmailreadComponent, 
+    BasicComponent, 
+    BillingComponent, 
+    AlertComponent,
+    GenerateComponent
+  ],
   imports: [
     CommonModule,
     UIModule,
