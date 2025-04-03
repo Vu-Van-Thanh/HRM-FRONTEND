@@ -335,6 +335,14 @@
           }
         }
       }
+    },
+    "SYSTEM": {
+      "TEXT": "System",
+      "MANAGESYSTEM": "Systemverwaltung",
+      "MANAGESYSTEM.DEPARTMENT": "Abteilungsverwaltung",
+      "MANAGESYSTEM.SALARY": "Gehalts-/Bonusverwaltung",
+      "MANAGESYSTEM.EMPLOYEE": "Mitarbeiterverwaltung",
+      "MANAGESYSTEM.ACTIVITY": "Aktivitätsregistrierung"
     }
   }
 }

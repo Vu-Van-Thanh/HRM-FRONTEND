@@ -333,6 +333,14 @@
           }
         }
       }
+    },
+    "SYSTEM": {
+      "TEXT": "Система",
+      "MANAGESYSTEM": "Управление системой",
+      "MANAGESYSTEM.DEPARTMENT": "Управление отделами",
+      "MANAGESYSTEM.SALARY": "Управление зарплатой/бонусами",
+      "MANAGESYSTEM.EMPLOYEE": "Управление сотрудниками",
+      "MANAGESYSTEM.ACTIVITY": "Управление регистрацией активности"
     }
   }
 }

@@ -12,6 +12,7 @@ import { ErrorPageService } from './error-page.service';
 
 export class ConfigService {
 
+  // lấy url từ environment
   URL = environment.externalService.configServiceUrl;
 
   constructor(private http: HttpClient, private errorPageService: ErrorPageService) { }

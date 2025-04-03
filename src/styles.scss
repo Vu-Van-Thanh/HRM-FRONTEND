@@ -154,4 +154,27 @@ ngx-dropzone-preview {
   color: #f44336;
 }
 
+// Fix modal position
+.modal {
+  z-index: 1050 !important;
+}
+
+.modal-dialog {
+  margin: 1.75rem auto;
+  max-width: 500px;
+  position: relative;
+  z-index: 1051 !important;
+}
+
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 3.5rem);
+}
+
+.modal-content {
+  position: relative;
+  z-index: 1052 !important;
+}
+
 

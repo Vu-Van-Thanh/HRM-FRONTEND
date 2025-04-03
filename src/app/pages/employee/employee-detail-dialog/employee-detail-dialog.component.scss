@@ -8,6 +8,21 @@
     overflow-y: auto;
   }
 
+  // Fix modal position
+  ::ng-deep .mat-dialog-container {
+    position: relative;
+    z-index: 1050 !important;
+  }
+
+  ::ng-deep .cdk-overlay-pane {
+    position: fixed !important;
+    z-index: 1051 !important;
+  }
+
+  ::ng-deep .cdk-overlay-backdrop {
+    z-index: 1049 !important;
+  }
+
   .mat-tab-group {
     height: 100%;
   }

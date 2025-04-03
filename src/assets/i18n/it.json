@@ -333,6 +333,14 @@
           }
         }
       }
+    },
+    "SYSTEM": {
+      "TEXT": "Sistema",
+      "MANAGESYSTEM": "Gestione del sistema",
+      "MANAGESYSTEM.DEPARTMENT": "Gestione dipartimenti",
+      "MANAGESYSTEM.SALARY": "Gestione stipendi/bonus",
+      "MANAGESYSTEM.EMPLOYEE": "Gestione dipendenti",
+      "MANAGESYSTEM.ACTIVITY": "Gestione registrazione attività"
     }
   }
 }

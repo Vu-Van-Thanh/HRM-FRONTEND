@@ -1,0 +1,88 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">Danh sách thông tin nội bộ</h4>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex gap-2">
+              <mat-form-field appearance="outline">
+                <mat-label>Phòng ban</mat-label>
+                <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onFilterChange()">
+                  <mat-option value="">Tất cả</mat-option>
+                  <mat-option *ngFor="let dept of departments" [value]="dept">
+                    {{dept}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Tìm kiếm</mat-label>
+                <input matInput (keyup)="applyFilter($event)" placeholder="Nhập từ khóa tìm kiếm">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+            </div>
+            <button mat-raised-button color="primary" (click)="onAddNew()">
+              <mat-icon>add</mat-icon>
+              Thêm mới
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table mat-table [dataSource]="dataSource" matSort class="w-100">
+              <!-- Title Column -->
+              <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Tiêu đề</th>
+                <td mat-cell *matCellDef="let info">{{info.title}}</td>
+              </ng-container>
+
+              <!-- Department Column -->
+              <ng-container matColumnDef="departmentName">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Phòng ban</th>
+                <td mat-cell *matCellDef="let info">{{info.departmentName}}</td>
+              </ng-container>
+
+              <!-- Created By Column -->
+              <ng-container matColumnDef="createdByName">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Người tạo</th>
+                <td mat-cell *matCellDef="let info">{{info.createdByName}}</td>
+              </ng-container>
+
+              <!-- Created At Column -->
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Ngày tạo</th>
+                <td mat-cell *matCellDef="let info">{{info.createdAt | date:'dd/MM/yyyy HH:mm'}}</td>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Thao tác</th>
+                <td mat-cell *matCellDef="let info">
+                  <button mat-icon-button color="primary" (click)="onViewDocument(info)" matTooltip="Xem tài liệu" *ngIf="info.documentId">
+                    <mat-icon>description</mat-icon>
+                  </button>
+                  <button mat-icon-button color="primary" (click)="onEdit(info)" matTooltip="Sửa">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="onDelete(info)" matTooltip="Xóa">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+              <!-- Row shown when there is no matching data. -->
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="5">Không có dữ liệu</td>
+              </tr>
+            </table>
+          </div>
+
+          <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of internal info"></mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

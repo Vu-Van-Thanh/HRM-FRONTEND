@@ -1,0 +1,56 @@
+// Styles for activity list 
+.container-fluid {
+  padding: 20px;
+}
+
+.card {
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.card-title {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.mat-table {
+  width: 100%;
+}
+
+.mat-column-actions {
+  width: 100px;
+  text-align: center;
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.bg-warning {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.bg-success {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.bg-danger {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.mat-paginator {
+  margin-top: 20px;
+} 

@@ -17,6 +17,14 @@ const routes: Routes = [
     loadChildren: () => import('../pages/employee/employee.module').then(m => m.EmployeeModule)
   },
   {
+    path: 'activity',
+    loadChildren: () => import('../pages/activity/activity.module').then(m => m.ActivityModule)
+  },
+  {
+    path: 'internal-info',
+    loadChildren: () => import('../pages/internal-info/internal-info.module').then(m => m.InternalInfoModule)
+  },
+  {
     path: '',
     redirectTo: 'department',
     pathMatch: 'prefix'
