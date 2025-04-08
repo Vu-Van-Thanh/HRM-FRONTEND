@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -16,7 +17,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'employeeName',
     'departmentName',
-    'type',
+    'activityType',
     'startDate',
     'endDate',
     'reason',
@@ -28,7 +29,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   activityTypes = Object.values(ActivityType);
   activityStatuses = Object.values(ActivityStatus);
   selectedDepartment: string = '';
-  selectedType: ActivityType | '' = '';
+  selectedActivityType: ActivityType | '' = '';
   selectedStatus: ActivityStatus | '' = '';
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -36,11 +37,18 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
 
   constructor(
     private activityService: ActivityService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
-    this.loadActivities();
+    // Get activityType from route data
+    this.route.data.subscribe(data => {
+      if (data['activityType']) {
+        this.selectedActivityType = data['activityType'];
+      }
+      this.loadActivities();
+    });
   }
 
   ngAfterViewInit() {
@@ -53,8 +61,8 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
     if (this.selectedDepartment) {
       params.department = this.selectedDepartment;
     }
-    if (this.selectedType) {
-      params.type = this.selectedType;
+    if (this.selectedActivityType) {
+      params.activityType = this.selectedActivityType;
     }
     if (this.selectedStatus) {
       params.status = this.selectedStatus;

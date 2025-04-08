@@ -1,0 +1,25 @@
+{
+    "MENUITEMS": {
+        "ACTIVITY": {
+            "TEXT": "Quản lý hoạt động",
+            "LIST": {
+                "ATTENDANCE": "Chấm công",
+                "LEAVE": "Đăng ký nghỉ phép",
+                "REMOTE": "Đăng ký làm việc từ xa"
+            }
+        },
+        "ECOMMERCE": {
+            "TEXT": "Ecommerce",
+            "LIST": {
+                "PRODUCTS": "Products",
+                "PRODUCTDETAIL": "Product Detail",
+                "ORDERS": "Orders",
+                "CUSTOMERS": "Customers",
+                "CART": "Cart",
+                "CHECKOUT": "Checkout",
+                "SHOPS": "Shops",
+                "ADDPRODUCT": "Add Product"
+            }
+        }
+    }
+} 
