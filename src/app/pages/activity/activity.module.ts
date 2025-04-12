@@ -21,6 +21,8 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ActivityListComponent } from './activity-list/activity-list.component';
 import { ActivityDetailDialogComponent } from './activity-detail-dialog/activity-detail-dialog.component';
@@ -84,7 +86,9 @@ const routes: Routes = [
     MatBadgeModule,
     MatSnackBarModule,
     MatCheckboxModule,
-    MatRadioModule
+    MatRadioModule,
+    MatTabsModule,
+    MatTooltipModule
   ],
   exports: [RouterModule]
 })
