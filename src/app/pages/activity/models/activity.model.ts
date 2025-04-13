@@ -4,22 +4,27 @@ export interface Activity {
   employeeName: string;
   departmentId: number;
   departmentName: string;
-  type: ActivityType;
-  startDate: Date;
-  endDate: Date;
+  activityType: ActivityType;
+  registrationType?: 'leave' | 'remote';
+  startDate: string;
+  endDate: string;
+  startTime?: string;
+  endTime?: string;
+  leaveType?: string;
+  remoteType?: string;
   reason: string;
-  status: ActivityStatus;
+  status: string;
   approvedBy?: number;
   approvedByName?: string;
-  approvedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  approvedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum ActivityType {
-  LEAVE = 'LEAVE',           // Nghỉ phép
-  REMOTE = 'REMOTE',         // Làm việc từ xa
-  OVERTIME = 'OVERTIME',     // Tăng ca
+  ATTENDANCE = 'ATTENDANCE',      // Chấm công
+  REGISTRATION = 'REGISTRATION',  // Đăng ký hoạt động (nghỉ phép, làm việc từ xa)
+  OVERTIME = 'OVERTIME',         // Tăng ca
   BUSINESS_TRIP = 'BUSINESS_TRIP'  // Công tác
 }
 
@@ -27,4 +32,12 @@ export enum ActivityStatus {
   PENDING = 'PENDING',       // Chờ phê duyệt
   APPROVED = 'APPROVED',     // Đã phê duyệt
   REJECTED = 'REJECTED'      // Từ chối
+}
+
+export interface ActivityField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  options?: { value: string; label: string }[];
 } 

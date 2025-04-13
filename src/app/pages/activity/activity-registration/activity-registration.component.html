@@ -1,0 +1,69 @@
+<div class="container">
+  <div class="card">
+    <h2 class="card-title">
+      {{ registrationType === 'leave' ? 'Đăng ký nghỉ phép' : 'Đăng ký làm việc từ xa' }}
+    </h2>
+
+    <div *ngIf="isLoading" class="spinner-container">
+      <mat-spinner></mat-spinner>
+      <p>Đang tải form đăng ký...</p>
+    </div>
+
+    <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-field" *ngFor="let field of formFields">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ field.label }}</mat-label>
+          <input
+            *ngIf="field.type === 'text' || field.type === 'number' || field.type === 'date' || field.type === 'time'"
+            matInput
+            [type]="field.type"
+            [formControlName]="field.name"
+            [required]="field.required"
+          />
+          <mat-select
+            *ngIf="field.type === 'select'"
+            [formControlName]="field.name"
+            [required]="field.required"
+          >
+            <mat-option *ngFor="let option of field.options" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+          <textarea
+            *ngIf="field.type === 'textarea'"
+            matInput
+            [formControlName]="field.name"
+            [required]="field.required"
+            rows="4"
+          ></textarea>
+          <mat-checkbox
+            *ngIf="field.type === 'checkbox'"
+            [formControlName]="field.name"
+            [required]="field.required"
+          >
+            {{ field.label }}
+          </mat-checkbox>
+          <mat-radio-group
+            *ngIf="field.type === 'radio'"
+            [formControlName]="field.name"
+            [required]="field.required"
+          >
+            <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+              {{ option.label }}
+            </mat-radio-button>
+          </mat-radio-group>
+        </mat-form-field>
+        <mat-error *ngIf="form.get(field.name)?.hasError('required')">
+          {{ field.label }} là bắt buộc
+        </mat-error>
+      </div>
+
+      <div class="button-container">
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || isLoading">
+          Gửi đăng ký
+        </button>
+        <button mat-button type="button" (click)="onBack()">Quay lại</button>
+      </div>
+    </form>
+  </div>
+</div> 

@@ -18,28 +18,52 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCardModule } from '@angular/material/card';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ActivityListComponent } from './activity-list/activity-list.component';
 import { ActivityDetailDialogComponent } from './activity-detail-dialog/activity-detail-dialog.component';
+import { ActivityFormDialogComponent } from './activity-form-dialog/activity-form-dialog.component';
+import { ActivityRegistrationComponent } from './activity-registration/activity-registration.component';
+import { ActivityType } from './models/activity.model';
 
 const routes: Routes = [
   {
     path: '',
     component: ActivityListComponent
+  },
+  {
+    path: 'attendance',
+    component: ActivityListComponent,
+    data: { activityType: ActivityType.ATTENDANCE }
+  },
+  {
+    path: 'registration',
+    component: ActivityListComponent,
+    data: { activityType: ActivityType.REGISTRATION }
+  },
+  {
+    path: 'register/:type',
+    component: ActivityRegistrationComponent
   }
 ];
 
 @NgModule({
   declarations: [
     ActivityListComponent,
-    ActivityDetailDialogComponent
+    ActivityDetailDialogComponent,
+    ActivityFormDialogComponent,
+    ActivityRegistrationComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule,
     RouterModule.forChild(routes),
+    HttpClientModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -54,7 +78,13 @@ const routes: Routes = [
     MatNativeDateModule,
     MatDividerModule,
     MatCardModule,
-    MatBadgeModule
-  ]
+    MatBadgeModule,
+    MatSnackBarModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatTabsModule,
+    MatTooltipModule
+  ],
+  exports: [RouterModule]
 })
 export class ActivityModule { } 

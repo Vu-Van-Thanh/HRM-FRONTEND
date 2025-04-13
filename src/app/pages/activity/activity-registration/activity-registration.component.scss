@@ -1,0 +1,68 @@
+:host {
+  display: block;
+}
+
+.card {
+  box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+  border: 0;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.mat-radio-button {
+  margin-right: 1rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  i {
+    margin-right: 0.5rem;
+  }
+}
+
+.btn-primary {
+  background-color: #556ee6;
+  border-color: #556ee6;
+  
+  &:hover {
+    background-color: #485ec4;
+    border-color: #485ec4;
+  }
+  
+  &:disabled {
+    background-color: #a5b1e8;
+    border-color: #a5b1e8;
+  }
+}
+
+.btn-light {
+  background-color: #f8f9fa;
+  border-color: #f8f9fa;
+  color: #495057;
+  
+  &:hover {
+    background-color: #e2e6ea;
+    border-color: #dae0e5;
+    color: #212529;
+  }
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+} 

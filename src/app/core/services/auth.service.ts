@@ -8,6 +8,11 @@ import { LocalStorage } from '../enums/local-storage.enum';
 export class AuthenticationService {
 
     private user: any;
+    private currentUser: any = {
+        id: 1,
+        username: 'admin',
+        role: 'ADMIN'
+    };
 
     constructor(private http: HttpClient,private router: Router) {
     }
@@ -66,6 +71,18 @@ export class AuthenticationService {
     // Get User Profile
     public GetUserProfile() { 
         return this.http.get('/api/aspnet-identity/auth/me');
+    }
+
+    isAdmin(): boolean {
+        return this.currentUser?.role === 'ADMIN';
+    }
+
+    getCurrentUserId(): number {
+        return this.currentUser?.id;
+    }
+
+    getCurrentUser(): any {
+        return this.currentUser;
     }
 }
 

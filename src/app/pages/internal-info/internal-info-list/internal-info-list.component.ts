@@ -11,7 +11,7 @@ import { WordDocumentDialogComponent } from '../word-document-dialog/word-docume
 @Component({
   selector: 'app-internal-info-list',
   templateUrl: './internal-info-list.component.html',
-  styleUrls: ['./internal-info-list.component.scss']
+  //styleUrls: ['./internal-info-list.component.scss']
 })
 export class InternalInfoListComponent implements OnInit {
   displayedColumns: string[] = [

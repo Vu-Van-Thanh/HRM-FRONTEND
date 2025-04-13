@@ -17,7 +17,7 @@ import { SharedModule } from './cyptolanding/shared/shared.module';
 
 import { ExtrapagesModule } from './extrapages/extrapages.module';
 
-import { LayoutsModule } from './layouts/layouts.module';
+import { LayoutModule } from './layouts/layout.module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CyptolandingComponent } from './cyptolanding/cyptolanding.component';
@@ -51,7 +51,7 @@ export function createTranslateLoader(http: HttpClient): any {
         deps: [HttpClient]
       }
     }),
-    LayoutsModule,
+    LayoutModule,
     AppRoutingModule,
     ExtrapagesModule,
     CarouselModule,

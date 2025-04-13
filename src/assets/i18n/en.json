@@ -350,6 +350,14 @@
           }
         }
       }
+    },
+    "ACTIVITY": {
+      "TEXT": "Activity Management",
+      "LIST": {
+        "ATTENDANCE": "Attendance Tracking",
+        "LEAVE": "Leave Requests",
+        "REMOTE": "Remote Work"
+      }
     }
   }
 }
