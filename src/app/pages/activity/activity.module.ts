@@ -41,14 +41,9 @@ const routes: Routes = [
     data: { activityType: ActivityType.ATTENDANCE }
   },
   {
-    path: 'leave',
+    path: 'registration',
     component: ActivityListComponent,
-    data: { activityType: ActivityType.LEAVE }
-  },
-  {
-    path: 'remote',
-    component: ActivityListComponent,
-    data: { activityType: ActivityType.REMOTE }
+    data: { activityType: ActivityType.REGISTRATION }
   },
   {
     path: 'register/:type',

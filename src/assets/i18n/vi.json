@@ -3,6 +3,7 @@
         "ACTIVITY": {
             "TEXT": "Quản lý hoạt động",
             "LIST": {
+                "REGISTRATION": "Đăng ký hoạt động",
                 "ATTENDANCE": "Chấm công",
                 "LEAVE": "Đăng ký nghỉ phép",
                 "REMOTE": "Đăng ký làm việc từ xa"

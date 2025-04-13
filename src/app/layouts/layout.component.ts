@@ -4,7 +4,7 @@ import { EventService } from '../core/services/event.service';
 
 import {
   LAYOUT_VERTICAL, LAYOUT_HORIZONTAL, LAYOUT_WIDTH, TOPBAR, LAYOUT_MODE, SIDEBAR_TYPE
-} from './layouts.model';
+} from './layout.model';
 
 @Component({
   selector: 'app-layout',

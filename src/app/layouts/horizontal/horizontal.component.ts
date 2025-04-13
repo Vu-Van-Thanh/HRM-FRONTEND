@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { TOPBAR } from "../layouts.model";
+import { TOPBAR } from "../layout.model";
 import { EventService } from '../../core/services/event.service';
 
 @Component({

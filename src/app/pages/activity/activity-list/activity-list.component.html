@@ -6,10 +6,10 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="card-title">Quản lý đăng ký hoạt động</h4>
             <div class="d-flex">
-              <button *ngIf="selectedActivityType === 'LEAVE'" class="btn btn-primary me-2" routerLink="/system/activity/register/leave">
+              <button *ngIf="selectedActivityType === 'REGISTRATION'" class="btn btn-primary me-2" routerLink="/system/activity/register/leave">
                 <i class="bx bx-plus"></i> Đăng ký nghỉ phép
               </button>
-              <button *ngIf="selectedActivityType === 'REMOTE'" class="btn btn-primary me-2" routerLink="/system/activity/register/remote">
+              <button *ngIf="selectedActivityType === 'REGISTRATION'" class="btn btn-primary me-2" routerLink="/system/activity/register/remote">
                 <i class="bx bx-plus"></i> Đăng ký làm việc từ xa
               </button>
             </div>
@@ -39,8 +39,8 @@
                       <mat-select [(ngModel)]="selectedActivityType" (selectionChange)="onFilterChange()">
                         <mat-option value="">Tất cả</mat-option>
                         <mat-option *ngFor="let type of activityTypes" [value]="type">
-                          {{type === 'LEAVE' ? 'Nghỉ phép' :
-                            type === 'REMOTE' ? 'Làm việc từ xa' :
+                          {{type === 'ATTENDANCE' ? 'Chấm công' :
+                            type === 'REGISTRATION' ? 'Đăng ký hoạt động' :
                             type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
                         </mat-option>
                       </mat-select>
@@ -86,8 +86,8 @@
                     <ng-container matColumnDef="activityType">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header>Loại hoạt động</th>
                       <td mat-cell *matCellDef="let activity">
-                        {{activity.activityType === 'LEAVE' ? 'Nghỉ phép' :
-                          activity.activityType === 'REMOTE' ? 'Làm việc từ xa' :
+                        {{activity.activityType === 'ATTENDANCE' ? 'Chấm công' :
+                          activity.activityType === 'REGISTRATION' ? 'Đăng ký hoạt động' :
                           activity.activityType === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
                       </td>
                     </ng-container>
@@ -169,8 +169,8 @@
                       <mat-select [(ngModel)]="selectedActivityType" (selectionChange)="onFilterChange()">
                         <mat-option value="">Tất cả</mat-option>
                         <mat-option *ngFor="let type of activityTypes" [value]="type">
-                          {{type === 'LEAVE' ? 'Nghỉ phép' :
-                            type === 'REMOTE' ? 'Làm việc từ xa' :
+                          {{type === 'ATTENDANCE' ? 'Chấm công' :
+                            type === 'REGISTRATION' ? 'Đăng ký hoạt động' :
                             type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
                         </mat-option>
                       </mat-select>
@@ -204,8 +204,8 @@
                     <ng-container matColumnDef="activityType">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header>Loại hoạt động</th>
                       <td mat-cell *matCellDef="let activity">
-                        {{activity.activityType === 'LEAVE' ? 'Nghỉ phép' :
-                          activity.activityType === 'REMOTE' ? 'Làm việc từ xa' :
+                        {{activity.activityType === 'ATTENDANCE' ? 'Chấm công' :
+                          activity.activityType === 'REGISTRATION' ? 'Đăng ký hoạt động' :
                           activity.activityType === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
                       </td>
                     </ng-container>

@@ -16,6 +16,7 @@ export class ActivityFormDialogComponent implements OnInit {
   isView: boolean = false;
   activityType: string = '';
   record?: Activity;
+  title: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -39,6 +40,7 @@ export class ActivityFormDialogComponent implements OnInit {
       this.activityType = this.record.activityType;
     }
     this.loadActivityFields();
+    this.setActivityTypeTitle();
   }
 
   loadActivityFields(): void {
@@ -108,14 +110,31 @@ export class ActivityFormDialogComponent implements OnInit {
     switch (type) {
       case ActivityType.ATTENDANCE:
         return 'Chấm công';
-      case ActivityType.LEAVE:
-        return 'Nghỉ phép';
-      case ActivityType.REMOTE:
-        return 'Làm việc từ xa';
+      case ActivityType.REGISTRATION:
+        return 'Đăng ký hoạt động';
       case ActivityType.OVERTIME:
         return 'Tăng ca';
+      case ActivityType.BUSINESS_TRIP:
+        return 'Đăng ký công tác';
       default:
         return '';
+    }
+  }
+
+  setActivityTypeTitle(): void {
+    switch (this.data.activityType) {
+      case ActivityType.ATTENDANCE:
+        this.title = 'Đăng ký chấm công';
+        break;
+      case ActivityType.REGISTRATION:
+        this.title = 'Đăng ký hoạt động';
+        break;
+      case ActivityType.OVERTIME:
+        this.title = 'Đăng ký tăng ca';
+        break;
+      case ActivityType.BUSINESS_TRIP:
+        this.title = 'Đăng ký công tác';
+        break;
     }
   }
 } 

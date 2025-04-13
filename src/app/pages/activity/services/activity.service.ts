@@ -18,34 +18,33 @@ export class ActivityService {
       employeeName: 'Nguyễn Văn A',
       departmentId: 1,
       departmentName: 'Phòng Nhân sự',
-      activityType: ActivityType.LEAVE,
-      startDate: new Date('2024-04-01'),
-      endDate: new Date('2024-04-03'),
-      startTime: '09:00',
-      endTime: '18:00',
-      reason: 'Nghỉ phép gia đình',
-      status: ActivityStatus.PENDING,
-      createdAt: new Date('2024-03-25'),
-      updatedAt: new Date('2024-03-25')
+      activityType: ActivityType.REGISTRATION,
+      registrationType: 'leave',
+      startDate: '2024-04-01',
+      endDate: '2024-04-02',
+      leaveType: 'Nghỉ phép năm',
+      reason: 'Nghỉ phép cá nhân',
+      status: 'PENDING',
+      createdAt: '2024-03-30T10:00:00',
+      updatedAt: '2024-03-30T10:00:00'
     },
     {
       id: 2,
       employeeId: 2,
       employeeName: 'Trần Thị B',
-      departmentName: 'Phòng Kế toán',
       departmentId: 2,
-      activityType: ActivityType.REMOTE,
-      startDate: new Date('2024-04-05'),
-      endDate: new Date('2024-04-05'),
+      departmentName: 'Phòng Kế toán',
+      activityType: ActivityType.REGISTRATION,
+      registrationType: 'remote',
+      startDate: '2024-04-03',
+      endDate: '2024-04-03',
       startTime: '09:00',
-      endTime: '18:00',
-      reason: 'Làm việc từ xa do thời tiết',
-      status: ActivityStatus.APPROVED,
-      approvedBy: 1,
-      approvedByName: 'Admin',
-      approvedAt: new Date('2024-03-26'),
-      createdAt: new Date('2024-03-25'),
-      updatedAt: new Date('2024-03-26')
+      endTime: '17:00',
+      remoteType: 'Làm việc từ xa',
+      reason: 'Làm việc tại nhà',
+      status: 'APPROVED',
+      createdAt: '2024-03-29T15:30:00',
+      updatedAt: '2024-03-30T09:00:00'
     },
     {
       id: 3,
@@ -54,17 +53,17 @@ export class ActivityService {
       departmentName: 'Phòng IT',
       departmentId: 3,
       activityType: ActivityType.OVERTIME,
-      startDate: new Date('2024-04-10'),
-      endDate: new Date('2024-04-10'),
+      startDate: '2024-04-10',
+      endDate: '2024-04-10',
       startTime: '09:00',
       endTime: '18:00',
       reason: 'Tăng ca dự án',
-      status: ActivityStatus.REJECTED,
+      status: 'REJECTED',
       approvedBy: 1,
       approvedByName: 'Admin',
-      approvedAt: new Date('2024-03-27'),
-      createdAt: new Date('2024-03-25'),
-      updatedAt: new Date('2024-03-27')
+      approvedAt: '2024-03-27T00:00:00',
+      createdAt: '2024-03-25T00:00:00',
+      updatedAt: '2024-03-27T00:00:00'
     },
     {
       id: 4,
@@ -73,14 +72,14 @@ export class ActivityService {
       departmentName: 'Phòng Marketing',
       departmentId: 4,
       activityType: ActivityType.BUSINESS_TRIP,
-      startDate: new Date('2024-04-15'),
-      endDate: new Date('2024-04-17'),
+      startDate: '2024-04-15',
+      endDate: '2024-04-17',
       startTime: '09:00',
       endTime: '18:00',
       reason: 'Công tác tại Hà Nội',
-      status: ActivityStatus.PENDING,
-      createdAt: new Date('2024-03-28'),
-      updatedAt: new Date('2024-03-28')
+      status: 'PENDING',
+      createdAt: '2024-03-28T00:00:00',
+      updatedAt: '2024-03-28T00:00:00'
     }
   ];
 
@@ -119,11 +118,11 @@ export class ActivityService {
   approveActivity(id: number): Observable<Activity> {
     const activity = this.mockActivities.find(a => a.id === id);
     if (activity) {
-      activity.status = ActivityStatus.APPROVED;
+      activity.status = 'APPROVED';
       activity.approvedBy = 1; // Mock admin ID
       activity.approvedByName = 'Admin';
-      activity.approvedAt = new Date();
-      activity.updatedAt = new Date();
+      activity.approvedAt = new Date().toISOString();
+      activity.updatedAt = new Date().toISOString();
     }
     return of(activity!);
   }
@@ -131,11 +130,11 @@ export class ActivityService {
   rejectActivity(id: number, reason: string): Observable<Activity> {
     const activity = this.mockActivities.find(a => a.id === id);
     if (activity) {
-      activity.status = ActivityStatus.REJECTED;
+      activity.status = 'REJECTED';
       activity.approvedBy = 1; // Mock admin ID
       activity.approvedByName = 'Admin';
-      activity.approvedAt = new Date();
-      activity.updatedAt = new Date();
+      activity.approvedAt = new Date().toISOString();
+      activity.updatedAt = new Date().toISOString();
     }
     return of(activity!);
   }
@@ -162,9 +161,9 @@ export class ActivityService {
       startTime: activity.startTime!,
       endTime: activity.endTime!,
       reason: activity.reason!,
-      status: ActivityStatus.PENDING,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     this.mockActivities.push(newActivity);
     return of(newActivity);
@@ -174,7 +173,11 @@ export class ActivityService {
     // TODO: Replace with actual API call
     const index = this.mockActivities.findIndex(a => a.id === id);
     if (index !== -1) {
-      this.mockActivities[index] = { ...this.mockActivities[index], ...activity, updatedAt: new Date() };
+      this.mockActivities[index] = { 
+        ...this.mockActivities[index], 
+        ...activity, 
+        updatedAt: new Date().toISOString() 
+      };
       return of(this.mockActivities[index]);
     }
     throw new Error('Activity not found');
@@ -191,57 +194,8 @@ export class ActivityService {
   }
 
   getActivityFields(activityType: string): Observable<ActivityField[]> {
-    // Mock form fields based on activity type
-    let fields: ActivityField[] = [];
-    
-    if (activityType === ActivityType.LEAVE) {
-      fields = [
-        {
-          name: 'startDate',
-          label: 'Ngày bắt đầu',
-          type: 'date',
-          required: true
-        },
-        {
-          name: 'endDate',
-          label: 'Ngày kết thúc',
-          type: 'date',
-          required: true
-        },
-        {
-          name: 'leaveType',
-          label: 'Loại nghỉ phép',
-          type: 'select',
-          required: true,
-          options: [
-            { value: 'ANNUAL', label: 'Nghỉ phép năm' },
-            { value: 'SICK', label: 'Nghỉ ốm' },
-            { value: 'PERSONAL', label: 'Nghỉ việc riêng' },
-            { value: 'MATERNITY', label: 'Nghỉ thai sản' },
-            { value: 'BEREAVEMENT', label: 'Nghỉ tang' }
-          ]
-        },
-        {
-          name: 'reason',
-          label: 'Lý do',
-          type: 'textarea',
-          required: true
-        },
-        {
-          name: 'contactInfo',
-          label: 'Thông tin liên hệ khi nghỉ',
-          type: 'text',
-          required: true
-        },
-        {
-          name: 'handoverWork',
-          label: 'Bàn giao công việc',
-          type: 'textarea',
-          required: false
-        }
-      ];
-    } else if (activityType === ActivityType.REMOTE) {
-      fields = [
+    if (activityType === ActivityType.REGISTRATION) {
+      return of([
         {
           name: 'startDate',
           label: 'Ngày bắt đầu',
@@ -258,22 +212,22 @@ export class ActivityService {
           name: 'startTime',
           label: 'Giờ bắt đầu',
           type: 'time',
-          required: true
+          required: false
         },
         {
           name: 'endTime',
           label: 'Giờ kết thúc',
           type: 'time',
-          required: true
+          required: false
         },
         {
-          name: 'remoteType',
-          label: 'Hình thức làm việc từ xa',
+          name: 'registrationType',
+          label: 'Loại đăng ký',
           type: 'select',
           required: true,
           options: [
-            { value: 'FULL_DAY', label: 'Cả ngày' },
-            { value: 'PARTIAL_DAY', label: 'Một phần ngày' }
+            { value: 'leave', label: 'Nghỉ phép' },
+            { value: 'remote', label: 'Làm việc từ xa' }
           ]
         },
         {
@@ -281,34 +235,10 @@ export class ActivityService {
           label: 'Lý do',
           type: 'textarea',
           required: true
-        },
-        {
-          name: 'workLocation',
-          label: 'Địa điểm làm việc',
-          type: 'text',
-          required: true
-        },
-        {
-          name: 'equipment',
-          label: 'Thiết bị cần thiết',
-          type: 'textarea',
-          required: false
-        },
-        {
-          name: 'availability',
-          label: 'Khả năng liên lạc',
-          type: 'select',
-          required: true,
-          options: [
-            { value: 'AVAILABLE', label: 'Luôn sẵn sàng' },
-            { value: 'PARTIAL', label: 'Một phần thời gian' },
-            { value: 'SPECIFIC', label: 'Thời gian cụ thể' }
-          ]
         }
-      ];
+      ]);
     }
-    
-    return of(fields);
+    return of([]);
   }
 
   createActivityRecord(record: Partial<Activity>): Observable<Activity> {

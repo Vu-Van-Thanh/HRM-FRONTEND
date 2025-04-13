@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivityService } from '../services/activity.service';
-import { ActivityType } from '../models/activity.model';
+import { Activity, ActivityType } from '../models/activity.model';
 
 @Component({
   selector: 'app-activity-registration',
@@ -11,8 +11,9 @@ import { ActivityType } from '../models/activity.model';
   styleUrls: ['./activity-registration.component.scss']
 })
 export class ActivityRegistrationComponent implements OnInit {
-  registrationForm: FormGroup;
-  activityType: ActivityType;
+  activityType: string = '';
+  registrationType: 'leave' | 'remote' = 'leave';
+  form: FormGroup;
   formFields: any[] = [];
   isLoading = false;
   isSubmitting = false;
@@ -24,42 +25,30 @@ export class ActivityRegistrationComponent implements OnInit {
     private activityService: ActivityService,
     private snackBar: MatSnackBar
   ) {
-    this.registrationForm = this.fb.group({});
+    this.form = this.fb.group({});
   }
 
   ngOnInit(): void {
-    // Get activity type from route
-    this.route.params.subscribe(params => {
-      const type = params['type'];
-      if (type === 'leave') {
-        this.activityType = ActivityType.LEAVE;
-      } else if (type === 'remote') {
-        this.activityType = ActivityType.REMOTE;
-      } else {
-        this.router.navigate(['/system/activity']);
-        return;
-      }
-      
-      this.loadFormFields();
-    });
+    this.activityType = ActivityType.REGISTRATION;
+    this.registrationType = this.route.snapshot.params['type'] as 'leave' | 'remote';
+    
+    this.loadFormFields();
   }
 
   loadFormFields(): void {
     this.isLoading = true;
     
-    // Get form fields from service
     this.activityService.getActivityFields(this.activityType).subscribe({
       next: (fields) => {
         this.formFields = fields;
         
-        // Create form controls
         const formControls: any = {};
         fields.forEach(field => {
           const validators = field.required ? [Validators.required] : [];
           formControls[field.name] = ['', validators];
         });
         
-        this.registrationForm = this.fb.group(formControls);
+        this.form = this.fb.group(formControls);
         this.isLoading = false;
       },
       error: (error) => {
@@ -71,21 +60,20 @@ export class ActivityRegistrationComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.registrationForm.invalid) {
+    if (this.form.invalid) {
       return;
     }
 
     this.isSubmitting = true;
     
-    // Prepare activity data
-    const formValue = this.registrationForm.value;
-    const activityData = {
+    const formValue = this.form.value;
+    const activityData: Activity = {
       ...formValue,
-      activityType: this.activityType,
+      activityType: this.activityType as ActivityType,
+      registrationType: this.registrationType,
       status: 'PENDING'
     };
     
-    // Submit activity
     this.activityService.createActivity(activityData).subscribe({
       next: () => {
         this.isSubmitting = false;
@@ -98,6 +86,10 @@ export class ActivityRegistrationComponent implements OnInit {
         this.snackBar.open('Không thể đăng ký', 'Đóng', { duration: 3000 });
       }
     });
+  }
+
+  onBack(): void {
+    this.router.navigate(['/system/activity', this.activityType.toLowerCase()]);
   }
 
   getFieldType(field: any): string {

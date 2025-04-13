@@ -78,16 +78,11 @@ export const MENU: MenuItem[] = [
             },
             {
                 id: 18,
-                label: 'MENUITEMS.ACTIVITY.LIST.LEAVE',
-                link: '/system/activity/leave',
-                parentId: 16
-            },
-            {
-                id: 19,
-                label: 'MENUITEMS.ACTIVITY.LIST.REMOTE',
-                link: '/system/activity/remote',
+                label: 'MENUITEMS.ACTIVITY.LIST.REGISTRATION',
+                link: '/system/activity/registration',
                 parentId: 16
             }
+           
         ]
     },
     {

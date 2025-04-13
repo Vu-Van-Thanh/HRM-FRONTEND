@@ -3,7 +3,7 @@ import { Router, NavigationEnd } from '@angular/router';
 
 import { EventService } from '../../core/services/event.service';
 
-import { SIDEBAR_TYPE } from "../layouts.model";
+import { SIDEBAR_TYPE } from "../layout.model";
 
 @Component({
   selector: 'app-vertical',
