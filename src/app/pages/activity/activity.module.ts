@@ -29,6 +29,7 @@ import { ActivityDetailDialogComponent } from './activity-detail-dialog/activity
 import { ActivityFormDialogComponent } from './activity-form-dialog/activity-form-dialog.component';
 import { ActivityRegistrationComponent } from './activity-registration/activity-registration.component';
 import { ActivityType } from './models/activity.model';
+import { WorkLogDialogComponent } from './work-log-dialog/work-log-dialog.component';
 
 const routes: Routes = [
   {
@@ -56,7 +57,8 @@ const routes: Routes = [
     ActivityListComponent,
     ActivityDetailDialogComponent,
     ActivityFormDialogComponent,
-    ActivityRegistrationComponent
+    ActivityRegistrationComponent,
+    WorkLogDialogComponent
   ],
   imports: [
     CommonModule,

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Activity, ActivityStatus, ActivityType, ActivityField } from '../models/activity.model';
 import { environment } from '../../../../environments/environment';
+import { delay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -183,14 +184,9 @@ export class ActivityService {
     throw new Error('Activity not found');
   }
 
-  deleteActivity(id: number): Observable<void> {
+  deleteActivity(id: number, reason?: string): Observable<any> {
     // TODO: Replace with actual API call
-    const index = this.mockActivities.findIndex(a => a.id === id);
-    if (index !== -1) {
-      this.mockActivities.splice(index, 1);
-      return of(void 0);
-    }
-    throw new Error('Activity not found');
+    return of(null).pipe(delay(500));
   }
 
   getActivityFields(activityType: string): Observable<ActivityField[]> {

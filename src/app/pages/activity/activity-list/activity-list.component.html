@@ -4,7 +4,11 @@
       <div class="card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title">Quản lý đăng ký hoạt động</h4>
+            <h4 class="card-title">
+              {{selectedActivityType === 'ATTENDANCE' ? 'Quản lý khai công' :
+                selectedActivityType === 'REGISTRATION' ? 'Quản lý đăng ký hoạt động' :
+                selectedActivityType === 'OVERTIME' ? 'Quản lý tăng ca' : 'Quản lý công tác'}}
+            </h4>
             <div class="d-flex">
               <button *ngIf="selectedActivityType === 'REGISTRATION'" class="btn btn-primary me-2" routerLink="/system/activity/register/leave">
                 <i class="bx bx-plus"></i> Đăng ký nghỉ phép
@@ -16,9 +20,8 @@
           </div>
 
           <!-- Tabs -->
-          <mat-tab-group (selectedTabChange)="onTabChange($event.tab.textLabel === 'all' ? 'all' : 'personal')" class="mb-4">
+          <mat-tab-group (selectedTabChange)="onTabChange($event.index === 0 ? 'all' : 'personal')" class="mb-4">
             <mat-tab label="Tất cả hoạt động" *ngIf="isAdmin">
-              <!-- All Activities Content -->
               <div class="p-3">
                 <!-- Filters -->
                 <div class="row mb-3">
@@ -27,8 +30,8 @@
                       <mat-label>Phòng ban</mat-label>
                       <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onFilterChange()">
                         <mat-option value="">Tất cả</mat-option>
-                        <mat-option *ngFor="let dept of departments" [value]="dept">
-                          {{dept}}
+                        <mat-option *ngFor="let department of departments" [value]="department">
+                          {{department}}
                         </mat-option>
                       </mat-select>
                     </mat-form-field>
@@ -61,8 +64,7 @@
                   <div class="col-md-3">
                     <mat-form-field appearance="outline" class="w-100">
                       <mat-label>Tìm kiếm</mat-label>
-                      <input matInput (keyup)="applyFilter($event)" placeholder="Tìm kiếm...">
-                      <mat-icon matSuffix>search</mat-icon>
+                      <input matInput (keyup)="applyFilter($event)" placeholder="Nhập từ khóa...">
                     </mat-form-field>
                   </div>
                 </div>
@@ -84,7 +86,7 @@
 
                     <!-- Type Column -->
                     <ng-container matColumnDef="activityType">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Loại hoạt động</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Loại</th>
                       <td mat-cell *matCellDef="let activity">
                         {{activity.activityType === 'ATTENDANCE' ? 'Chấm công' :
                           activity.activityType === 'REGISTRATION' ? 'Đăng ký hoạt động' :
@@ -94,19 +96,19 @@
 
                     <!-- Start Date Column -->
                     <ng-container matColumnDef="startDate">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Ngày bắt đầu</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Từ ngày</th>
                       <td mat-cell *matCellDef="let activity">{{activity.startDate | date:'dd/MM/yyyy'}}</td>
                     </ng-container>
 
                     <!-- End Date Column -->
                     <ng-container matColumnDef="endDate">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Ngày kết thúc</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Đến ngày</th>
                       <td mat-cell *matCellDef="let activity">{{activity.endDate | date:'dd/MM/yyyy'}}</td>
                     </ng-container>
 
                     <!-- Reason Column -->
                     <ng-container matColumnDef="reason">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Lý do</th>
+                      <th mat-header-cell *matHeaderCellDef>Lý do</th>
                       <td mat-cell *matCellDef="let activity">{{activity.reason}}</td>
                     </ng-container>
 
@@ -114,9 +116,7 @@
                     <ng-container matColumnDef="status">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header>Trạng thái</th>
                       <td mat-cell *matCellDef="let activity">
-                        <span [class]="'badge ' + 
-                          (activity.status === 'PENDING' ? 'bg-warning' :
-                           activity.status === 'APPROVED' ? 'bg-success' : 'bg-danger')">
+                        <span [class]="'status-badge ' + activity.status.toLowerCase()">
                           {{activity.status === 'PENDING' ? 'Chờ phê duyệt' :
                             activity.status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
                         </span>
@@ -127,25 +127,17 @@
                     <ng-container matColumnDef="actions">
                       <th mat-header-cell *matHeaderCellDef>Thao tác</th>
                       <td mat-cell *matCellDef="let activity">
-                        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Actions">
-                          <mat-icon>more_vert</mat-icon>
+                        <button mat-icon-button color="primary" (click)="onViewDetail(activity)" matTooltip="Xem chi tiết">
+                          <mat-icon>visibility</mat-icon>
                         </button>
-                        <mat-menu #menu="matMenu">
-                          <button mat-menu-item (click)="onViewDetail(activity)">
-                            <mat-icon>visibility</mat-icon>
-                            <span>Xem chi tiết</span>
-                          </button>
-                          <ng-container *ngIf="activity.status === 'PENDING'">
-                            <button mat-menu-item (click)="onApprove(activity)">
-                              <mat-icon>check_circle</mat-icon>
-                              <span>Phê duyệt</span>
-                            </button>
-                            <button mat-menu-item (click)="onReject(activity)">
-                              <mat-icon>cancel</mat-icon>
-                              <span>Từ chối</span>
-                            </button>
-                          </ng-container>
-                        </mat-menu>
+                        <button mat-icon-button color="accent" (click)="onApprove(activity)" 
+                          *ngIf="activity.status === 'PENDING'" matTooltip="Phê duyệt">
+                          <mat-icon>check_circle</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="onReject(activity)"
+                          *ngIf="activity.status === 'PENDING'" matTooltip="Từ chối">
+                          <mat-icon>cancel</mat-icon>
+                        </button>
                       </td>
                     </ng-container>
 
@@ -153,17 +145,25 @@
                     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
                   </table>
 
-                  <mat-paginator #allPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of activities"></mat-paginator>
+                  <mat-paginator #allPaginator [pageSizeOptions]="[5, 10, 25, 100]">
+                  </mat-paginator>
                 </div>
               </div>
             </mat-tab>
 
             <mat-tab label="Hoạt động của tôi">
-              <!-- Personal Activities Content -->
               <div class="p-3">
+                <!-- Add Work Log Button -->
+                <div class="d-flex justify-content-end mb-3">
+                  <button mat-raised-button color="primary" (click)="onAddWorkLog()">
+                    <mat-icon>add</mat-icon>
+                    Thêm khai công
+                  </button>
+                </div>
+
                 <!-- Filters -->
                 <div class="row mb-3">
-                  <div class="col-md-4">
+                  <div class="col-md-3">
                     <mat-form-field appearance="outline" class="w-100">
                       <mat-label>Loại hoạt động</mat-label>
                       <mat-select [(ngModel)]="selectedActivityType" (selectionChange)="onFilterChange()">
@@ -176,7 +176,7 @@
                       </mat-select>
                     </mat-form-field>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-3">
                     <mat-form-field appearance="outline" class="w-100">
                       <mat-label>Trạng thái</mat-label>
                       <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()">
@@ -188,11 +188,20 @@
                       </mat-select>
                     </mat-form-field>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-3">
                     <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Tìm kiếm</mat-label>
-                      <input matInput (keyup)="applyFilter($event)" placeholder="Tìm kiếm...">
-                      <mat-icon matSuffix>search</mat-icon>
+                      <mat-label>Từ ngày</mat-label>
+                      <input matInput [matDatepicker]="startDatePicker" [(ngModel)]="startDate">
+                      <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+                      <mat-datepicker #startDatePicker></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>Đến ngày</mat-label>
+                      <input matInput [matDatepicker]="endDatePicker" [(ngModel)]="endDate">
+                      <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+                      <mat-datepicker #endDatePicker></mat-datepicker>
                     </mat-form-field>
                   </div>
                 </div>
@@ -202,7 +211,7 @@
                   <table mat-table [dataSource]="personalDataSource" matSort #personalSort="matSort" class="w-100">
                     <!-- Type Column -->
                     <ng-container matColumnDef="activityType">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Loại hoạt động</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Loại</th>
                       <td mat-cell *matCellDef="let activity">
                         {{activity.activityType === 'ATTENDANCE' ? 'Chấm công' :
                           activity.activityType === 'REGISTRATION' ? 'Đăng ký hoạt động' :
@@ -212,19 +221,19 @@
 
                     <!-- Start Date Column -->
                     <ng-container matColumnDef="startDate">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Ngày bắt đầu</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Từ ngày</th>
                       <td mat-cell *matCellDef="let activity">{{activity.startDate | date:'dd/MM/yyyy'}}</td>
                     </ng-container>
 
                     <!-- End Date Column -->
                     <ng-container matColumnDef="endDate">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Ngày kết thúc</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Đến ngày</th>
                       <td mat-cell *matCellDef="let activity">{{activity.endDate | date:'dd/MM/yyyy'}}</td>
                     </ng-container>
 
                     <!-- Reason Column -->
                     <ng-container matColumnDef="reason">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Lý do</th>
+                      <th mat-header-cell *matHeaderCellDef>Lý do</th>
                       <td mat-cell *matCellDef="let activity">{{activity.reason}}</td>
                     </ng-container>
 
@@ -232,9 +241,7 @@
                     <ng-container matColumnDef="status">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header>Trạng thái</th>
                       <td mat-cell *matCellDef="let activity">
-                        <span [class]="'badge ' + 
-                          (activity.status === 'PENDING' ? 'bg-warning' :
-                           activity.status === 'APPROVED' ? 'bg-success' : 'bg-danger')">
+                        <span [class]="'status-badge ' + activity.status.toLowerCase()">
                           {{activity.status === 'PENDING' ? 'Chờ phê duyệt' :
                             activity.status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
                         </span>
@@ -245,8 +252,17 @@
                     <ng-container matColumnDef="actions">
                       <th mat-header-cell *matHeaderCellDef>Thao tác</th>
                       <td mat-cell *matCellDef="let activity">
-                        <button mat-icon-button (click)="onViewDetail(activity)" matTooltip="Xem chi tiết">
+                        <button mat-icon-button color="primary" (click)="onViewDetail(activity)" matTooltip="Xem chi tiết">
                           <mat-icon>visibility</mat-icon>
+                        </button>
+                        <button mat-icon-button color="accent" (click)="onEditActivity(activity)" 
+                          *ngIf="activity.status === 'PENDING'" matTooltip="Chỉnh sửa">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="onDeleteActivity(activity)"
+                          *ngIf="activity.status === 'PENDING' && activity.activityType === 'ATTENDANCE'" 
+                          matTooltip="Xóa">
+                          <mat-icon>delete</mat-icon>
                         </button>
                       </td>
                     </ng-container>
@@ -255,7 +271,8 @@
                     <tr mat-row *matRowDef="let row; columns: personalDisplayedColumns;"></tr>
                   </table>
 
-                  <mat-paginator #personalPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of activities"></mat-paginator>
+                  <mat-paginator #personalPaginator [pageSizeOptions]="[5, 10, 25, 100]">
+                  </mat-paginator>
                 </div>
               </div>
             </mat-tab>

@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>Khai công</h2>
+
+<form [formGroup]="workLogForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Dự án</mat-label>
+        <mat-select formControlName="projectId">
+          <mat-option *ngFor="let project of projects" [value]="project.id">
+            {{project.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Vị trí</mat-label>
+        <mat-select formControlName="positionId">
+          <mat-option *ngFor="let position of positions" [value]="position.id">
+            {{position.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Ngày</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="date">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Giờ bắt đầu</mat-label>
+        <input matInput type="time" formControlName="startTime">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Giờ kết thúc</mat-label>
+        <input matInput type="time" formControlName="endTime">
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Mô tả công việc</mat-label>
+      <textarea matInput formControlName="description" rows="2"></textarea>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Hủy</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!workLogForm.valid">
+      Lưu
+    </button>
+  </mat-dialog-actions>
+</form> 
