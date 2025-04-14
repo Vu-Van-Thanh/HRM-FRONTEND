@@ -1,4 +1,4 @@
-/*import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 import { Observable, of } from 'rxjs';
@@ -49,17 +49,15 @@ export class AuthGuard {
     return of(false);
   }
 }
-*/
-import { Injectable } from '@angular/core';
+
+/*import { Injectable } from '@angular/core';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
 
 import { AuthenticationService } from '../services/auth.service';
 
 import { ConfigService } from '../services/config.service';
-import { AUTH_MODE } from '../constants/config-values.constant';
 import { MockService } from '../services/mock.service';
 
 @Injectable({ providedIn: 'root' })
@@ -76,3 +74,4 @@ export class AuthGuard {
     return of(true);
   }
 }
+*/
