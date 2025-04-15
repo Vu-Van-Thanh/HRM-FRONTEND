@@ -41,7 +41,7 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
       userName: ['admin', [Validators.required]],
-      password: ['Haidang106@', [Validators.required]],
+      password: ['Thanh2k3@', [Validators.required]],
       rememberMe: [true] 
     });
 
@@ -56,30 +56,42 @@ export class LoginComponent implements OnInit {
    * Form submit
    */
   onSubmit() {
+    console.log('onSubmit called');
     this.submitted = true;
     // stop here if form is invalid
     if (this.loginForm.invalid) {
+      console.log('Form is invalid');
       return;
     } 
     
     if (this.authMode === AUTH_MODE.DB) {
+      console.log('Auth mode is DB');
       var isRemember = this.f.rememberMe.value;
+      console.log('Login attempt with:', {
+        userName: this.f.userName.value,
+        password: this.f.password.value,
+        isRemember
+      });
 
       this.authenticationService.login(this.f.userName.value, this.f.password.value,isRemember)
-        .subscribe(
-        (response: any) => {
-          if(response?.isSuccess){
-            const accessToken = response?.data?.accessToken;
-
-            this.authenticationService.setAuthToken({ accessToken },isRemember);
-            this.toastService.success('Đăng nhập thành công!');
-            this.router.navigate(['/dashboard']);
+        .subscribe({
+          next: (response: any) => {
+            console.log('Login response:', response);
+            if(response?.isSuccess){
+              const accessToken = response?.accessToken;
+              this.authenticationService.setAuthToken({ accessToken },isRemember);
+              this.toastService.success('Đăng nhập thành công!');
+              this.router.navigate(['/dashboard']);
+            } else {
+              this.toastService.error(response?.message || 'Đăng nhập thất bại!');
+            }
+          },
+          error: (error: any) => {
+            console.error('Login error:', error);
+            this.toastService.error(error?.error?.message || 'Có lỗi xảy ra khi đăng nhập!');
           }
-        },
-        (failure: any) => {
-          this.toastService.error(failure?.error?.message);
-        }
-    )};
+        });
+    }
   }
 
   // UI

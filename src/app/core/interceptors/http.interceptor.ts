@@ -62,11 +62,11 @@ export class HttpInterceptor implements HttpSystemInterceptor {
     }
 
     // Mock auth APIs
-    if (url.includes('/api/auth/login')) {
+    /*if (url.includes('/api/auth/login')) {
       return this.mockService.login(request.body).pipe(
         finalize(() => this.loadingService.hide())
       );
-    }
+    }*/
     
     if (url.includes('/api/users')) {
       return this.mockService.getUsers().pipe(

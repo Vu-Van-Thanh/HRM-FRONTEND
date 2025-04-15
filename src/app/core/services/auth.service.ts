@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { LocalStorage } from '../enums/local-storage.enum';
+import {API_ENDPOINT} from '../constants/endpoint';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 
@@ -20,12 +22,29 @@ export class AuthenticationService {
     // Login
     public login(userName: string, password: string,rememberMe: boolean) {
         const body = {
-            userName: userName,
+            email: userName,
             password: password,
-            rememberMe: rememberMe
         };
-      
-        return this.http.post('/api/aspnet-identity/auth/login', body);
+        console.log('Sending login request to:', API_ENDPOINT.login);
+        console.log('Request body:', body);
+        
+        return this.http.post(API_ENDPOINT.login, body, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Skip-Interceptor': 'true'
+            },
+            observe: 'response'
+        }).pipe(
+            map(response => {
+                console.log('Login response:', response);
+                return response.body;
+            }),
+            catchError(error => {
+                console.error('Login error:', error);
+                throw error;
+            })
+        );
     }
 
     public logout() {
