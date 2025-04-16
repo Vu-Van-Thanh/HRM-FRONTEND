@@ -58,7 +58,6 @@ export class LoginComponent implements OnInit {
    * Form submit
    */
   onSubmit() {
-    this.router.navigate(['/dashboard']);
     console.log('onSubmit called');
     this.submitted = true;
     // stop here if form is invalid
