@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { API_ENDPOINT } from '../constants/endpoint';
 
 import { User } from '../models/auth.models';
 
@@ -12,6 +13,7 @@ export class UserProfileService {
     }
 
     register(user: User) {
-        return this.http.post(`/users/register`, user);
+        console.log('Sending registration request to:', user);
+        return this.http.post(API_ENDPOINT.register, user);
     }
 }

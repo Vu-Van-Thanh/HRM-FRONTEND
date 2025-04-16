@@ -39,14 +39,16 @@ export class LoginComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.loginForm = this.formBuilder.group({
-      userName: ['admin', [Validators.required]],
-      password: ['Thanh2k3@', [Validators.required]],
-      rememberMe: [true] 
-    });
 
-    // Reset login status
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+      const state = history.state;
+
+      this.loginForm = this.formBuilder.group({
+        userName: [state?.username ?? 'admin', [Validators.required]],
+        password: [state?.password ?? 'Thanh2k3@', [Validators.required]],
+        rememberMe: [true]
+      });
+
+  this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
   // Convenience getter for easy access to form fields
@@ -56,6 +58,7 @@ export class LoginComponent implements OnInit {
    * Form submit
    */
   onSubmit() {
+    this.router.navigate(['/dashboard']);
     console.log('onSubmit called');
     this.submitted = true;
     // stop here if form is invalid

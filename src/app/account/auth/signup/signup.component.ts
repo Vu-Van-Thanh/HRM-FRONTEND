@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
 import { AuthenticationService } from '../../../core/services/auth.service';
-import { environment } from '../../../../environments/environment';
 import { first } from 'rxjs/operators';
 import { UserProfileService } from '../../../core/services/user.service';
+import {User} from '../../../core/models/auth.models';
 
 @Component({
   selector: 'app-signup',
@@ -47,30 +46,29 @@ export class SignupComponent implements OnInit {
     if (this.signupForm.invalid) {
       return;
     } else {
-      if (environment.defaultauth === 'firebase') {
-        // this.authenticationService.register(this.f.email.value, this.f.password.value).then((res: any) => {
-        //   this.successmsg = true;
-        //   if (this.successmsg) {
-        //     this.router.navigate(['/dashboard']);
-        //   }
-        // })
-        //   .catch(error => {
-        //     this.error = error ? error : '';
-        //   });
-      } else {
-        this.userService.register(this.signupForm.value)
+      const payload: User = {
+        Fullname: this.f.username.value,
+        Email: this.f.email.value,
+        Password: this.f.password.value,
+        ConfirmPassword: this.f.password.value,
+        Role: 'User'
+      };
+      this.userService.register(payload)
           .pipe(first())
           .subscribe(
             data => {
               this.successmsg = true;
               if (this.successmsg) {
-                this.router.navigate(['/account/login']);
+                this.router.navigate(['/account/login'], {
+                  state: {
+                    username: this.f.username.value,
+                    password: this.f.password.value
+                  }});
               }
             },
             error => {
               this.error = error ? error : '';
             });
-      }
     }
   }
 }
