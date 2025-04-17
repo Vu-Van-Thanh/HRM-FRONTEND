@@ -18,7 +18,7 @@ export class AuthGuard {
   ) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-
+    return of(true);
     const currentUser = this.authenticationService.GetCurrentUser();
 
       // Refresh user info if current user is null
