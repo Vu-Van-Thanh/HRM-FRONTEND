@@ -19,8 +19,7 @@ export class AuthGuard {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
 
-    if (this.configService.authMode === AUTH_MODE.DB) {
-      const currentUser = this.authenticationService.GetCurrentUser();
+    const currentUser = this.authenticationService.GetCurrentUser();
 
       // Refresh user info if current user is null
       if (!currentUser) {
@@ -43,10 +42,6 @@ export class AuthGuard {
       }
 
       return of(true);
-    }
-
-    this.router.navigate(['/account/login'], { queryParams: { returnUrl: state.url } });
-    return of(false);
   }
 }
 

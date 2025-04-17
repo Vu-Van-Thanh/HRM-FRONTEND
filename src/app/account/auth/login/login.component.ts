@@ -81,7 +81,9 @@ export class LoginComponent implements OnInit {
             console.log('Login response:', response);
             if(response?.isSuccess){
               const accessToken = response?.accessToken;
+              const user = response?.user;
               this.authenticationService.setAuthToken({ accessToken },isRemember);
+              this.authenticationService.SetCurrentUser(user);
               this.toastService.success('Đăng nhập thành công!');
               this.router.navigate(['/dashboard']);
             } else {
