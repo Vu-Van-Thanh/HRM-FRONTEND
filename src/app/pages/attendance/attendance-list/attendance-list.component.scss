@@ -30,17 +30,17 @@
 
   
   .table-section {
-    flex: 1; // Đảm bảo phần này chiếm không gian còn lại
-    min-height: 0; // Ngăn lỗi chiều cao
-    overflow: auto; // Bật cuộn dọc cho toàn bộ section
+    height: 65vh;
+    min-height: 0;
     
     .table-container {
       height: 100%;
-      overflow-y: auto; // Bật cuộn dọc cho bảng
-      display: block; // Đảm bảo bảng không bị ảnh hưởng bởi flex
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
       
       table {
-        flex: 1 1 auto; // Đảm bảo bảng chiếm không gian còn lại
         width: 100%;
         min-width: 1500px;
       }
