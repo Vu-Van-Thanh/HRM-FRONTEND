@@ -5,6 +5,8 @@ import { AuthenticationService } from '../../../core/services/auth.service';
 import { first } from 'rxjs/operators';
 import { UserProfileService } from '../../../core/services/user.service';
 import {User} from '../../../core/models/auth.models';
+import { ToastService } from 'angular-toastify';
+
 
 @Component({
   selector: 'app-signup',
@@ -23,13 +25,14 @@ export class SignupComponent implements OnInit {
 
   // tslint:disable-next-line: max-line-length
   constructor(private formBuilder: UntypedFormBuilder, private route: ActivatedRoute, private router: Router, private authenticationService: AuthenticationService,
-    private userService: UserProfileService) { }
+    private userService: UserProfileService,private toastService: ToastService) { }
 
   ngOnInit() {
     this.signupForm = this.formBuilder.group({
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
+      role:['',Validators.required]
     });
   }
 
@@ -51,7 +54,7 @@ export class SignupComponent implements OnInit {
         Email: this.f.email.value,
         Password: this.f.password.value,
         ConfirmPassword: this.f.password.value,
-        Role: 'User'
+        Role: this.f.role.value,
       };
       this.userService.register(payload)
           .pipe(first())
@@ -59,9 +62,10 @@ export class SignupComponent implements OnInit {
             data => {
               this.successmsg = true;
               if (this.successmsg) {
+                this.toastService.success('Đăng ký tài khoản thành công');
                 this.router.navigate(['/account/login'], {
                   state: {
-                    username: this.f.username.value,
+                    username: this.f.email.value,
                     password: this.f.password.value
                   }});
               }

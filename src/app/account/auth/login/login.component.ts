@@ -43,8 +43,8 @@ export class LoginComponent implements OnInit {
       const state = history.state;
 
       this.loginForm = this.formBuilder.group({
-        userName: [state?.username ?? 'admin', [Validators.required]],
-        password: [state?.password ?? 'Thanh2k3@', [Validators.required]],
+        userName: [state?.username ?? 'admin@gmail.com', [Validators.required]],
+        password: [state?.password ?? 'Thanh2k3!', [Validators.required]],
         rememberMe: [true]
       });
 
@@ -58,45 +58,42 @@ export class LoginComponent implements OnInit {
    * Form submit
    */
   onSubmit() {
-    this.router.navigate(['/dashboard']);
-    console.log('onSubmit called');
+    /*this.router.navigate(['/dashboard']);*/
     this.submitted = true;
-    // stop here if form is invalid
     if (this.loginForm.invalid) {
-      console.log('Form is invalid');
       return;
     } 
     
-    if (this.authMode === AUTH_MODE.DB) {
-      console.log('Auth mode is DB');
-      var isRemember = this.f.rememberMe.value;
-      console.log('Login attempt with:', {
-        userName: this.f.userName.value,
-        password: this.f.password.value,
-        isRemember
-      });
+    var isRemember = this.f.rememberMe.value;
+    console.log('Login request with:', {
+      userName: this.f.userName.value,
+      password: this.f.password.value,
+      isRemember
+    });
 
-      this.authenticationService.login(this.f.userName.value, this.f.password.value,isRemember)
-        .subscribe({
-          next: (response: any) => {
-            console.log('Login response:', response);
-            if(response?.isSuccess){
-              const accessToken = response?.accessToken;
-              const user = response?.user;
-              this.authenticationService.setAuthToken({ accessToken },isRemember);
-              this.authenticationService.SetCurrentUser(user);
-              this.toastService.success('Đăng nhập thành công!');
-              this.router.navigate(['/dashboard']);
-            } else {
-              this.toastService.error(response?.message || 'Đăng nhập thất bại!');
-            }
-          },
-          error: (error: any) => {
-            console.error('Login error:', error);
-            this.toastService.error(error?.error?.message || 'Có lỗi xảy ra khi đăng nhập!');
+    this.authenticationService.login(this.f.userName.value, this.f.password.value,isRemember)
+      .subscribe({
+        next: (response: any) => {
+          console.log('Login response:', response);
+          if(response?.isSuccess){
+            const accessToken = response?.accessToken;
+            const refresh_token = response?.refresh_token;
+            const user = response?.user;
+            this.authenticationService.setAuthToken({ accessToken,refresh_token },isRemember);
+            this.authenticationService.SetCurrentUser(user);
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            this.toastService.success('Đăng nhập thành công!');
+            console.log("redirect /dashboard");
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.toastService.error(response?.message || 'Đăng nhập thất bại!');
           }
-        });
-    }
+        },
+        error: (error: any) => {
+          console.error('Login error:', error);
+          this.toastService.error(error?.error?.message || 'Có lỗi xảy ra khi đăng nhập!');
+        }
+      });
   }
 
   // UI
