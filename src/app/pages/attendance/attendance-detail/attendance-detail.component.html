@@ -1,0 +1,45 @@
+<div class="attendance-detail-container" *ngIf="attendance">
+  <div class="header">
+    <h1>Attendance Detail</h1>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <div class="detail-row">
+        <div class="label">Employee Name:</div>
+        <div class="value">{{attendance.employeeName}}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="label">Date:</div>
+        <div class="value">{{attendance.date | date:'mediumDate'}}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="label">Check In:</div>
+        <div class="value">{{attendance.checkIn}}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="label">Check Out:</div>
+        <div class="value">{{attendance.checkOut}}</div>
+      </div>
+
+      <div class="detail-row">
+        <div class="label">Status:</div>
+        <div class="value">
+          <mat-chip-listbox>
+            <mat-chip [color]="getStatusColor(attendance.status)" selected>
+              {{attendance.status}}
+            </mat-chip>
+          </mat-chip-listbox>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <div class="label">Note:</div>
+        <div class="value">{{attendance.note}}</div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div> 

@@ -1,0 +1,249 @@
+.timesheet-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; // Đảm bảo chiếm toàn bộ chiều cao của container cha
+  overflow: hidden; // Ngăn tràn không mong muốn
+  padding: 16px;
+  gap: 16px;
+
+  // Add New Entry Button
+  .action-bar {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+
+    .date-filter {
+      flex: 1;
+      max-width: 400px;
+
+      mat-form-field {
+        width: 100%;
+      }
+    }
+
+    button {
+      height: 40px;
+    }
+  }
+
+  
+  .table-section {
+    flex: 1; // Đảm bảo phần này chiếm không gian còn lại
+    min-height: 0; // Ngăn lỗi chiều cao
+    overflow: auto; // Bật cuộn dọc cho toàn bộ section
+    
+    .table-container {
+      height: 100%;
+      overflow-y: auto; // Bật cuộn dọc cho bảng
+      display: block; // Đảm bảo bảng không bị ảnh hưởng bởi flex
+      
+      table {
+        flex: 1 1 auto; // Đảm bảo bảng chiếm không gian còn lại
+        width: 100%;
+        min-width: 1500px;
+      }
+
+      th {
+        background-color: #f5f5f5;
+        color: rgba(0, 0, 0, 0.87);
+        font-weight: 500;
+        font-size: 13px;
+        padding: 12px 8px;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      td {
+        font-size: 13px;
+        padding: 8px;
+      }
+
+      .hours-cell {
+        background-color: #e8f5e9;
+      }
+
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      // Column widths
+      .mat-column-date { min-width: 100px; }
+      .mat-column-checkIn { min-width: 80px; }
+      .mat-column-checkOut { min-width: 80px; }
+      .mat-column-hours { min-width: 80px; }
+      .mat-column-total { min-width: 80px; }
+      .mat-column-customer { min-width: 100px; }
+      .mat-column-project { min-width: 200px; }
+      .mat-column-activity { min-width: 100px; }
+      .mat-column-description { min-width: 200px; }
+      .mat-column-username { min-width: 120px; }
+      .mat-column-status { min-width: 100px; }
+      .mat-column-approved { min-width: 80px; text-align: center; }
+      .mat-column-cleared { min-width: 80px; text-align: right; }
+      .mat-column-actions { 
+        width: 48px;
+        text-align: center;
+      }
+    }
+  }
+
+  // Statistics Section
+  .stats-section {
+    height: calc(35vh - 72px);
+    min-height: 250px;
+
+    .stats-grid {
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+
+      .stats-card {
+        height: 100%;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        background: white;
+        overflow: hidden;
+
+        mat-card-header {
+          flex: 0 0 auto;
+          padding: 16px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+          background: white;
+          position: sticky;
+          top: 0;
+          z-index: 1;
+
+          mat-card-title {
+            font-size: 16px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .filter-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+              opacity: 0.7;
+            }
+
+            button {
+              width: 24px;
+              height: 24px;
+              line-height: 24px;
+              margin-left: 8px;
+
+              &:hover .filter-icon {
+                opacity: 1;
+              }
+            }
+          }
+        }
+
+        mat-card-content {
+          flex: 1;
+          padding: 16px;
+          overflow-y: auto;
+          height: 0;
+          min-height: 0;
+        }
+
+        &.projects-card {
+          mat-nav-list {
+            padding: 0;
+
+            a {
+              height: auto;
+              padding: 12px 16px;
+
+              &:hover {
+                background-color: #f5f5f5;
+              }
+
+              [matListItemTitle] {
+                font-weight: 500;
+                margin-bottom: 4px;
+              }
+
+              [matListItemLine] {
+                color: rgba(0, 0, 0, 0.54);
+              }
+            }
+          }
+        }
+
+        &.activities-card {
+          .activity-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+
+            .activity-item {
+              .activity-header {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                font-size: 13px;
+
+                .activity-name {
+                  color: rgba(0, 0, 0, 0.87);
+                }
+
+                .activity-hours {
+                  color: rgba(0, 0, 0, 0.54);
+                }
+              }
+            }
+          }
+        }
+
+        &.summary-card {
+          .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+
+            .stat-item {
+              text-align: center;
+
+              .stat-label {
+                font-size: 12px;
+                color: rgba(0, 0, 0, 0.54);
+                margin-bottom: 4px;
+              }
+
+              .stat-value {
+                font-size: 24px;
+                font-weight: 500;
+                color: rgba(0, 0, 0, 0.87);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Filter Menu Styles
+::ng-deep .filter-menu {
+  .mat-mdc-menu-content {
+    padding: 0;
+  }
+
+  .filter-menu-content {
+    padding: 16px;
+    width: 250px;
+
+    mat-form-field {
+      width: 100%;
+    }
+  }
+}

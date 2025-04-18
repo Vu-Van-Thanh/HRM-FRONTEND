@@ -1,0 +1,75 @@
+<div class="attendance-form-container">
+  <h2 mat-dialog-title>{{ isEditMode ? 'Edit Attendance' : 'New Attendance' }}</h2>
+
+  <form [formGroup]="attendanceForm" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Employee</mat-label>
+          <mat-select formControlName="employeeId" required>
+            <mat-option value="1">John Doe</mat-option>
+            <mat-option value="2">Jane Smith</mat-option>
+          </mat-select>
+          <mat-error *ngIf="attendanceForm.get('employeeId')?.hasError('required')">
+            Employee is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" required>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="attendanceForm.get('date')?.hasError('required')">
+            Date is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Check In</mat-label>
+          <input matInput type="time" formControlName="checkIn" required>
+          <mat-error *ngIf="attendanceForm.get('checkIn')?.hasError('required')">
+            Check in time is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Check Out</mat-label>
+          <input matInput type="time" formControlName="checkOut" required>
+          <mat-error *ngIf="attendanceForm.get('checkOut')?.hasError('required')">
+            Check out time is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status" required>
+            <mat-option value="Present">Present</mat-option>
+            <mat-option value="Absent">Absent</mat-option>
+            <mat-option value="Late">Late</mat-option>
+            <mat-option value="Early Leave">Early Leave</mat-option>
+          </mat-select>
+          <mat-error *ngIf="attendanceForm.get('status')?.hasError('required')">
+            Status is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Note</mat-label>
+          <textarea matInput formControlName="note" rows="3"></textarea>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!attendanceForm.valid">
+        {{ isEditMode ? 'Update' : 'Save' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div> 

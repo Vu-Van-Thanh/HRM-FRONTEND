@@ -1,0 +1,24 @@
+.attendance-form-container {
+  padding: 24px;
+
+  h2 {
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    mat-form-field {
+      flex: 1;
+    }
+  }
+
+  mat-dialog-actions {
+    margin-top: 24px;
+    padding: 0;
+  }
+} 

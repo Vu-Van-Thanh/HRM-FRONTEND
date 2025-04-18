@@ -30,6 +30,7 @@ import { ActivityFormDialogComponent } from './activity-form-dialog/activity-for
 import { ActivityRegistrationComponent } from './activity-registration/activity-registration.component';
 import { ActivityType } from './models/activity.model';
 import { WorkLogDialogComponent } from './work-log-dialog/work-log-dialog.component';
+import { AttendanceListComponent } from '../attendance/attendance-list/attendance-list.component';
 
 const routes: Routes = [
   {
@@ -38,8 +39,7 @@ const routes: Routes = [
   },
   {
     path: 'attendance',
-    component: ActivityListComponent,
-    data: { activityType: ActivityType.ATTENDANCE }
+    component: AttendanceListComponent
   },
   {
     path: 'registration',
