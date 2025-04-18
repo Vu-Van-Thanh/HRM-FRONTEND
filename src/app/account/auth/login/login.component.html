@@ -65,10 +65,18 @@
                 <div class="mt-3 d-grid">
                   <button class="btn btn-primary" type="submit">Đăng nhập</button>
                 </div>
-                <div class="mt-3 text-center">
-                  <span>Chưa có tài khoản? </span>
-                  <a routerLink="/account/auth/signup" class="text-primary fw-semibold">Đăng ký ngay</a>
+                <div class="mt-4 d-flex justify-content-between px-2 text-center text-muted" style="font-size: 0.95rem;">
+                  <div>
+                    <i class="mdi mdi-account-plus-outline me-1 text-primary"></i>
+                    <span>Chưa có tài khoản?</span>
+                    <a routerLink="/account/auth/signup" class="text-primary fw-semibold text-decoration-none ms-1">Đăng ký ngay</a>
+                  </div>
+                  <div>
+                    <i class="mdi mdi-lock-reset me-1 text-primary"></i>
+                    <a routerLink="/account/auth/change-password" class="text-primary fw-semibold text-decoration-none">Quên mật khẩu?</a>
+                  </div>
                 </div>
+                
               </form>
             </div>
 

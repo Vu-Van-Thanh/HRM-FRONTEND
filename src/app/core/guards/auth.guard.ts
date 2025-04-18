@@ -7,13 +7,15 @@ import { catchError, map } from 'rxjs/operators';
 import { AuthenticationService } from '../services/auth.service';
 
 import { ConfigService } from '../services/config.service';
+import { ToastService } from 'angular-toastify';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard {
   constructor(
     private router: Router,
     private authenticationService: AuthenticationService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private toastService: ToastService 
   ) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
@@ -35,7 +37,7 @@ export class AuthGuard {
             return true; 
           }),
           catchError((error) => {
-            console.error('Lỗi khi lấy profile:', error); 
+            this.toastService.error('Không thể lấy thông tin hồ sơ người dùng.'); 
             return of(true); 
           })
         );

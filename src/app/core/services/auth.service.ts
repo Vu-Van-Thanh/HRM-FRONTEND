@@ -56,11 +56,30 @@ export class AuthenticationService {
             })
         );
     }
+    public changepassword(passwordInfo : any)
+    {   
+        return this.http.post(API_ENDPOINT.changePassword, passwordInfo, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            observe: 'response'
+        }).pipe(
+            map(response => {
+                return response.body;
+            }),
+            catchError(error => {
+                console.error('Change Password error:', error);
+                throw error;
+            })
+        );
+    }
 
     public logout() {
         this.removeAuthToken();
         this.removeUserProfile();
     }
+    
 
     // Set AuthToken
     public setAuthToken(token : {accessToken: string, refresh_token : string}, rememberMe: boolean) {
@@ -102,7 +121,6 @@ export class AuthenticationService {
 
     // Get Current User
     public GetCurrentUser(): any {
-        console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         if (this.user.AccountId === null || this.user.AccountId === "" || this.user.AccountId === undefined) {
             const userString = localStorage.getItem('currentUser');
             if (userString) {
