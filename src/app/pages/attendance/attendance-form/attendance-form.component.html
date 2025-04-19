@@ -3,66 +3,86 @@
 
   <form [formGroup]="attendanceForm" (ngSubmit)="onSubmit()">
     <mat-dialog-content>
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Employee</mat-label>
-          <mat-select formControlName="employeeId" required>
-            <mat-option value="1">John Doe</mat-option>
-            <mat-option value="2">Jane Smith</mat-option>
-          </mat-select>
-          <mat-error *ngIf="attendanceForm.get('employeeId')?.hasError('required')">
-            Employee is required
-          </mat-error>
-        </mat-form-field>
+      <mat-tab-group>
+        <mat-tab label="General">
+          <div class="form-container">
+            <mat-form-field appearance="fill">
+              <mat-label>Project</mat-label>
+              <mat-select formControlName="project">
+                <mat-option *ngFor="let project of projects" [value]="project">
+                  {{ project }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Date</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="date" required>
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          <mat-error *ngIf="attendanceForm.get('date')?.hasError('required')">
-            Date is required
-          </mat-error>
-        </mat-form-field>
-      </div>
+            <mat-form-field appearance="fill">
+              <mat-label>Activity</mat-label>
+              <mat-select formControlName="activity">
+                <mat-option *ngFor="let activity of activities" [value]="activity">
+                  {{ activity }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Check In</mat-label>
-          <input matInput type="time" formControlName="checkIn" required>
-          <mat-error *ngIf="attendanceForm.get('checkIn')?.hasError('required')">
-            Check in time is required
-          </mat-error>
-        </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description"></textarea>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Check Out</mat-label>
-          <input matInput type="time" formControlName="checkOut" required>
-          <mat-error *ngIf="attendanceForm.get('checkOut')?.hasError('required')">
-            Check out time is required
-          </mat-error>
-        </mat-form-field>
-      </div>
+            <mat-form-field appearance="fill">
+              <mat-label>Day</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
 
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="status" required>
-            <mat-option value="Present">Present</mat-option>
-            <mat-option value="Absent">Absent</mat-option>
-            <mat-option value="Late">Late</mat-option>
-            <mat-option value="Early Leave">Early Leave</mat-option>
-          </mat-select>
-          <mat-error *ngIf="attendanceForm.get('status')?.hasError('required')">
-            Status is required
-          </mat-error>
-        </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Start Time</mat-label>
+              <input matInput type="time" formControlName="checkIn">
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Note</mat-label>
-          <textarea matInput formControlName="note" rows="3"></textarea>
-        </mat-form-field>
-      </div>
+            <mat-form-field appearance="fill">
+              <mat-label>End Time</mat-label>
+              <input matInput type="time" formControlName="checkOut">
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Duration</mat-label>
+              <input matInput [value]="duration" readonly>
+            </mat-form-field>
+          </div>
+        </mat-tab>
+        <mat-tab label="Advanced">
+          <div class="form-container">
+            <mat-form-field appearance="fill">
+              <mat-label>Overtime</mat-label>
+              <input matInput type="number" formControlName="overtime">
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Notes</mat-label>
+              <textarea matInput formControlName="notes"></textarea>
+            </mat-form-field>
+          </div>
+        </mat-tab>
+        <mat-tab label="Budget">
+          <div class="form-container">
+            <mat-form-field appearance="fill">
+              <mat-label>Cost Center</mat-label>
+              <mat-select formControlName="costCenter">
+                <mat-option *ngFor="let center of costCenters" [value]="center">
+                  {{ center }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Estimated Cost</mat-label>
+              <input matInput type="number" formControlName="estimatedCost">
+            </mat-form-field>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">

@@ -20,6 +20,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTabsModule } from '@angular/material/tabs';
 
 import { AttendanceListComponent } from './attendance-list/attendance-list.component';
 import { AttendanceFormComponent } from './attendance-form/attendance-form.component';
@@ -53,7 +54,8 @@ import { AttendanceDetailComponent } from './attendance-detail/attendance-detail
     MatCardModule,
     MatListModule,
     MatProgressBarModule,
-    MatMenuModule
+    MatMenuModule,
+    MatTabsModule
   ],
   exports: [
     AttendanceListComponent,
