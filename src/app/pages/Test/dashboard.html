@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-sm font-sans">
+
+  <main class="p-6 space-y-6">
+
+    <!-- Tiêu đề -->
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-semibold">Dashboard</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-lg">🇻🇳</span>
+        <div class="w-8 h-8 rounded-full bg-gray-300"></div>
+      </div>
+    </div>
+
+    <!-- Nút tác vụ -->
+    <div class="grid grid-cols-4 md:grid-cols-6 gap-4">
+      <button class="bg-purple-100 text-purple-700 p-3 rounded-lg font-medium">Xin nghỉ phép</button>
+      <button class="bg-red-100 text-red-700 p-3 rounded-lg font-medium">Thêm tăng ca</button>
+      <button class="bg-yellow-100 text-yellow-700 p-3 rounded-lg font-medium">Quên chấm công</button>
+      <button class="bg-green-100 text-green-700 p-3 rounded-lg font-medium">Đi công tác</button>
+      <button class="bg-blue-100 text-blue-700 p-3 rounded-lg font-medium">Công</button>
+      <button class="bg-gray-200 text-gray-700 p-3 rounded-lg font-medium">Hồ sơ cá nhân</button>
+    </div>
+
+    <!-- 3 khối chính -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Lịch cá nhân -->
+      <div class="bg-white rounded-xl shadow p-4">
+        <h2 class="font-semibold mb-3">Lịch Cá Nhân</h2>
+        <ul class="space-y-3 text-gray-700">
+          <li>
+            <p class="font-medium">Thiết kế giao diện Web Portal</p>
+            <p class="text-xs text-gray-500">Người giao: Đăng Vũ - 04 Th12</p>
+          </li>
+          <li>
+            <p class="font-medium">Seminar: Chia sẻ về cuộc đời</p>
+            <p class="text-xs text-gray-500">10:00AM – 11:30AM</p>
+          </li>
+          <li>
+            <p class="font-medium">Phỏng vấn - Ứng viên Front-End</p>
+            <p class="text-xs text-gray-500">08:00AM – 10:30AM</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Tiến độ công việc -->
+      <div class="bg-white rounded-xl shadow p-4">
+        <h2 class="font-semibold mb-3">Tiến độ công việc</h2>
+        <p class="text-4xl font-bold text-blue-600">42</p>
+        <p class="text-gray-500">Hoàn thành / 50 công việc</p>
+        <div class="mt-4">
+          <div class="h-24 bg-gray-100 flex items-end">
+            <!-- Biểu đồ giả -->
+            <div class="w-2 bg-blue-400 h-12 mx-1"></div>
+            <div class="w-2 bg-blue-400 h-16 mx-1"></div>
+            <div class="w-2 bg-blue-400 h-20 mx-1"></div>
+            <div class="w-2 bg-blue-400 h-16 mx-1"></div>
+            <div class="w-2 bg-blue-400 h-24 mx-1"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Số giờ chấm công -->
+      <div class="bg-white rounded-xl shadow p-4">
+        <h2 class="font-semibold mb-3">Số giờ chấm công</h2>
+        <div class="relative w-32 h-32 mx-auto">
+          <div class="w-full h-full rounded-full border-8 border-blue-400 border-t-red-400 border-b-yellow-400 border-l-green-400"></div>
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+            <p class="text-xl font-bold text-blue-700">210</p>
+            <p class="text-xs text-gray-500">/ 254 giờ</p>
+          </div>
+        </div>
+        <ul class="mt-4 text-xs text-gray-600 space-y-1">
+          <li>✔️ Làm việc: 82.7%</li>
+          <li>❌ Ngày nghỉ: 6.3%</li>
+          <li>⏱️ Tăng ca: 9.4%</li>
+          <li>🐢 Đi trễ: 1.6%</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Lịch chấm công + sinh nhật + tin tức -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Lịch chấm công -->
+      <div class="bg-white rounded-xl shadow p-4">
+        <h2 class="font-semibold mb-3">Lịch chấm công - Kỳ công tháng 12</h2>
+        <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-600">
+          <div>CN</div><div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div>
+        </div>
+        <div class="grid grid-cols-7 gap-1 mt-2 text-center text-xs">
+          <!-- Giả lập các ngày -->
+          <div class="text-gray-300">1</div><div>2</div><div class="text-green-500">3</div>
+          <div class="text-yellow-500">4</div><div class="text-red-500">5</div><div>6</div><div>7</div>
+          <!-- Có thể thêm các ngày khác -->
+        </div>
+      </div>
+
+      <!-- Sinh nhật hôm nay -->
+      <div class="bg-white rounded-xl shadow p-4 flex items-center justify-between">
+        <div>
+          <p class="text-gray-500 text-sm">Hôm nay là sinh nhật</p>
+          <h3 class="text-lg font-semibold text-blue-600">Hoàng Vũ</h3>
+        </div>
+        <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-xs">🎁 Gửi lời chúc</button>
+      </div>
+
+      <!-- Tin tức nội bộ -->
+      <div class="bg-white rounded-xl shadow p-4">
+        <h2 class="font-semibold mb-3">Tin tức nội bộ</h2>
+        <ul class="space-y-2 text-gray-700 text-sm">
+          <li>
+            <p class="font-medium">👥 Phòng nhân sự: Welcome đồng nghiệp</p>
+            <p class="text-xs text-gray-500">Lorem ipsum text.</p>
+          </li>
+          <li>
+            <p class="font-medium">🌱 Hội chị em cây khế</p>
+            <p class="text-xs text-gray-500">Lorem ipsum text.</p>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,16 @@
+/* Tăng chiều cao header và container logo */
+:host ::ng-deep .navbar-header {
+  height: 70px;
+}
+
+:host ::ng-deep .navbar-brand-box {
+  display: flex;
+  align-items: center;
+  height: 70px;
+}
+
+/* Đảm bảo logo được căn giữa */
+:host ::ng-deep .logo {
+  display: flex;
+  align-items: center;
+}
