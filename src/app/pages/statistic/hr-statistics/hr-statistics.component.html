@@ -15,9 +15,8 @@
   </div>
   <!-- end page title -->
 
-  <!-- Tổng quan - Biểu đồ kỹ năng và tăng trưởng - Đặt 2 biểu đồ quan trọng lên đầu trang -->
+  <!-- Biểu đồ tăng trưởng và kỹ năng -->
   <div class="row">
-    <!-- Workforce Growth Line Chart - Biểu đồ lớn nổi bật, xu hướng phát triển -->
     <div class="col-xl-8">
       <div class="card">
         <div class="card-body">
@@ -38,7 +37,6 @@
       </div>
     </div>
 
-    <!-- Employee Skills Radar Chart - Kỹ năng quan trọng -->
     <div class="col-xl-4">
       <div class="card">
         <div class="card-body">
@@ -61,9 +59,8 @@
     </div>
   </div>
 
-  <!-- Cơ cấu nhân sự - Thông tin cơ bản về tỷ lệ -->
+  <!-- Phân bố và cơ cấu -->
   <div class="row">
-    <!-- Regional Distribution Map - Bản đồ phân phối nhân sự -->
     <div class="col-xl-6">
       <div class="card">
         <div class="card-body">
@@ -73,10 +70,9 @@
       </div>
     </div>
 
-    <!-- Biểu đồ cơ cấu trình độ và giới tính - Nhóm các biểu đồ nhỏ -->
     <div class="col-xl-6">
       <div class="row">
-        <!-- Education Level Chart -->
+        <!-- Education Level -->
         <div class="col-sm-6">
           <div class="card">
             <div class="card-body">
@@ -97,7 +93,7 @@
           </div>
         </div>
 
-        <!-- Gender Ratio Chart -->
+        <!-- Gender Ratio -->
         <div class="col-sm-6">
           <div class="card">
             <div class="card-body">
@@ -118,7 +114,7 @@
           </div>
         </div>
 
-        <!-- Department Chart -->
+        <!-- Department -->
         <div class="col-sm-6">
           <div class="card">
             <div class="card-body">
@@ -139,20 +135,21 @@
           </div>
         </div>
 
-        <!-- Average Salary Chart -->
+        <!-- Department By Gender (mới hoán đổi) -->
         <div class="col-sm-6">
           <div class="card">
             <div class="card-body">
-              <h4 class="card-title mb-4">Lương trung bình</h4>
-              <div id="average-salary-chart" style="height: 362px;">
+              <h4 class="card-title mb-4">Nhân sự phòng ban theo giới tính</h4>
+              <div id="department-gender-chart">
                 <apx-chart
-                  [series]="averageSalaryChartOptions.series"
-                  [chart]="averageSalaryChartOptions.chart"
-                  [dataLabels]="averageSalaryChartOptions.dataLabels"
-                  [plotOptions]="averageSalaryChartOptions.plotOptions"
-                  [yaxis]="averageSalaryChartOptions.yaxis"
-                  [xaxis]="averageSalaryChartOptions.xaxis"
-                  [colors]="averageSalaryChartOptions.colors">
+                  [series]="departmentGenderChartOptions.series"
+                  [chart]="departmentGenderChartOptions.chart"
+                  [dataLabels]="departmentGenderChartOptions.dataLabels"
+                  [plotOptions]="departmentGenderChartOptions.plotOptions"
+                  [xaxis]="departmentGenderChartOptions.xaxis"
+                  [colors]="departmentGenderChartOptions.colors"
+                  [legend]="departmentGenderChartOptions.legend"
+                  [fill]="departmentGenderChartOptions.fill">
                 </apx-chart>
               </div>
             </div>
@@ -161,15 +158,14 @@
       </div>
     </div>
   </div>
-  
-  <!-- Hiệu suất và phân tích nâng cao -->
+
+  <!-- Hiệu suất và lương trung bình -->
   <div class="row">
-    <!-- Department Performance Chart -->
+    <!-- Department Performance -->
     <div class="col-xl-7">
       <div class="card">
         <div class="card-body">
           <h4 class="card-title mb-4">Hiệu suất theo phòng ban và quý</h4>
-          
           <div id="department-performance-chart">
             <apx-chart
               [series]="departmentPerformanceChartOptions.series"
@@ -183,21 +179,20 @@
       </div>
     </div>
 
-    <!-- Department By Gender Chart -->
+    <!-- Average Salary (mới hoán đổi) -->
     <div class="col-xl-5">
       <div class="card">
         <div class="card-body">
-          <h4 class="card-title mb-4">Nhân sự phòng ban theo giới tính</h4>
-          <div id="department-gender-chart">
+          <h4 class="card-title mb-4">Cơ cấu lương</h4>
+          <div id="average-salary-chart" style="height: 362px;">
             <apx-chart
-              [series]="departmentGenderChartOptions.series"
-              [chart]="departmentGenderChartOptions.chart"
-              [dataLabels]="departmentGenderChartOptions.dataLabels"
-              [plotOptions]="departmentGenderChartOptions.plotOptions"
-              [xaxis]="departmentGenderChartOptions.xaxis"
-              [colors]="departmentGenderChartOptions.colors"
-              [legend]="departmentGenderChartOptions.legend"
-              [fill]="departmentGenderChartOptions.fill">
+              [series]="averageSalaryChartOptions.series"
+              [chart]="averageSalaryChartOptions.chart"
+              [dataLabels]="averageSalaryChartOptions.dataLabels"
+              [plotOptions]="averageSalaryChartOptions.plotOptions"
+              [yaxis]="averageSalaryChartOptions.yaxis"
+              [xaxis]="averageSalaryChartOptions.xaxis"
+              [colors]="averageSalaryChartOptions.colors">
             </apx-chart>
           </div>
         </div>
@@ -205,9 +200,8 @@
     </div>
   </div>
 
-  <!-- Thâm niên công tác - Chiếm toàn bộ chiều rộng để tạo điểm nhấn cuối trang -->
+  <!-- Thâm niên công tác -->
   <div class="row">
-    <!-- Thâm niên công tác Chart -->
     <div class="col-xl-12">
       <div class="card">
         <div class="card-body">
@@ -228,4 +222,4 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
