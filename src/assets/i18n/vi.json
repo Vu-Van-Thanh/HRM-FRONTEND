@@ -9,6 +9,10 @@
                 "REMOTE": "Đăng ký làm việc từ xa"
             }
         },
+        "STATISTIC": {
+            "TEXT": "Thống kê",
+            "DASHBOARD": "Thống kê nhân sự"
+        },
         "ECOMMERCE": {
             "TEXT": "Ecommerce",
             "LIST": {

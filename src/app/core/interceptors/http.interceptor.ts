@@ -37,11 +37,11 @@ export class HttpInterceptor implements HttpSystemInterceptor {
 
     // Set token header
     const authToken = this.authService.getAuthToken();
-    if (authToken?.accessToken) {
-      console.log('Auth Token:', authToken?.accessToken);
+    if (authToken) {
+      console.log('Auth Token:', authToken);
       request = request.clone({
         setHeaders: {
-          Authorization: `Bearer ${authToken.accessToken}`,
+          Authorization: `Bearer ${authToken}`,
         }
       });
     }
@@ -62,36 +62,8 @@ export class HttpInterceptor implements HttpSystemInterceptor {
       ).pipe(finalize(() => this.loadingService.hide()));
     }
 
-    // Mock auth APIs
-    /*if (url.includes('/api/auth/login')) {
-      return this.mockService.login(request.body).pipe(
-        finalize(() => this.loadingService.hide())
-      );
-    }*/
     
-    if (url.includes('/api/users')) {
-      return this.mockService.getUsers().pipe(
-        finalize(() => this.loadingService.hide())
-      );
-    }
-    
-    if (url.includes('/api/employees')) {
-      return this.mockService.getEmployees().pipe(
-        finalize(() => this.loadingService.hide())
-      );
-    }
-    
-    if (url.includes('/api/departments')) {
-      return this.mockService.getDepartments().pipe(
-        finalize(() => this.loadingService.hide())
-      );
-    }
-    
-    if (url.includes('/api/user/profile')) {
-      return this.mockService.getUserProfile().pipe(
-        finalize(() => this.loadingService.hide())
-      );
-    }
+
     
     return next.handle(request).pipe(
       catchError((error: any) => {

@@ -57,7 +57,8 @@ export class AuthenticationService {
         );
     }
     public changepassword(passwordInfo : any)
-    {   
+    {   console.log("API endpoint:", API_ENDPOINT.changePassword);
+
         return this.http.post(API_ENDPOINT.changePassword, passwordInfo, {
             headers: {
                 'Content-Type': 'application/json',
@@ -100,6 +101,7 @@ export class AuthenticationService {
     public getAuthToken(): any {
         const tokenString = localStorage.getItem(LocalStorage.AuthToken) || sessionStorage.getItem(LocalStorage.AuthToken);
         if (tokenString) {
+            console.log("Token String:", tokenString);
             return JSON.parse(tokenString);
         }
         return null;

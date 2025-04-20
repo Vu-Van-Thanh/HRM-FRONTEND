@@ -46,16 +46,18 @@ export class ChangepasswordComponent {
 
   onSubmit() {
     this.submitted = true;
-
     if (this.changePasswordForm.invalid) return;
-
     const { oldPassword, newPassword } = this.changePasswordForm.value;
     const body  : any = {
       CurrentPassword : oldPassword, 
       NewPassword : newPassword,
       ConfirmPassword : newPassword
     };
-    return this.authService.changepassword(body);
+    console.log("Đổi mật khẩu", body);
 
+    return this.authService.changepassword(body).subscribe({
+      next: (res) => console.log("Change password success:", res),
+      error: (err) => console.error("Change password error:", err)
+    });
   }
 }

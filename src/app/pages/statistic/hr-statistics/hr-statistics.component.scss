@@ -1,0 +1,46 @@
+.card {
+  margin-bottom: 24px;
+  box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.card-title {
+  font-size: 15px;
+  margin-bottom: 0;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+apx-chart {
+  display: block;
+}
+
+/* Leaflet map styles */
+#region-map {
+  min-height: 350px;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+.leaflet-popup-content {
+  font-size: 14px;
+  padding: 5px;
+}
+
+.region-popup {
+  font-weight: bold;
+}
+
+/* Fix for marker icon paths */
+.leaflet-default-icon-path {
+  background-image: url("../../../../assets/leaflet/marker-icon.png");
+}
+
+.leaflet-default-shadow-path {
+  background-image: url("../../../../assets/leaflet/marker-shadow.png");
+} 

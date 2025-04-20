@@ -1,0 +1,224 @@
+<div class="container-fluid">
+  <!-- start page title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-flex align-items-center justify-content-between">
+        <h4 class="mb-0 font-size-18">Thống kê nhân sự</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item"><a href="javascript: void(0);">Thống kê</a></li>
+            <li class="breadcrumb-item active">Thống kê nhân sự</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end page title -->
+
+  <div class="row">
+    <!-- Education Level Chart -->
+    <div class="col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Cơ cấu nhân sự theo trình độ</h4>
+          <div class="text-center">
+            <div id="education-chart">
+              <apx-chart
+                [series]="educationChartOptions.series"
+                [chart]="educationChartOptions.chart"
+                [labels]="educationChartOptions.labels"
+                [colors]="educationChartOptions.colors"
+                [legend]="educationChartOptions.legend"
+                [dataLabels]="educationChartOptions.dataLabels">
+              </apx-chart>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department Chart -->
+    <div class="col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Cơ cấu nhân sự theo phòng ban</h4>
+          <div class="text-center">
+            <div id="department-chart">
+              <apx-chart
+                [series]="departmentChartOptions.series"
+                [chart]="departmentChartOptions.chart"
+                [labels]="departmentChartOptions.labels"
+                [colors]="departmentChartOptions.colors"
+                [legend]="departmentChartOptions.legend"
+                [dataLabels]="departmentChartOptions.dataLabels">
+              </apx-chart>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gender Ratio Chart -->
+    <div class="col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Tỷ lệ nam, nữ</h4>
+          <div class="text-center">
+            <div id="gender-chart">
+              <apx-chart
+                [series]="genderRatioChartOptions.series"
+                [chart]="genderRatioChartOptions.chart"
+                [labels]="genderRatioChartOptions.labels"
+                [colors]="genderRatioChartOptions.colors"
+                [legend]="genderRatioChartOptions.legend"
+                [dataLabels]="genderRatioChartOptions.dataLabels">
+              </apx-chart>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Employee Skills Radar Chart -->
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Phân tích kỹ năng nhân viên</h4>
+          <div id="skills-radar-chart">
+            <apx-chart
+              [series]="employeeSkillsChartOptions.series"
+              [chart]="employeeSkillsChartOptions.chart"
+              [xaxis]="employeeSkillsChartOptions.xaxis"
+              [yaxis]="employeeSkillsChartOptions.yaxis"
+              [dataLabels]="employeeSkillsChartOptions.dataLabels"
+              [plotOptions]="employeeSkillsChartOptions.plotOptions"
+              [colors]="employeeSkillsChartOptions.colors"
+              [markers]="employeeSkillsChartOptions.markers"
+              [tooltip]="employeeSkillsChartOptions.tooltip">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workforce Growth Line Chart -->
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Tăng trưởng nhân sự</h4>
+          <div id="workforce-growth-chart">
+            <apx-chart
+              [series]="workforceGrowthChartOptions.series"
+              [chart]="workforceGrowthChartOptions.chart"
+              [dataLabels]="workforceGrowthChartOptions.dataLabels"
+              [stroke]="workforceGrowthChartOptions.stroke"
+              [colors]="workforceGrowthChartOptions.colors"
+              [xaxis]="workforceGrowthChartOptions.xaxis"
+              [yaxis]="workforceGrowthChartOptions.yaxis"
+              [legend]="workforceGrowthChartOptions.legend">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Average Salary Chart -->
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Chi phí trung bình lương theo vị trí</h4>
+          <div id="average-salary-chart">
+            <apx-chart
+              [series]="averageSalaryChartOptions.series"
+              [chart]="averageSalaryChartOptions.chart"
+              [dataLabels]="averageSalaryChartOptions.dataLabels"
+              [plotOptions]="averageSalaryChartOptions.plotOptions"
+              [yaxis]="averageSalaryChartOptions.yaxis"
+              [xaxis]="averageSalaryChartOptions.xaxis"
+              [colors]="averageSalaryChartOptions.colors">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department By Gender Chart -->
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Cơ cấu nhân sự phòng ban theo giới tính</h4>
+          <div id="department-gender-chart">
+            <apx-chart
+              [series]="departmentGenderChartOptions.series"
+              [chart]="departmentGenderChartOptions.chart"
+              [dataLabels]="departmentGenderChartOptions.dataLabels"
+              [plotOptions]="departmentGenderChartOptions.plotOptions"
+              [xaxis]="departmentGenderChartOptions.xaxis"
+              [colors]="departmentGenderChartOptions.colors"
+              [legend]="departmentGenderChartOptions.legend"
+              [fill]="departmentGenderChartOptions.fill">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Regional Distribution Map -->
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Phân bố nhân sự theo vùng miền</h4>
+          <div id="region-map" style="height: 400px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department Performance Heatmap -->
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Hiệu suất theo phòng ban và quý</h4>
+          
+          <div id="department-performance-chart">
+            <apx-chart
+              [series]="departmentPerformanceChartOptions.series"
+              [chart]="departmentPerformanceChartOptions.chart"
+              [dataLabels]="departmentPerformanceChartOptions.dataLabels"
+              [colors]="departmentPerformanceChartOptions.colors"
+              [xaxis]="departmentPerformanceChartOptions.xaxis">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Thâm niên công tác Chart -->
+    <div class="col-xl-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Phân bố nhân sự theo thâm niên công tác</h4>
+          <div id="seniority-chart">
+            <apx-chart
+              [series]="seniorityChartOptions.series"
+              [chart]="seniorityChartOptions.chart"
+              [dataLabels]="seniorityChartOptions.dataLabels"
+              [plotOptions]="seniorityChartOptions.plotOptions"
+              [xaxis]="seniorityChartOptions.xaxis"
+              [yaxis]="seniorityChartOptions.yaxis"
+              [colors]="seniorityChartOptions.colors"
+              [tooltip]="seniorityChartOptions.tooltip">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

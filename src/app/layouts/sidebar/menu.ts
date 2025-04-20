@@ -103,7 +103,7 @@ export const MENU: MenuItem[] = [
         icon: 'bx-folder',
         link: '/filemanager',
     },
-    {
+    /*{
         id: 13,
         label: 'MENUITEMS.ECOMMERCE.TEXT',
         icon: 'bx-store',
@@ -157,53 +157,18 @@ export const MENU: MenuItem[] = [
                 parentId: 13
             },
         ]
-    },
+    },*/
     {
         id: 23,
-        label: 'MENUITEMS.CRYPTO.TEXT',
-        icon: 'bx-bitcoin',
+        label: 'MENUITEMS.STATISTIC.TEXT',
+        icon: 'bx-bar-chart',
         subItems: [
             {
                 id: 24,
-                label: 'MENUITEMS.CRYPTO.LIST.WALLET',
-                link: '/crypto/wallet',
-                parentId: 23
-            },
-            {
-                id: 25,
-                label: 'MENUITEMS.CRYPTO.LIST.BUY/SELL',
-                link: '/crypto/buy-sell',
-                parentId: 23
-            },
-            {
-                id: 26,
-                label: 'MENUITEMS.CRYPTO.LIST.EXCHANGE',
-                link: '/crypto/exchange',
-                parentId: 23
-            },
-            {
-                id: 27,
-                label: 'MENUITEMS.CRYPTO.LIST.LENDING',
-                link: '/crypto/lending',
-                parentId: 23
-            },
-            {
-                id: 28,
-                label: 'MENUITEMS.CRYPTO.LIST.ORDERS',
-                link: '/crypto/orders',
-                parentId: 23
-            },
-            {
-                id: 29,
-                label: 'MENUITEMS.CRYPTO.LIST.KYCAPPLICATION',
-                link: '/crypto/kyc-application',
-                parentId: 23
-            },
-            {
-                id: 30,
-                label: 'MENUITEMS.CRYPTO.LIST.ICOLANDING',
-                link: '/crypto-ico-landing',
-                parentId: 23
+                label: 'MENUITEMS.STATISTIC.DASHBOARD',
+                link: '/statistic/dashboard',
+                parentId: 23,
+                icon: 'bx bx-user-pin'
             }
         ]
     },
@@ -261,7 +226,7 @@ export const MENU: MenuItem[] = [
             }
         ]
     },
-    {
+   /* {
         id: 39,
         label: 'MENUITEMS.INVOICES.TEXT',
         icon: 'bx-receipt',
@@ -279,7 +244,7 @@ export const MENU: MenuItem[] = [
                 parentId: 39
             },
         ]
-    },
+    },*/
     {
         id: 42,
         label: 'MENUITEMS.PROJECTS.TEXT',
