@@ -135,20 +135,39 @@ const genderRatioChartOptions: ChartType = {
 
 /**
  * Average Salary Chart Options
+ * Biểu đồ hiển thị lương trung bình, thấp nhất và cao nhất theo từng phòng ban
  */
 const averageSalaryChartOptions: ChartType = {
   series: [
     {
-      name: 'Lương trung bình (triệu VND)',
-      data: [25, 18, 20, 35]
+      name: 'Lương trung bình',
+      type: 'column',
+      data: [25, 18, 20, 35, 22]
+    },
+    {
+      name: 'Lương thấp nhất',
+      type: 'column',
+      data: [18, 12, 15, 28, 16]
+    },
+    {
+      name: 'Lương cao nhất',
+      type: 'column',
+      data: [38, 25, 30, 55, 32]
     }
   ],
   chart: {
     height: 350,
     type: 'bar',
+    stacked: false,
+    toolbar: {
+      show: false
+    }
   },
   plotOptions: {
     bar: {
+      horizontal: false,
+      columnWidth: '55%',
+      borderRadius: 4,
       dataLabels: {
         position: 'top',
       },
@@ -157,16 +176,21 @@ const averageSalaryChartOptions: ChartType = {
   dataLabels: {
     enabled: true,
     formatter: function (val) {
-      return val + " triệu";
+      return val + " tr";
     },
     offsetY: -20,
     style: {
-      fontSize: '12px',
+      fontSize: '11px',
       colors: ['#304758']
     }
   },
+  stroke: {
+    show: true,
+    width: 2,
+    colors: ['transparent']
+  },
   xaxis: {
-    categories: ['IT', 'Hành chính', 'Kế toán', 'Lãnh đạo'],
+    categories: ['IT', 'Hành chính', 'Kế toán', 'Lãnh đạo', 'Marketing'],
     position: 'bottom',
     labels: {
       show: true,
@@ -176,17 +200,30 @@ const averageSalaryChartOptions: ChartType = {
     },
     axisTicks: {
       show: false
-    },
-  },
-  yaxis: {
-    labels: {
-      show: true,
-      formatter: function (val) {
-        return val + " triệu";
-      }
     }
   },
-  colors: ['#556ee6']
+  yaxis: {
+    title: {
+      text: 'Mức lương (triệu VND)'
+    },
+    min: 0,
+    max: 60
+  },
+  fill: {
+    opacity: 1
+  },
+  legend: {
+    position: 'top',
+    horizontalAlign: 'right'
+  },
+  colors: ['#34c38f', '#556ee6', '#f46a6a'],
+  tooltip: {
+    y: {
+      formatter: function (val) {
+        return val + " triệu VND";
+      }
+    }
+  }
 };
 
 /**
@@ -289,6 +326,8 @@ const employeeSkillsChartOptions: ChartType = {
 
 /**
  * Workforce Growth Chart
+ * Biểu đồ hiển thị chi tiết tăng trưởng nhân sự công ty theo tháng, bao gồm 
+ * số lượng nhân viên mới, nhân viên nghỉ việc, tổng nhân sự và các chỉ số quan trọng
  */
 const workforceGrowthChartOptions: ChartType = {
   series: [
@@ -299,6 +338,20 @@ const workforceGrowthChartOptions: ChartType = {
     {
       name: "Nhân sự mới",
       data: [10, 8, 10, 12, 15, 10, 14, 12, 17, 20, 15, 18]
+    },
+    {
+      name: "Nghỉ việc",
+      data: [5, 3, 5, 7, 8, 5, 6, 7, 7, 10, 5, 8]
+    },
+    {
+      name: "Tỷ lệ giữ chân (%)",
+      data: [92.8, 96.0, 93.7, 91.7, 91.3, 94.8, 94.2, 93.6, 94.1, 92.3, 96.4, 94.6],
+      type: 'area'
+    },
+    {
+      name: "Tỷ lệ tăng trưởng thực (%)",
+      data: [7.1, 6.7, 6.3, 8.2, 5.4, 8.2, 4.8, 9.1, 8.3, 7.7, 7.1, 6.7],
+      type: 'area'
     }
   ],
   chart: {
@@ -309,6 +362,11 @@ const workforceGrowthChartOptions: ChartType = {
     },
     toolbar: {
       show: false
+    },
+    animations: {
+      enabled: true,
+      easing: 'easeinout',
+      speed: 800
     }
   },
   dataLabels: {
@@ -316,20 +374,81 @@ const workforceGrowthChartOptions: ChartType = {
   },
   stroke: {
     curve: 'smooth',
-    width: [3, 3]
+    width: [3, 3, 3, 1, 1],
+    dashArray: [0, 0, 0, 0, 0]
   },
-  colors: ['#556ee6', '#34c38f'],
+  fill: {
+    type: ['solid', 'solid', 'solid', 'gradient', 'gradient'],
+    gradient: {
+      shade: 'light',
+      type: 'vertical',
+      shadeIntensity: 0.5,
+      inverseColors: true,
+      opacityFrom: 0.8,
+      opacityTo: 0.2
+    }
+  },
+  markers: {
+    size: 4,
+    hover: {
+      size: 6
+    }
+  },
+  colors: ['#0acf97', '#727cf5', '#fa5c7c', '#39afd1', '#ffbc00'],
   xaxis: {
     categories: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+    title: {
+      text: 'Năm 2023'
+    }
   },
   yaxis: {
     title: {
       text: 'Số lượng nhân viên'
+    },
+    min: 0,
+    max: 160
+  },
+  tooltip: {
+    shared: true,
+    intersect: false,
+    y: {
+      formatter: function (y, { seriesIndex, dataPointIndex, w }) {
+        if (typeof y !== "undefined") {
+          const seriesName = w.config.series[seriesIndex].name;
+          if (seriesName.includes("%")) {
+            return y.toFixed(1) + "%";
+          }
+          return y.toFixed(0) + " nhân viên";
+        }
+        return y;
+      }
+    },
+    custom: function({ series, seriesIndex, dataPointIndex, w }) {
+      const seriesName = w.config.series[seriesIndex].name;
+      if (seriesName === "Tổng nhân sự") {
+        const newEmployees = series[1][dataPointIndex];
+        const leavers = series[2][dataPointIndex];
+        const month = w.config.xaxis.categories[dataPointIndex];
+        
+        return `<div class="custom-tooltip">
+          <span class="month">${month}/2023</span>
+          <div class="details">
+            <div class="total"><b>Tổng nhân sự:</b> ${series[0][dataPointIndex]} nhân viên</div>
+            <div class="new"><b>Nhân sự mới:</b> ${newEmployees} nhân viên</div>
+            <div class="leave"><b>Nghỉ việc:</b> ${leavers} nhân viên</div>
+            <div class="net"><b>Tăng trưởng thuần:</b> ${newEmployees - leavers} nhân viên</div>
+          </div>
+        </div>`;
+      }
+      return undefined;
     }
   },
   legend: {
     position: 'top',
     horizontalAlign: 'right',
+  },
+  grid: {
+    borderColor: '#f1f1f1'
   }
 };
 

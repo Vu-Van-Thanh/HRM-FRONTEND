@@ -95,10 +95,10 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
       center: [16.0544, 107.7045], // Trung tâm Việt Nam
       zoom: 5.5,
       zoomControl: false,
-      maxBounds: L.latLngBounds(this.vietnamBounds),
-      minZoom: 5.5, // Giới hạn zoom out
-      maxZoom: 9,   // Giới hạn zoom in
-      maxBoundsViscosity: 1.0 // Ngăn kéo ra ngoài biên giới hoàn toàn
+      // Loại bỏ maxBounds để cho phép di chuyển tự do
+      minZoom: 3, // Giảm giới hạn zoom out để xem thêm vùng lân cận
+      maxZoom: 18   // Tăng giới hạn zoom in để xem chi tiết
+      // Loại bỏ maxBoundsViscosity để không còn giới hạn
     });
 
     // Thêm base layer từ OpenStreetMap
@@ -136,7 +136,7 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
       position: 'bottomright'
     }).addTo(this.map);
     
-    // Fit bounds để vừa khít Việt Nam
+    // Vẫn focus vào Việt Nam lúc khởi tạo nhưng cho phép di chuyển ra xa
     this.map.fitBounds(this.vietnamBounds);
   }
 } 
