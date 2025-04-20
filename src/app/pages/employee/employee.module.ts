@@ -47,13 +47,15 @@ import { EmployeeRoutingModule } from './employee-routing.module';
 import { ContractDialogComponent } from './contract-dialog/contract-dialog.component';
 import { RelativeDialogComponent } from './relative-dialog/relative-dialog.component';
 import { EmployeeService } from './employee.service';
+import { PersonalInfoComponent } from './personal-info/personal-info.component';
 
 @NgModule({
   declarations: [
     EmployeeListComponent,
     EmployeeDetailDialogComponent,
     ContractDialogComponent,
-    RelativeDialogComponent
+    RelativeDialogComponent,
+    PersonalInfoComponent
   ],
   imports: [
     CommonModule,

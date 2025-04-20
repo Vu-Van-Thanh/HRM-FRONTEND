@@ -1,0 +1,48 @@
+.tab-pane {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-tabs .nav-link {
+  font-weight: 500;
+  transition: all 0.3s ease-in-out;
+}
+
+.nav-tabs .nav-link.active {
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #dee2e6 #dee2e6 #fff;
+  border-radius: 10px 10px 0 0;
+}
+
+.card {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.card h5 {
+  font-size: 1.25rem;
+  border-left: 4px solid #0d6efd;
+  padding-left: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid #eee;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.loading-text {
+  margin-top: 10px;
+  font-weight: 500;
+  color: #0d6efd;
+}

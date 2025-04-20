@@ -1,0 +1,198 @@
+<div class="container mt-4">
+    <div class="row">
+      <!-- Phần trên: ảnh hồ sơ bên trái, thông tin nhân viên bên phải -->
+      <div class="col-md-12">
+        <div class="row">
+          <!-- Sidebar: Thông tin nhanh -->
+          <div class="col-md-3 text-center border-end">
+            <img src="assets/images/avatar.png" class="img-thumbnail rounded-circle mb-3" width="150" alt="avatar" />
+            <h5 class="text-primary">NV{{ employee.employeeID }}</h5>
+            <span class="badge bg-success mb-2">Đang làm việc</span>
+            <hr />
+            <p><strong>{{ employee.firstName }} {{ employee.lastName }}</strong></p>
+            <p><i class="bi bi-building"></i> Phòng Nhân Sự</p>
+            <p><i class="bi bi-person-badge"></i> Nhân viên hành chính</p>
+            <p><i class="bi bi-telephone-fill"></i> 0987654321</p>
+            <p><i class="bi bi-calendar-event"></i> {{ employee.dateOfBirth | date: 'dd/MM/yyyy' }}</p>
+            <p><i class="bi bi-gender-ambiguous"></i> {{ employee.gender === 'male' ? 'Nam' : 'Nữ' }}</p>
+          </div>
+          
+          <!-- Thông tin nhân viên bên phải -->
+          <div class="col-md-9">
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>{{ employee.firstName }} {{ employee.lastName }}</strong></p>
+                <p><i class="bi bi-person"></i> {{ employee.position }}</p>
+                <p><i class="bi bi-calendar-event"></i> Ngày sinh: {{ employee.dateOfBirth | date: 'dd/MM/yyyy' }}</p>
+                <p><i class="bi bi-telephone-fill"></i> {{ employee.phone }}</p>
+                <p><i class="bi bi-person-badge"></i> Mã nhân viên: {{ employee.employeeID }}</p>
+                <p><i class="bi bi-building"></i> Phòng ban: {{ employee.departmentID }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><i class="bi bi-envelope"></i> Email: {{ employee.email }}</p>
+                <p><i class="bi bi-geo-alt"></i> Địa chỉ: {{ employee.address }}</p>
+                <p><i class="bi bi-basket"></i> Loại nhân viên: {{ employee.employeeType }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Phần dưới: full thông tin nhân viên -->
+      <div class="col-md-12 mt-4">
+        <form class="row g-3">
+          <!-- Họ tên, ngày sinh, giới tính -->
+          <div class="col-md-4">
+            <label class="form-label">Họ</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.firstName" name="firstName">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Tên</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.lastName" name="lastName">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Ngày sinh</label>
+            <input type="date" class="form-control" [(ngModel)]="employee.dateOfBirth" name="dob">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Giới tính</label>
+            <select class="form-select" [(ngModel)]="employee.gender" name="gender">
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
+            </select>
+          </div>
+  
+          <!-- CMND, nơi cấp, quốc tịch -->
+          <div class="col-md-4">
+            <label class="form-label">Số CMND/CCCD</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.indentityCard" name="cccd">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Nơi cấp</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.placeIssued" name="placeIssued">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Quốc tịch</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.nationality" name="nationality">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Tôn giáo</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.religion" name="religion">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Dân tộc</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.ethnic" name="ethnic">
+          </div>
+  
+          <!-- Hộ khẩu - tạm trú - nguyên quán -->
+          <div class="col-md-4">
+            <label class="form-label">Tỉnh thường trú</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.province" name="province">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Quận/huyện thường trú</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.district" name="district">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Xã/phường thường trú</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.commune" name="commune">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Tỉnh tạm trú</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.tempProvince" name="tempProvince">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Địa chỉ tạm trú</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.tempAddress" name="tempAddress">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Tỉnh nguyên quán</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.originProvince" name="originProvince">
+          </div>
+  
+          <!-- Thông tin tài khoản, ngân hàng -->
+          <div class="col-md-4">
+            <label class="form-label">Số tài khoản</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.bankAccount" name="bankAccount">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Ngân hàng</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.bank" name="bank">
+          </div>
+  
+          <!-- BHXH, mã số thuế -->
+          <div class="col-md-4">
+            <label class="form-label">Số BHXH</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.insuranceNumber" name="insuranceNumber">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Mã số thuế</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.tax" name="tax">
+          </div>
+  
+          <!-- Phòng ban, chức vụ -->
+          <div class="col-md-4">
+            <label class="form-label">Phòng ban</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.departmentID" name="departmentID">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Chức vụ</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.position" name="position">
+          </div>
+  
+          <!-- Hình thức -->
+          <div class="col-md-4">
+            <label class="form-label">Hình thức lương</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.salaryType" name="salaryType">
+          </div>
+  
+          <div class="col-md-4">
+            <label class="form-label">Hình thức nhân viên</label>
+            <input type="text" class="form-control" [(ngModel)]="employee.employeeType" name="employeeType">
+          </div>
+  
+          <!-- Nút lưu -->
+          <div class="col-12 text-end mt-3">
+            <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+          </div>
+  
+          <!-- Thêm phần tải ảnh -->
+          <div class="col-12 mt-4">
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label">Ảnh CMND/CCCD</label>
+                <input type="file" class="form-control" (change)="onFileChange($event, 'cccd')" name="cccdImage">
+                <div *ngIf="previewImages['cccd']" class="mt-2">
+                  <img [src]="previewImages['cccd']" alt="CMND preview" class="img-fluid rounded border" style="max-height: 200px;" />
+                </div>
+              </div>
+  
+              <div class="col-md-6">
+                <label class="form-label">Ảnh BHXH</label>
+                <input type="file" class="form-control" (change)="onFileChange($event, 'insurance')" name="insuranceImage">
+                <div *ngIf="previewImages['insurance']" class="mt-2">
+                  <img [src]="previewImages['insurance']" alt="BHXH preview" class="img-fluid rounded border" style="max-height: 200px;" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
