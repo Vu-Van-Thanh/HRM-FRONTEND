@@ -70,6 +70,9 @@ export class TopbarComponent implements OnInit {
     return this.authService.GetCurrentUser();
   }
 
+  public GetCurrentProfile(): any{
+    return this.authService.GetCurrentUserProfile();
+  }
   /**
    * Toggles the right sidebar
    */
