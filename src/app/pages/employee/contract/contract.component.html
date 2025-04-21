@@ -1,0 +1,140 @@
+<div class="container-fluid">
+  <!-- Add New Contract Card -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Thêm hợp đồng mới</h4>
+          
+          <form (ngSubmit)="addContract()" #contractForm="ngForm">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Loại hợp đồng</label>
+                  <select class="form-select" [(ngModel)]="newContract.contractType" name="contractType" required>
+                    <option value="">Chọn loại hợp đồng</option>
+                    <option *ngFor="let type of contractTypes" [value]="type">{{type}}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Vị trí</label>
+                  <input type="text" class="form-control" [(ngModel)]="newContract.position" name="position" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Ngày bắt đầu</label>
+                  <input type="date" class="form-control" [(ngModel)]="newContract.startDate" name="startDate" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Ngày kết thúc</label>
+                  <input type="date" class="form-control" [(ngModel)]="newContract.endDate" name="endDate">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Lương cơ bản</label>
+                  <input type="number" class="form-control" [(ngModel)]="newContract.salary" name="salary" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Thời gian làm việc</label>
+                  <input type="text" class="form-control" [(ngModel)]="newContract.workingTime" name="workingTime" placeholder="Ví dụ: 8 giờ/ngày" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end mt-4">
+              <button type="button" class="btn btn-light me-2" (click)="resetForm()">Làm mới</button>
+              <button type="submit" class="btn btn-primary" [disabled]="!contractForm.form.valid">
+                Thêm hợp đồng
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contract List Card -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">Danh sách hợp đồng lao động</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Số hợp đồng</th>
+                  <th>Loại hợp đồng</th>
+                  <th>Vị trí</th>
+                  <th>Phòng ban</th>
+                  <th>Ngày bắt đầu</th>
+                  <th>Ngày kết thúc</th>
+                  <th>Mức lương</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let contract of contracts">
+                  <td>{{ contract.contractNumber }}</td>
+                  <td>{{ contract.type }}</td>
+                  <td>{{ contract.position }}</td>
+                  <td>{{ contract.department }}</td>
+                  <td>{{ contract.startDate | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ contract.endDate | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ contract.salary | number }} VNĐ</td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(contract.status)">
+                      {{ contract.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-primary" (click)="viewContract(contract)">
+                      <i class="bx bx-file"></i> Xem
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contract Preview Modal -->
+<div class="modal fade" [class.show]="showPreview" [style.display]="showPreview ? 'block' : 'none'" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Xem hợp đồng: {{ selectedContract?.contractNumber }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closePreview()"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="ratio ratio-16x9">
+          <iframe *ngIf="previewUrl" [src]="previewUrl" frameborder="0" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showPreview"></div> 

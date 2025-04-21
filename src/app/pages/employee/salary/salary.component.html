@@ -1,0 +1,348 @@
+<div class="container-fluid">
+  <!-- Current Salary Card -->
+  <div class="row mb-4">
+    <div class="col-xl-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title">Chi tiết lương hiện tại</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table">
+              <tbody>
+                <tr>
+                  <th>Lương cơ bản:</th>
+                  <td>{{salaryDetails.basicSalary | number}} VNĐ</td>
+                </tr>
+                <tr>
+                  <th>Phụ cấp:</th>
+                  <td>{{salaryDetails.allowances | number}} VNĐ</td>
+                </tr>
+                <tr>
+                  <th>Khấu trừ:</th>
+                  <td>{{salaryDetails.deductions | number}} VNĐ</td>
+                </tr>
+                <tr>
+                  <th>Lương thực lãnh:</th>
+                  <td>{{salaryDetails.netSalary | number}} VNĐ</td>
+                </tr>
+                <tr>
+                  <th>Ngày có hiệu lực:</th>
+                  <td>{{salaryDetails.effectiveDate | date:'dd/MM/yyyy'}}</td>
+                </tr>
+                <tr>
+                  <th>Trạng thái:</th>
+                  <td>
+                    <span class="badge bg-success">{{salaryDetails.status}}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title">Lịch sử lương</h5>
+          <div class="d-flex gap-2">
+            <div class="d-flex align-items-center">
+              <label class="me-2">Từ:</label>
+              <select class="form-select form-select-sm me-2" [(ngModel)]="startMonth" (change)="onFilterChange()">
+                <option *ngFor="let month of availableMonths" [value]="month.value">{{month.label}}</option>
+              </select>
+              <select class="form-select form-select-sm" [(ngModel)]="startYear" (change)="onFilterChange()">
+                <option *ngFor="let year of availableYears" [value]="year">{{year}}</option>
+              </select>
+            </div>
+            <div class="d-flex align-items-center">
+              <label class="me-2">Đến:</label>
+              <select class="form-select form-select-sm me-2" [(ngModel)]="endMonth" (change)="onFilterChange()">
+                <option *ngFor="let month of availableMonths" [value]="month.value">{{month.label}}</option>
+              </select>
+              <select class="form-select form-select-sm" [(ngModel)]="endYear" (change)="onFilterChange()">
+                <option *ngFor="let year of availableYears" [value]="year">{{year}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div *ngIf="filteredSalaryHistory.length > 0; else noDataChart" style="height: 300px;">
+            <canvas baseChart
+              [data]="salaryChartData"
+              [type]="'line'"
+              [options]="lineChartOptions">
+            </canvas>
+          </div>
+          <ng-template #noDataChart>
+            <div class="text-center py-5">
+              <i class="bx bx-calendar-x text-muted" style="font-size: 3rem;"></i>
+              <h5 class="mt-3">Không có dữ liệu lương trong khoảng thời gian đã chọn</h5>
+              <p class="text-muted">Vui lòng chọn khoảng thời gian khác</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Allowances Card -->
+  <div class="row mb-4">
+    <div class="col-xl-6">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title">Chi tiết phụ cấp</h5>
+          <div class="d-flex align-items-center">
+            <select class="form-select form-select-sm me-2" [(ngModel)]="selectedMonth" (change)="onMonthChange()">
+              <option *ngFor="let month of availableMonths" [value]="month.value">{{month.label}}</option>
+            </select>
+            <select class="form-select form-select-sm" [(ngModel)]="selectedYear" (change)="onMonthChange()">
+              <option *ngFor="let year of availableYears" [value]="year">{{year}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Loại phụ cấp</th>
+                  <th>Số tiền</th>
+                  <th>Loại</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let allowance of allowanceTypes">
+                  <td>{{allowance.name}}</td>
+                  <td>{{allowance.value | number}} VNĐ</td>
+                  <td>
+                    <span class="badge" [ngClass]="allowance.isPercentage ? 'bg-info' : 'bg-primary'">
+                      {{allowance.isPercentage ? allowance.percentage + '%' : 'Cố định'}}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Tổng phụ cấp:</th>
+                  <td colspan="2">{{salaryDetails.allowances | number}} VNĐ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title">Phân bố phụ cấp</h5>
+        </div>
+        <div class="card-body">
+          <div style="height: 300px;">
+            <canvas baseChart
+              [data]="allowanceChartData"
+              [type]="'pie'"
+              [options]="pieChartOptions">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deductions Card -->
+  <div class="row mb-4">
+    <div class="col-xl-6">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title">Chi tiết khấu trừ</h5>
+          <div class="d-flex align-items-center">
+            <select class="form-select form-select-sm me-2" [(ngModel)]="selectedMonth" (change)="onMonthChange()">
+              <option *ngFor="let month of availableMonths" [value]="month.value">{{month.label}}</option>
+            </select>
+            <select class="form-select form-select-sm" [(ngModel)]="selectedYear" (change)="onMonthChange()">
+              <option *ngFor="let year of availableYears" [value]="year">{{year}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Loại khấu trừ</th>
+                  <th>Số tiền</th>
+                  <th>Loại</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let deduction of deductionTypes">
+                  <td>{{deduction.name}}</td>
+                  <td>{{deduction.value | number}} VNĐ</td>
+                  <td>
+                    <span class="badge" [ngClass]="deduction.isPercentage ? 'bg-info' : 'bg-primary'">
+                      {{deduction.isPercentage ? deduction.percentage + '%' : 'Cố định'}}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Tổng khấu trừ:</th>
+                  <td colspan="2">{{salaryDetails.deductions | number}} VNĐ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title">Phân bố khấu trừ</h5>
+        </div>
+        <div class="card-body">
+          <div style="height: 300px;">
+            <canvas baseChart
+              [data]="deductionChartData"
+              [type]="'bar'"
+              [options]="barChartOptions">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bonuses Card -->
+  <div class="row mb-4">
+    <div class="col-xl-6">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title">Chi tiết thưởng</h5>
+          <div class="d-flex align-items-center">
+            <select class="form-select form-select-sm me-2" [(ngModel)]="selectedMonth" (change)="onMonthChange()">
+              <option *ngFor="let month of availableMonths" [value]="month.value">{{month.label}}</option>
+            </select>
+            <select class="form-select form-select-sm" [(ngModel)]="selectedYear" (change)="onMonthChange()">
+              <option *ngFor="let year of availableYears" [value]="year">{{year}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Loại thưởng</th>
+                  <th>Số tiền</th>
+                  <th>Loại</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let bonus of bonusTypes">
+                  <td>{{bonus.name}}</td>
+                  <td>{{bonus.value | number}} VNĐ</td>
+                  <td>
+                    <span class="badge" [ngClass]="bonus.isPercentage ? 'bg-info' : 'bg-primary'">
+                      {{bonus.isPercentage ? bonus.percentage + '%' : 'Cố định'}}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Tổng thưởng:</th>
+                  <td colspan="2">{{calculateTotalBonus() | number}} VNĐ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title">Phân bố thưởng</h5>
+        </div>
+        <div class="card-body">
+          <div style="height: 300px;">
+            <canvas baseChart
+              [data]="bonusChartData"
+              [type]="'doughnut'"
+              [options]="doughnutChartOptions">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Salary History Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title">Lịch sử trả lương</h5>
+          <div class="d-flex gap-2">
+            <div class="d-flex align-items-center">
+              <label class="me-2">Từ:</label>
+              <select class="form-select form-select-sm me-2" [(ngModel)]="startMonth" (change)="onFilterChange()">
+                <option *ngFor="let month of availableMonths" [value]="month.value">{{month.label}}</option>
+              </select>
+              <select class="form-select form-select-sm" [(ngModel)]="startYear" (change)="onFilterChange()">
+                <option *ngFor="let year of availableYears" [value]="year">{{year}}</option>
+              </select>
+            </div>
+            <div class="d-flex align-items-center">
+              <label class="me-2">Đến:</label>
+              <select class="form-select form-select-sm me-2" [(ngModel)]="endMonth" (change)="onFilterChange()">
+                <option *ngFor="let month of availableMonths" [value]="month.value">{{month.label}}</option>
+              </select>
+              <select class="form-select form-select-sm" [(ngModel)]="endYear" (change)="onFilterChange()">
+                <option *ngFor="let year of availableYears" [value]="year">{{year}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div *ngIf="filteredSalaryHistory.length > 0; else noDataTable" class="table-responsive">
+            <table class="table table-centered table-nowrap mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Tháng</th>
+                  <th>Ngày trả</th>
+                  <th>Lương cơ bản</th>
+                  <th>Phụ cấp</th>
+                  <th>Giảm trừ</th>
+                  <th>Thực lãnh</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let salary of filteredSalaryHistory">
+                  <td>{{ salary.month }}</td>
+                  <td>{{ salary.paymentDate | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ salary.basicSalary | number }} VNĐ</td>
+                  <td>{{ salary.allowances | number }} VNĐ</td>
+                  <td>{{ salary.deductions | number }} VNĐ</td>
+                  <td>{{ salary.netSalary | number }} VNĐ</td>
+                  <td>
+                    <span class="badge" [ngClass]="{'bg-success': salary.status === 'Paid', 'bg-warning': salary.status === 'Pending'}">
+                      {{ salary.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ng-template #noDataTable>
+            <div class="text-center py-5">
+              <i class="bx bx-calendar-x text-muted" style="font-size: 3rem;"></i>
+              <h5 class="mt-3">Không có dữ liệu lương trong khoảng thời gian đã chọn</h5>
+              <p class="text-muted">Vui lòng chọn khoảng thời gian khác</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

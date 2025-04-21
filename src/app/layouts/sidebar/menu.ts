@@ -16,6 +16,12 @@ export const MENU: MenuItem[] = [
                 label: 'MENUITEMS.APP.DASHBOARDS.DEFAULT',
                 link: '/dashboard',
                 parentId: 2
+            },
+            {
+                id: 104,
+                label: 'MENUITEMS.APP.LIST.NEWS',
+                link: '/employee/news',
+                parentId: 100
             }
         ]
     },
@@ -82,7 +88,31 @@ export const MENU: MenuItem[] = [
                 link: '/system/activity/registration',
                 parentId: 16
             }
-           
+        ]
+    },
+    {
+        id: 100,
+        label: 'MENUITEMS.PERSONAL.TEXT',
+        icon: 'bx-user-circle',
+        subItems: [
+            {
+                id: 101,
+                label: 'MENUITEMS.PERSONAL.LIST.PROFILE',
+                link: '/employee/profile',
+                parentId: 100
+            },
+            {
+                id: 102,
+                label: 'MENUITEMS.PERSONAL.LIST.SALARY',
+                link: '/employee/salary',
+                parentId: 100
+            },
+            {
+                id: 103,
+                label: 'MENUITEMS.PERSONAL.LIST.CONTRACT',
+                link: '/employee/contract',
+                parentId: 100
+            }
         ]
     },
     {

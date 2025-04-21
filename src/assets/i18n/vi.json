@@ -9,6 +9,14 @@
                 "REMOTE": "Đăng ký làm việc từ xa"
             }
         },
+        "PERSONAL": {
+            "TEXT": "Quản lý thông tin cá nhân",
+            "LIST": {
+                "PROFILE": "Hồ sơ nhân viên",
+                "SALARY": "Lương/Thưởng/Phụ cấp",
+                "CONTRACT": "Hợp đồng lao động"
+            }
+        },
         "STATISTIC": {
             "TEXT": "Thống kê",
             "DASHBOARD": "Thống kê nhân sự"

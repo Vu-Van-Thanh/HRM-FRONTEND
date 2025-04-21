@@ -84,14 +84,18 @@ export class AuthenticationService {
 
     // Set AuthToken
     public setAuthToken(token : {accessToken: string, refresh_token : string}, rememberMe: boolean) {
+        console.log("@@@@@@@@@@@@@@@@ : ", token);
         const authtokenString = JSON.stringify(token.accessToken);
+        const parsedToken = JSON.parse(authtokenString); 
+        console.log("################ : ", parsedToken.result);
+
         const refreshTokenString = JSON.stringify(token.refresh_token);
     
         if (rememberMe) {
-            localStorage.setItem(LocalStorage.AuthToken, authtokenString);
+            localStorage.setItem(LocalStorage.AuthToken, parsedToken.result);
             localStorage.setItem(LocalStorage.RefreshToken, refreshTokenString);
         } else {
-            sessionStorage.setItem(LocalStorage.AuthToken, authtokenString);
+            sessionStorage.setItem(LocalStorage.AuthToken, parsedToken.result);
             sessionStorage.setItem(LocalStorage.RefreshToken, refreshTokenString);
         }
     }
@@ -102,7 +106,7 @@ export class AuthenticationService {
         const tokenString = localStorage.getItem(LocalStorage.AuthToken) || sessionStorage.getItem(LocalStorage.AuthToken);
         if (tokenString) {
             console.log("Token String:", tokenString);
-            return JSON.parse(tokenString);
+            return tokenString;
         }
         return null;
     }

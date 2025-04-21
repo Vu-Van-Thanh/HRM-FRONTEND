@@ -40,6 +40,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { MatRippleModule } from '@angular/material/core';
 import { MatTableExporterModule } from 'mat-table-exporter';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgChartsModule } from 'ng2-charts';
 
 import { EmployeeListComponent } from './employee-list/employee-list.component';
 import { EmployeeDetailDialogComponent } from './employee-detail-dialog/employee-detail-dialog.component';
@@ -48,6 +49,9 @@ import { ContractDialogComponent } from './contract-dialog/contract-dialog.compo
 import { RelativeDialogComponent } from './relative-dialog/relative-dialog.component';
 import { EmployeeService } from './employee.service';
 import { PersonalInfoComponent } from './personal-info/personal-info.component';
+import { SalaryComponent } from './salary/salary.component';
+import { ContractComponent } from './contract/contract.component';
+import { NewsComponent } from './news/news.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +59,10 @@ import { PersonalInfoComponent } from './personal-info/personal-info.component';
     EmployeeDetailDialogComponent,
     ContractDialogComponent,
     RelativeDialogComponent,
-    PersonalInfoComponent
+    PersonalInfoComponent,
+    SalaryComponent,
+    ContractComponent,
+    NewsComponent
   ],
   imports: [
     CommonModule,
@@ -100,6 +107,7 @@ import { PersonalInfoComponent } from './personal-info/personal-info.component';
     MatRippleModule,
     MatTableExporterModule,
     NgbModule,
+    NgChartsModule,
     EmployeeRoutingModule
   ],
   providers: [EmployeeService],

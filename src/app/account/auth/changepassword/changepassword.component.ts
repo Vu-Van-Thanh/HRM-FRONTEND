@@ -4,6 +4,7 @@ import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-change-password',
@@ -21,7 +22,7 @@ export class ChangepasswordComponent {
     confirm: 'password'
   };
 
-  constructor(private fb: FormBuilder,private http: HttpClient, private authService: AuthenticationService) {
+  constructor(private fb: FormBuilder,private http: HttpClient, private authService: AuthenticationService,private router: Router) {
     this.changePasswordForm = this.fb.group({
       oldPassword: ['', Validators.required],
       newPassword: ['', Validators.required],
@@ -56,7 +57,15 @@ export class ChangepasswordComponent {
     console.log("Đổi mật khẩu", body);
 
     return this.authService.changepassword(body).subscribe({
-      next: (res) => console.log("Change password success:", res),
+      next: (res) => {
+        console.log("Change password success:", res);
+        this.authService.logout();
+        this.router.navigate(['/account/login'], {
+          state: {
+            username: this.f.email.value,
+            password: this.f.password.value
+          }});
+      },
       error: (err) => console.error("Change password error:", err)
     });
   }

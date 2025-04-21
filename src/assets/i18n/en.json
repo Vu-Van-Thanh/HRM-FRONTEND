@@ -69,7 +69,8 @@
     "APP": {
       "TEXT": "App",
       "DASHBOARDS": "Trang điều khiển",
-      "DASHBOARDS.DEFAULT": "Trang chủ"
+      "DASHBOARDS.DEFAULT": "Trang chủ",
+      "LIST.NEWS": "Tin tức"
     },
     "SYSTEM": {
       "TEXT": "Hệ thống",
@@ -354,7 +355,7 @@
     "ACTIVITY": {
       "TEXT": "Activity Management",
       "LIST": {
-        "ATTENDANCE": "Attendance Tracking",
+        "ATTENDANCE": "Quản lý chấm công",
         "LEAVE": "Leave Requests",
         "REMOTE": "Remote Work"
       }
