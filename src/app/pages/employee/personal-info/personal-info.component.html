@@ -1,209 +1,192 @@
-<div class="container mt-4">
-  <!-- Tabs navigation -->
-  <ul class="nav nav-tabs mb-4">
-    <li class="nav-item">
-      <a class="nav-link" [class.active]="activeTab === 0" (click)="activeTab = 0" href="javascript:void(0)">Thông tin cá nhân</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" [class.active]="activeTab === 1" (click)="activeTab = 1" href="javascript:void(0)">Thông tin người thân</a>
-    </li>
-  </ul>
+<div class="profile-container">
+  <!-- Header with tabs -->
+  <div class="profile-header">
+    <h2 class="profile-title">Hồ sơ nhân viên</h2>
+    <div class="profile-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 0" (click)="activeTab = 0">
+        <i class="bi bi-person-circle"></i> Thông tin cá nhân
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 1" (click)="activeTab = 1">
+        <i class="bi bi-people"></i> Thông tin người thân
+      </button>
+    </div>
+  </div>
 
   <!-- Tab content -->
   <div class="tab-content">
     <!-- Thông tin cá nhân tab -->
     <div class="tab-pane" [class.active]="activeTab === 0">
-      <div class="row">
-        <!-- Phần trên: ảnh hồ sơ bên trái, thông tin nhân viên bên phải -->
-        <div class="col-md-12">
-          <div class="row">
-            <!-- Sidebar: Thông tin nhanh -->
-            <div class="col-md-3 text-center border-end">
-              <img src="assets/images/error-img.png" class="img-thumbnail rounded-circle mb-3" width="150" height="150" alt="avatar" />
-              <h5 class="text-primary">NV{{ employee.employeeID }}</h5>
-              <span class="badge bg-success mb-2">Đang làm việc</span>
-              <hr />
-              <p><strong>{{ employee.firstName }} {{ employee.lastName }}</strong></p>
-              <p><i class="bi bi-building"></i> Phòng Nhân Sự</p>
-              <p><i class="bi bi-person-badge"></i> Nhân viên hành chính</p>
-              <p><i class="bi bi-telephone-fill"></i> 0987654321</p>
-              <p><i class="bi bi-calendar-event"></i> {{ employee.dateOfBirth | date: 'dd/MM/yyyy' }}</p>
-              <p><i class="bi bi-gender-ambiguous"></i> {{ employee.gender === 'male' ? 'Nam' : 'Nữ' }}</p>
+      <div class="profile-card">
+        <!-- Profile header with avatar and basic info -->
+        <div class="profile-header-card">
+          <div class="profile-avatar">
+            <div class="avatar-container">
+              <img src="assets/images/error-img.png" alt="avatar" />
+              <div class="avatar-edit">
+                <i class="bi bi-camera"></i>
+              </div>
             </div>
-            
-            <!-- Thông tin nhân viên bên phải -->
-            <div class="col-md-9">
-              <div class="row">
-                <div class="col-md-6">
-                  <p><strong>{{ employee.firstName }} {{ employee.lastName }}</strong></p>
-                  <p><i class="bi bi-person"></i> {{ employee.position }}</p>
-                  <p><i class="bi bi-calendar-event"></i> Ngày sinh: {{ employee.dateOfBirth | date: 'dd/MM/yyyy' }}</p>
-                  <p><i class="bi bi-telephone-fill"></i> {{ employee.phone }}</p>
-                  <p><i class="bi bi-person-badge"></i> Mã nhân viên: {{ employee.employeeID }}</p>
-                  <p><i class="bi bi-building"></i> Phòng ban: {{ employee.departmentID }}</p>
-                </div>
-                <div class="col-md-6">
-                  <p><i class="bi bi-envelope"></i> Email: {{ employee.email }}</p>
-                  <p><i class="bi bi-geo-alt"></i> Địa chỉ: {{ employee.address }}</p>
-                  <p><i class="bi bi-basket"></i> Loại nhân viên: {{ employee.employeeType }}</p>
-                </div>
+            <div class="employee-status">
+              <span class="status-badge active">Đang làm việc</span>
+              <h4 class="employee-name">{{ employee.firstName }} {{ employee.lastName }}</h4>
+              <p class="employee-id">Mã nhân viên: NV{{ employee.employeeID }}</p>
+            </div>
+          </div>
+          
+          <div class="profile-quick-info">
+            <div class="info-item">
+              <i class="bi bi-building"></i>
+              <div>
+                <span class="info-label">Phòng ban</span>
+                <span class="info-value">{{ employee.departmentID }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="bi bi-person-badge"></i>
+              <div>
+                <span class="info-label">Chức vụ</span>
+                <span class="info-value">{{ employee.position }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="bi bi-telephone"></i>
+              <div>
+                <span class="info-label">Số điện thoại</span>
+                <span class="info-value">{{ employee.phone }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="bi bi-envelope"></i>
+              <div>
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ employee.email }}</span>
               </div>
             </div>
           </div>
         </div>
-        
-        <!-- Phần dưới: full thông tin nhân viên -->
-        <div class="col-md-12 mt-4">
-          <form class="row g-3">
-            <!-- Họ tên, ngày sinh, giới tính -->
-            <div class="col-md-4">
-              <label class="form-label">Họ</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.firstName" name="firstName">
+
+        <!-- Profile details -->
+        <div class="profile-details">
+          <div class="section-title">
+            <i class="bi bi-person-vcard"></i>
+            <h3>Thông tin cá nhân</h3>
+          </div>
+          
+          <form class="profile-form">
+            <div class="form-section">
+              <h4>Thông tin cơ bản</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Họ</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.firstName" name="firstName">
+                </div>
+                <div class="form-group">
+                  <label>Tên</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.lastName" name="lastName">
+                </div>
+                <div class="form-group">
+                  <label>Ngày sinh</label>
+                  <input type="date" class="form-control" [(ngModel)]="employee.dateOfBirth" name="dob">
+                </div>
+                <div class="form-group">
+                  <label>Giới tính</label>
+                  <select class="form-control" [(ngModel)]="employee.gender" name="gender">
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                  </select>
+                </div>
+              </div>
             </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Tên</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.lastName" name="lastName">
+
+            <div class="form-section">
+              <h4>Thông tin liên hệ</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Số điện thoại</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.phone" name="phone">
+                </div>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input type="email" class="form-control" [(ngModel)]="employee.email" name="email">
+                </div>
+                <div class="form-group full-width">
+                  <label>Địa chỉ</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.address" name="address">
+                </div>
+              </div>
             </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Ngày sinh</label>
-              <input type="date" class="form-control" [(ngModel)]="employee.dateOfBirth" name="dob">
+
+            <div class="form-section">
+              <h4>Thông tin giấy tờ</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Số CMND/CCCD</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.indentityCard" name="cccd">
+                </div>
+                <div class="form-group">
+                  <label>Nơi cấp</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.placeIssued" name="placeIssued">
+                </div>
+                <div class="form-group">
+                  <label>Quốc tịch</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.nationality" name="nationality">
+                </div>
+                <div class="form-group">
+                  <label>Dân tộc</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.ethnic" name="ethnic">
+                </div>
+              </div>
             </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Giới tính</label>
-              <select class="form-select" [(ngModel)]="employee.gender" name="gender">
-                <option value="male">Nam</option>
-                <option value="female">Nữ</option>
-              </select>
+
+            <div class="form-section">
+              <h4>Thông tin tài chính</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Số tài khoản</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.bankAccount" name="bankAccount">
+                </div>
+                <div class="form-group">
+                  <label>Ngân hàng</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.bank" name="bank">
+                </div>
+                <div class="form-group">
+                  <label>Số BHXH</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.insuranceNumber" name="insuranceNumber">
+                </div>
+                <div class="form-group">
+                  <label>Mã số thuế</label>
+                  <input type="text" class="form-control" [(ngModel)]="employee.tax" name="tax">
+                </div>
+              </div>
             </div>
-    
-            <!-- CMND, nơi cấp, quốc tịch -->
-            <div class="col-md-4">
-              <label class="form-label">Số CMND/CCCD</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.indentityCard" name="cccd">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Nơi cấp</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.placeIssued" name="placeIssued">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Quốc tịch</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.nationality" name="nationality">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Tôn giáo</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.religion" name="religion">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Dân tộc</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.ethnic" name="ethnic">
-            </div>
-    
-            <!-- Hộ khẩu - tạm trú - nguyên quán -->
-            <div class="col-md-4">
-              <label class="form-label">Tỉnh thường trú</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.province" name="province">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Quận/huyện thường trú</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.district" name="district">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Xã/phường thường trú</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.commune" name="commune">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Tỉnh tạm trú</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.tempProvince" name="tempProvince">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Địa chỉ tạm trú</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.tempAddress" name="tempAddress">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Tỉnh nguyên quán</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.originProvince" name="originProvince">
-            </div>
-    
-            <!-- Thông tin tài khoản, ngân hàng -->
-            <div class="col-md-4">
-              <label class="form-label">Số tài khoản</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.bankAccount" name="bankAccount">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Ngân hàng</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.bank" name="bank">
-            </div>
-    
-            <!-- BHXH, mã số thuế -->
-            <div class="col-md-4">
-              <label class="form-label">Số BHXH</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.insuranceNumber" name="insuranceNumber">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Mã số thuế</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.tax" name="tax">
-            </div>
-    
-            <!-- Phòng ban, chức vụ -->
-            <div class="col-md-4">
-              <label class="form-label">Phòng ban</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.departmentID" name="departmentID">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Chức vụ</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.position" name="position">
-            </div>
-    
-            <!-- Hình thức -->
-            <div class="col-md-4">
-              <label class="form-label">Hình thức lương</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.salaryType" name="salaryType">
-            </div>
-    
-            <div class="col-md-4">
-              <label class="form-label">Hình thức nhân viên</label>
-              <input type="text" class="form-control" [(ngModel)]="employee.employeeType" name="employeeType">
-            </div>
-    
-            <!-- Nút lưu -->
-            <div class="col-12 text-end mt-3">
-              <button type="submit" class="btn btn-primary">Lưu thông tin</button>
-            </div>
-    
-            <!-- Thêm phần tải ảnh -->
-            <div class="col-12 mt-4">
-              <div class="row">
-                <div class="col-md-6">
-                  <label class="form-label">Ảnh CMND/CCCD</label>
-                  <input type="file" class="form-control" (change)="onFileChange($event, 'cccd')" name="cccdImage">
-                  <div *ngIf="previewImages['cccd']" class="mt-2">
-                    <img [src]="previewImages['cccd']" alt="CMND preview" class="img-fluid rounded border" style="max-height: 200px;" />
+
+            <div class="form-section">
+              <h4>Tài liệu đính kèm</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Ảnh CMND/CCCD</label>
+                  <div class="file-upload">
+                    <input type="file" class="form-control" (change)="onFileChange($event, 'cccd')" name="cccdImage">
+                    <div *ngIf="previewImages['cccd']" class="preview-image">
+                      <img [src]="previewImages['cccd']" alt="CMND preview" />
+                    </div>
                   </div>
                 </div>
-    
-                <div class="col-md-6">
-                  <label class="form-label">Ảnh BHXH</label>
-                  <input type="file" class="form-control" (change)="onFileChange($event, 'insurance')" name="insuranceImage">
-                  <div *ngIf="previewImages['insurance']" class="mt-2">
-                    <img [src]="previewImages['insurance']" alt="BHXH preview" class="img-fluid rounded border" style="max-height: 200px;" />
+                <div class="form-group">
+                  <label>Ảnh BHXH</label>
+                  <div class="file-upload">
+                    <input type="file" class="form-control" (change)="onFileChange($event, 'bhxh')" name="bhxhImage">
+                    <div *ngIf="previewImages['bhxh']" class="preview-image">
+                      <img [src]="previewImages['bhxh']" alt="BHXH preview" />
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary">Hủy</button>
+              <button type="submit" class="btn btn-primary">Lưu thông tin</button>
             </div>
           </form>
         </div>
@@ -212,81 +195,67 @@
 
     <!-- Thông tin người thân tab -->
     <div class="tab-pane" [class.active]="activeTab === 1">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Danh sách người thân</h5>
-              <button class="btn btn-primary btn-sm" (click)="addRelative()">
-                <i class="bi bi-plus-circle"></i> Thêm người thân
+      <div class="profile-card">
+        <div class="section-title">
+          <i class="bi bi-people"></i>
+          <h3>Thông tin người thân</h3>
+        </div>
+        
+        <div class="relatives-list">
+          <div class="relative-card" *ngFor="let relative of relatives; let i = index">
+            <div class="relative-header">
+              <h4>{{ relative.name }}</h4>
+              <span class="relationship-badge">{{ relative.relationship }}</span>
+              <button class="btn-icon" (click)="removeRelative(i)">
+                <i class="bi bi-trash"></i>
               </button>
             </div>
-            <div class="card-body">
-              <!-- Form thêm người thân -->
-              <div class="row mb-4">
-                <div class="col-md-12">
-                  <h6>Thêm người thân mới</h6>
-                  <div class="row g-3">
-                    <div class="col-md-4">
-                      <label class="form-label">Họ và tên</label>
-                      <input type="text" class="form-control" [(ngModel)]="newRelative.name" placeholder="Nhập họ và tên">
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label">Quan hệ</label>
-                      <select class="form-select" [(ngModel)]="newRelative.relationship">
-                        <option value="">Chọn quan hệ</option>
-                        <option *ngFor="let option of relationshipOptions" [value]="option">{{option}}</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label">Ngày sinh</label>
-                      <input type="date" class="form-control" [(ngModel)]="newRelative.dateOfBirth">
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label">Số điện thoại</label>
-                      <input type="text" class="form-control" [(ngModel)]="newRelative.phone" placeholder="Nhập số điện thoại">
-                    </div>
-                    <div class="col-md-8">
-                      <label class="form-label">Địa chỉ</label>
-                      <input type="text" class="form-control" [(ngModel)]="newRelative.address" placeholder="Nhập địa chỉ">
-                    </div>
-                  </div>
-                </div>
+            <div class="relative-info">
+              <div class="info-item">
+                <i class="bi bi-calendar"></i>
+                <span>Ngày sinh: {{ relative.dateOfBirth | date:'dd/MM/yyyy' }}</span>
               </div>
-
-              <!-- Bảng danh sách người thân -->
-              <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>Họ và tên</th>
-                      <th>Quan hệ</th>
-                      <th>Ngày sinh</th>
-                      <th>Số điện thoại</th>
-                      <th>Địa chỉ</th>
-                      <th>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let relative of relatives; let i = index">
-                      <td>{{relative.name}}</td>
-                      <td>{{relative.relationship}}</td>
-                      <td>{{relative.dateOfBirth | date: 'dd/MM/yyyy'}}</td>
-                      <td>{{relative.phone}}</td>
-                      <td>{{relative.address}}</td>
-                      <td>
-                        <button class="btn btn-danger btn-sm" (click)="removeRelative(i)">
-                          <i class="bi bi-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr *ngIf="relatives.length === 0">
-                      <td colspan="6" class="text-center">Không có dữ liệu</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div class="info-item">
+                <i class="bi bi-telephone"></i>
+                <span>Số điện thoại: {{ relative.phone }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-geo-alt"></i>
+                <span>Địa chỉ: {{ relative.address }}</span>
               </div>
             </div>
+          </div>
+        </div>
+        
+        <div class="add-relative-form">
+          <h4>Thêm người thân</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Họ tên</label>
+              <input type="text" class="form-control" [(ngModel)]="newRelative.name" name="relativeName">
+            </div>
+            <div class="form-group">
+              <label>Mối quan hệ</label>
+              <select class="form-control" [(ngModel)]="newRelative.relationship" name="relationship">
+                <option value="">Chọn mối quan hệ</option>
+                <option *ngFor="let option of relationshipOptions" [value]="option">{{ option }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Ngày sinh</label>
+              <input type="date" class="form-control" [(ngModel)]="newRelative.dateOfBirth" name="relativeDob">
+            </div>
+            <div class="form-group">
+              <label>Số điện thoại</label>
+              <input type="text" class="form-control" [(ngModel)]="newRelative.phone" name="relativePhone">
+            </div>
+            <div class="form-group full-width">
+              <label>Địa chỉ</label>
+              <input type="text" class="form-control" [(ngModel)]="newRelative.address" name="relativeAddress">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" (click)="addRelative()">Thêm người thân</button>
           </div>
         </div>
       </div>
