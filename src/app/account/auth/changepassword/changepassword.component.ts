@@ -55,15 +55,16 @@ export class ChangepasswordComponent {
       ConfirmPassword : newPassword
     };
     console.log("Đổi mật khẩu", body);
-
+    
     return this.authService.changepassword(body).subscribe({
       next: (res) => {
         console.log("Change password success:", res);
+        const email = this.authService.GetCurrentUserEmail();
         this.authService.logout();
         this.router.navigate(['/account/login'], {
           state: {
-            username: this.f.email.value,
-            password: this.f.password.value
+            username: email,
+            password: body.NewPassword
           }});
       },
       error: (err) => console.error("Change password error:", err)

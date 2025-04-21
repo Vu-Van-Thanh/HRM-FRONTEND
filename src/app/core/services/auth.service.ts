@@ -127,13 +127,21 @@ export class AuthenticationService {
 
     // Get Current User
     public GetCurrentUser(): any {
-        if (this.user.AccountId === null || this.user.AccountId === "" || this.user.AccountId === undefined) {
+        if (this.user.AccountId === "" || this.user.AccountId === null || this.user.AccountId === undefined) {
             const userString = localStorage.getItem('currentUser');
             if (userString) {
                 this.user = JSON.parse(userString);
             }
         }
         return this.user;
+    }
+
+    public GetCurrentUserEmail(): string {
+        const userString = JSON.parse(localStorage.getItem('currentUser'));
+        if (userString) {
+            return userString.email;
+        }
+        return "";
     }
 
     public SetCurrentUser(userinput: any): any {
