@@ -38,7 +38,6 @@ export class HttpInterceptor implements HttpSystemInterceptor {
     // Set token header
     const authToken = this.authService.getAuthToken();
     if (authToken) {
-      console.log('Auth Token:', authToken);
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${authToken}`,

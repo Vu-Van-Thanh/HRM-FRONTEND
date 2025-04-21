@@ -30,6 +30,11 @@ export class AuthenticationService {
     private userprofile : UserProfile;
 
     constructor(private http: HttpClient,private router: Router) {
+        const userString = localStorage.getItem('currentUser');
+        if (userString) {
+            this.user = JSON.parse(userString);
+            console.log("Khởi tạo user : ", this.user);
+        }
     }
 
     // Login
@@ -57,8 +62,7 @@ export class AuthenticationService {
         );
     }
     public changepassword(passwordInfo : any)
-    {   console.log("API endpoint:", API_ENDPOINT.changePassword);
-
+    {   
         return this.http.post(API_ENDPOINT.changePassword, passwordInfo, {
             headers: {
                 'Content-Type': 'application/json',
@@ -84,10 +88,8 @@ export class AuthenticationService {
 
     // Set AuthToken
     public setAuthToken(token : {accessToken: string, refresh_token : string}, rememberMe: boolean) {
-        console.log("@@@@@@@@@@@@@@@@ : ", token);
         const authtokenString = JSON.stringify(token.accessToken);
         const parsedToken = JSON.parse(authtokenString); 
-        console.log("################ : ", parsedToken.result);
 
         const refreshTokenString = JSON.stringify(token.refresh_token);
     
@@ -105,7 +107,6 @@ export class AuthenticationService {
     public getAuthToken(): any {
         const tokenString = localStorage.getItem(LocalStorage.AuthToken) || sessionStorage.getItem(LocalStorage.AuthToken);
         if (tokenString) {
-            console.log("Token String:", tokenString);
             return tokenString;
         }
         return null;
@@ -127,7 +128,7 @@ export class AuthenticationService {
 
     // Get Current User
     public GetCurrentUser(): any {
-        if (this.user.AccountId === "" || this.user.AccountId === null || this.user.AccountId === undefined) {
+        if (!this.user || !this.user.AccountId) {
             const userString = localStorage.getItem('currentUser');
             if (userString) {
                 this.user = JSON.parse(userString);
@@ -152,6 +153,8 @@ export class AuthenticationService {
             FullName: userinput.fullName,
             avartar: userinput.avatarUrl
           };
+
+          localStorage.setItem('currentUser', JSON.stringify(this.user));
     }
 
     public SetCurrentUserProfile(profile: any) {

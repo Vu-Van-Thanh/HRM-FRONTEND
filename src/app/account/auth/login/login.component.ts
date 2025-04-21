@@ -80,8 +80,9 @@ export class LoginComponent implements OnInit {
             const refresh_token = response?.refresh_token;
             const user = response?.user;
             this.authenticationService.setAuthToken({ accessToken,refresh_token },isRemember);
+            console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUUU: ", this.authenticationService.GetCurrentUser());
             this.authenticationService.SetCurrentUser(user);
-            localStorage.setItem('currentUser', JSON.stringify(user));
+            //localStorage.setItem('currentUser', JSON.stringify(user));
             this.toastService.success('Đăng nhập thành công!');
             console.log("redirect /dashboard");
             this.router.navigate(['/dashboard']);
