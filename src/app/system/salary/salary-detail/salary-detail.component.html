@@ -17,11 +17,15 @@
       </div>
     </div>
 
-    <!-- Base Salary -->
+    <!-- Salary Information -->
     <div class="row mb-3">
-      <div class="col-12">
+      <div class="col-md-6">
         <label class="form-label">Lương cơ bản</label>
         <input type="number" class="form-control" formControlName="baseSalary" (change)="calculateTotal()">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Ngày hiệu lực</label>
+        <input type="text" class="form-control" [value]="employee?.salaryBase?.effectiveDate | date:'dd/MM/yyyy'" disabled>
       </div>
     </div>
 
@@ -31,7 +35,7 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="mb-0">Các khoản phụ cấp</h6>
           <button type="button" class="btn btn-primary btn-sm" (click)="addAllowance()">
-            Thêm phụ cấp
+            <i class="fas fa-plus"></i> Thêm phụ cấp
           </button>
         </div>
         <div class="table-responsive">
@@ -40,22 +44,29 @@
               <tr>
                 <th>Tên phụ cấp</th>
                 <th>Số tiền</th>
+                <th>% Lương cơ bản</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let allowance of allowances">
+              <tr *ngFor="let allowance of allowances; let i = index">
                 <td>
-                  <input type="text" class="form-control" [(ngModel)]="allowance.name" (change)="calculateTotal()">
+                  <input type="text" class="form-control" [(ngModel)]="allowance.name" [ngModelOptions]="{standalone: true}" (change)="calculateTotal()">
                 </td>
                 <td>
-                  <input type="number" class="form-control" [(ngModel)]="allowance.amount" (change)="calculateTotal()">
+                  <input type="number" class="form-control" [(ngModel)]="allowance.amount" [ngModelOptions]="{standalone: true}" (change)="calculateTotal(); calculatePercentage(allowance)">
+                </td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="allowance.percentage" [ngModelOptions]="{standalone: true}" (change)="calculateAmountFromPercentage(allowance)">
                 </td>
                 <td>
                   <button type="button" class="btn btn-danger btn-sm" (click)="removeAllowance(allowance.id)">
-                    Xóa
+                    <i class="fas fa-trash"></i> Xóa
                   </button>
                 </td>
+              </tr>
+              <tr *ngIf="allowances.length === 0">
+                <td colspan="4" class="text-center">Chưa có khoản phụ cấp nào</td>
               </tr>
             </tbody>
           </table>
@@ -69,7 +80,7 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="mb-0">Các khoản khấu trừ</h6>
           <button type="button" class="btn btn-primary btn-sm" (click)="addDeduction()">
-            Thêm khấu trừ
+            <i class="fas fa-plus"></i> Thêm khấu trừ
           </button>
         </div>
         <div class="table-responsive">
@@ -78,22 +89,74 @@
               <tr>
                 <th>Tên khấu trừ</th>
                 <th>Số tiền</th>
+                <th>% Lương cơ bản</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let deduction of deductions">
+              <tr *ngFor="let deduction of deductions; let i = index">
                 <td>
-                  <input type="text" class="form-control" [(ngModel)]="deduction.name" (change)="calculateTotal()">
+                  <input type="text" class="form-control" [(ngModel)]="deduction.name" [ngModelOptions]="{standalone: true}" (change)="calculateTotal()">
                 </td>
                 <td>
-                  <input type="number" class="form-control" [(ngModel)]="deduction.amount" (change)="calculateTotal()">
+                  <input type="number" class="form-control" [(ngModel)]="deduction.amount" [ngModelOptions]="{standalone: true}" (change)="calculateTotal(); calculatePercentage(deduction)">
+                </td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="deduction.percentage" [ngModelOptions]="{standalone: true}" (change)="calculateAmountFromPercentage(deduction)">
                 </td>
                 <td>
                   <button type="button" class="btn btn-danger btn-sm" (click)="removeDeduction(deduction.id)">
-                    Xóa
+                    <i class="fas fa-trash"></i> Xóa
                   </button>
                 </td>
+              </tr>
+              <tr *ngIf="deductions.length === 0">
+                <td colspan="4" class="text-center">Chưa có khoản khấu trừ nào</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Adjustments -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Các khoản khác</h6>
+          <button type="button" class="btn btn-primary btn-sm" (click)="addOther()">
+            <i class="fas fa-plus"></i> Thêm khoản khác
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Tên khoản</th>
+                <th>Số tiền</th>
+                <th>% Lương cơ bản</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let other of others; let i = index">
+                <td>
+                  <input type="text" class="form-control" [(ngModel)]="other.name" [ngModelOptions]="{standalone: true}" (change)="calculateTotal()">
+                </td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="other.amount" [ngModelOptions]="{standalone: true}" (change)="calculateTotal(); calculatePercentage(other)">
+                </td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="other.percentage" [ngModelOptions]="{standalone: true}" (change)="calculateAmountFromPercentage(other)">
+                </td>
+                <td>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="removeOther(other.id)">
+                    <i class="fas fa-trash"></i> Xóa
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="others.length === 0">
+                <td colspan="4" class="text-center">Chưa có khoản điều chỉnh khác</td>
               </tr>
             </tbody>
           </table>
@@ -105,7 +168,7 @@
     <div class="row">
       <div class="col-12">
         <div class="alert alert-info">
-          <h6 class="mb-0">Tổng lương thực lĩnh: {{salaryForm.get('totalSalary')?.value | currency:'VND'}}</h6>
+          <h6 class="mb-0">Tổng lương thực lĩnh: {{salaryForm.get('totalSalary')?.value | currency:'VND':'symbol-narrow':'1.0-0'}}</h6>
         </div>
       </div>
     </div>

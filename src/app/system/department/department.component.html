@@ -20,6 +20,7 @@
                   <th>Tên phòng ban</th>
                   <th>Mô tả</th>
                   <th>Trưởng phòng</th>
+                  <th>Liên hệ</th>
                   <th>Trạng thái</th>
                   <th>Thao tác</th>
                 </tr>
@@ -30,6 +31,7 @@
                   <td>{{ department.name }}</td>
                   <td>{{ department.description }}</td>
                   <td>{{ department.managerName || 'Chưa có' }}</td>
+                  <td>{{ department.contact || 'Chưa có' }}</td>
                   <td>
                     <span [class]="department.status ? 'badge bg-success' : 'badge bg-danger'">
                       {{ department.status ? 'Hoạt động' : 'Không hoạt động' }}

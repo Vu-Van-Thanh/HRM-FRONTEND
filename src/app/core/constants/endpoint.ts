@@ -11,4 +11,6 @@ export const API_ENDPOINT = {
    deleteEmployee: 'https://localhost:7214/Employee',
    searchEmployees: 'https://localhost:7214/Employee/search',
    getAllDepartment : 'https://localhost:7176/Department/',
+   getAllSalary : 'http://localhost:5285/SalaryBase/payroll-info',
+   getEmployeeID : 'https://localhost:7214/Employee/employeeIdList',
 };
