@@ -23,52 +23,89 @@
           <mat-tab-group (selectedTabChange)="onTabChange($event.index === 0 ? 'all' : 'personal')" class="mb-4">
             <mat-tab label="Tất cả hoạt động" *ngIf="isAdmin">
               <div class="p-3">
-                <!-- Filters -->
-                <div class="row mb-3">
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Phòng ban</mat-label>
-                      <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onFilterChange()">
-                        <mat-option value="">Tất cả</mat-option>
-                        <mat-option *ngFor="let department of departments" [value]="department">
-                          {{department}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
+                <!-- Filter Card -->
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <h5 class="mb-0">Bộ lọc</h5>
                   </div>
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Loại hoạt động</mat-label>
-                      <mat-select [(ngModel)]="selectedActivityType" (selectionChange)="onFilterChange()">
-                        <mat-option value="">Tất cả</mat-option>
-                        <mat-option *ngFor="let type of activityTypes" [value]="type">
-                          {{type === 'ATTENDANCE' ? 'Chấm công' :
-                            type === 'REGISTRATION' ? 'Đăng ký hoạt động' :
-                            type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Trạng thái</mat-label>
-                      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()">
-                        <mat-option value="">Tất cả</mat-option>
-                        <mat-option *ngFor="let status of activityStatuses" [value]="status">
-                          {{status === 'PENDING' ? 'Chờ phê duyệt' :
-                            status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Tìm kiếm</mat-label>
-                      <input matInput (keyup)="applyFilter($event)" placeholder="Nhập từ khóa...">
-                    </mat-form-field>
+                  <div class="card-body">
+                    <form [formGroup]="advancedFilterForm" (ngSubmit)="applyAdvancedFilter()">
+                      <div class="row">
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Mã quản lý</mat-label>
+                            <input matInput formControlName="managerID" placeholder="Nhập mã quản lý">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Mã phòng ban</mat-label>
+                            <input matInput formControlName="departmentID" placeholder="Nhập mã phòng ban">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Mã nhân viên</mat-label>
+                            <input matInput formControlName="employeeID" placeholder="Nhập mã nhân viên">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Loại hoạt động</mat-label>
+                            <mat-select formControlName="activityType">
+                              <mat-option value="">Tất cả</mat-option>
+                              <mat-option *ngFor="let type of activityTypes" [value]="type">
+                                {{type === 'ATTENDANCE' ? 'Chấm công' :
+                                  type === 'REGISTRATION' ? 'Đăng ký hoạt động' :
+                                  type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Trạng thái</mat-label>
+                            <mat-select formControlName="activityStatus">
+                              <mat-option value="">Tất cả</mat-option>
+                              <mat-option *ngFor="let status of activityStatuses" [value]="status">
+                                {{status === 'PENDING' ? 'Chờ phê duyệt' :
+                                  status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Thời gian bắt đầu</mat-label>
+                            <input matInput [matDatepicker]="startTimePicker" formControlName="startTime">
+                            <mat-datepicker-toggle matSuffix [for]="startTimePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #startTimePicker></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Thời gian kết thúc</mat-label>
+                            <input matInput [matDatepicker]="endTimePicker" formControlName="endTime">
+                            <mat-datepicker-toggle matSuffix [for]="endTimePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #endTimePicker></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+                      </div>
+                      <div class="d-flex justify-content-end">
+                        <button type="button" mat-button (click)="resetAdvancedFilter()" class="me-2">
+                          <mat-icon>refresh</mat-icon> Đặt lại
+                        </button>
+                        <button type="submit" mat-raised-button color="primary">
+                          <mat-icon>search</mat-icon> Tìm kiếm
+                        </button>
+                      </div>
+                      <div *ngIf="isLoading" class="text-center mt-3">
+                        <mat-spinner diameter="30" class="mx-auto"></mat-spinner>
+                        <p class="mt-2">Đang tải dữ liệu...</p>
+                      </div>
+                    </form>
                   </div>
                 </div>
-
                 <!-- All Activities Table -->
                 <div class="table-responsive">
                   <table mat-table [dataSource]="dataSource" matSort #allSort="matSort" class="w-100">
@@ -88,37 +125,40 @@
                     <ng-container matColumnDef="activityType">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header>Loại</th>
                       <td mat-cell *matCellDef="let activity">
-                        {{activity.activityType === 'ATTENDANCE' ? 'Chấm công' :
-                          activity.activityType === 'REGISTRATION' ? 'Đăng ký hoạt động' :
-                          activity.activityType === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
+                        {{getActivityTypeName(activity)}}
                       </td>
                     </ng-container>
 
-                    <!-- Start Date Column -->
-                    <ng-container matColumnDef="startDate">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Từ ngày</th>
-                      <td mat-cell *matCellDef="let activity">{{activity.startDate | date:'dd/MM/yyyy'}}</td>
+                    <!-- Task Name Column -->
+                    <ng-container matColumnDef="taskName">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Tên công việc</th>
+                      <td mat-cell *matCellDef="let activity">{{activity.taskName || 'N/A'}}</td>
                     </ng-container>
 
-                    <!-- End Date Column -->
-                    <ng-container matColumnDef="endDate">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Đến ngày</th>
-                      <td mat-cell *matCellDef="let activity">{{activity.endDate | date:'dd/MM/yyyy'}}</td>
+                    <!-- Start Time Column -->
+                    <ng-container matColumnDef="startTime">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Bắt đầu</th>
+                      <td mat-cell *matCellDef="let activity">{{formatDateTime(activity.startTime)}}</td>
                     </ng-container>
 
-                    <!-- Reason Column -->
-                    <ng-container matColumnDef="reason">
-                      <th mat-header-cell *matHeaderCellDef>Lý do</th>
-                      <td mat-cell *matCellDef="let activity">{{activity.reason}}</td>
+                    <!-- End Time Column -->
+                    <ng-container matColumnDef="endTime">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Kết thúc</th>
+                      <td mat-cell *matCellDef="let activity">{{formatDateTime(activity.endTime)}}</td>
+                    </ng-container>
+                    
+                    <!-- Estimated Hours Column -->
+                    <ng-container matColumnDef="estimatedHours">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Giờ ước tính</th>
+                      <td mat-cell *matCellDef="let activity">{{activity.estimatedHours || 0}} giờ</td>
                     </ng-container>
 
                     <!-- Status Column -->
                     <ng-container matColumnDef="status">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header>Trạng thái</th>
                       <td mat-cell *matCellDef="let activity">
-                        <span [class]="'status-badge ' + activity.status.toLowerCase()">
-                          {{activity.status === 'PENDING' ? 'Chờ phê duyệt' :
-                            activity.status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
+                        <span [class]="getStatusClass(activity.status)">
+                          {{getStatusDisplay(activity.status)}}
                         </span>
                       </td>
                     </ng-container>
@@ -131,11 +171,11 @@
                           <mat-icon>visibility</mat-icon>
                         </button>
                         <button mat-icon-button color="accent" (click)="onApprove(activity)" 
-                          *ngIf="activity.status === 'PENDING'" matTooltip="Phê duyệt">
+                          *ngIf="activity.status.toUpperCase() === 'PENDING'" matTooltip="Phê duyệt">
                           <mat-icon>check_circle</mat-icon>
                         </button>
                         <button mat-icon-button color="warn" (click)="onReject(activity)"
-                          *ngIf="activity.status === 'PENDING'" matTooltip="Từ chối">
+                          *ngIf="activity.status.toUpperCase() === 'PENDING'" matTooltip="Từ chối">
                           <mat-icon>cancel</mat-icon>
                         </button>
                       </td>
@@ -161,48 +201,87 @@
                   </button>
                 </div>
 
-                <!-- Filters -->
-                <div class="row mb-3">
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Loại hoạt động</mat-label>
-                      <mat-select [(ngModel)]="selectedActivityType" (selectionChange)="onFilterChange()">
-                        <mat-option value="">Tất cả</mat-option>
-                        <mat-option *ngFor="let type of activityTypes" [value]="type">
-                          {{type === 'ATTENDANCE' ? 'Chấm công' :
-                            type === 'REGISTRATION' ? 'Đăng ký hoạt động' :
-                            type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
+                <!-- Filter Card -->
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <h5 class="mb-0">Bộ lọc</h5>
                   </div>
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Trạng thái</mat-label>
-                      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()">
-                        <mat-option value="">Tất cả</mat-option>
-                        <mat-option *ngFor="let status of activityStatuses" [value]="status">
-                          {{status === 'PENDING' ? 'Chờ phê duyệt' :
-                            status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Từ ngày</mat-label>
-                      <input matInput [matDatepicker]="startDatePicker" [(ngModel)]="startDate">
-                      <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
-                      <mat-datepicker #startDatePicker></mat-datepicker>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Đến ngày</mat-label>
-                      <input matInput [matDatepicker]="endDatePicker" [(ngModel)]="endDate">
-                      <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
-                      <mat-datepicker #endDatePicker></mat-datepicker>
-                    </mat-form-field>
+                  <div class="card-body">
+                    <form [formGroup]="advancedFilterForm" (ngSubmit)="applyAdvancedFilter()">
+                      <div class="row">
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Mã quản lý</mat-label>
+                            <input matInput formControlName="managerID" placeholder="Nhập mã quản lý">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Mã phòng ban</mat-label>
+                            <input matInput formControlName="departmentID" placeholder="Nhập mã phòng ban">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Mã nhân viên</mat-label>
+                            <input matInput formControlName="employeeID" placeholder="Nhập mã nhân viên">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Loại hoạt động</mat-label>
+                            <mat-select formControlName="activityType">
+                              <mat-option value="">Tất cả</mat-option>
+                              <mat-option *ngFor="let type of activityTypes" [value]="type">
+                                {{type === 'ATTENDANCE' ? 'Chấm công' :
+                                  type === 'REGISTRATION' ? 'Đăng ký hoạt động' :
+                                  type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Trạng thái</mat-label>
+                            <mat-select formControlName="activityStatus">
+                              <mat-option value="">Tất cả</mat-option>
+                              <mat-option *ngFor="let status of activityStatuses" [value]="status">
+                                {{status === 'PENDING' ? 'Chờ phê duyệt' :
+                                  status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Thời gian bắt đầu</mat-label>
+                            <input matInput [matDatepicker]="personalStartTimePicker" formControlName="startTime">
+                            <mat-datepicker-toggle matSuffix [for]="personalStartTimePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #personalStartTimePicker></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Thời gian kết thúc</mat-label>
+                            <input matInput [matDatepicker]="personalEndTimePicker" formControlName="endTime">
+                            <mat-datepicker-toggle matSuffix [for]="personalEndTimePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #personalEndTimePicker></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+                      </div>
+                      <div class="d-flex justify-content-end">
+                        <button type="button" mat-button (click)="resetAdvancedFilter()" class="me-2">
+                          <mat-icon>refresh</mat-icon> Đặt lại
+                        </button>
+                        <button type="submit" mat-raised-button color="primary">
+                          <mat-icon>search</mat-icon> Tìm kiếm
+                        </button>
+                      </div>
+                      <div *ngIf="isLoading" class="text-center mt-3">
+                        <mat-spinner diameter="30" class="mx-auto"></mat-spinner>
+                        <p class="mt-2">Đang tải dữ liệu...</p>
+                      </div>
+                    </form>
                   </div>
                 </div>
 
@@ -213,37 +292,40 @@
                     <ng-container matColumnDef="activityType">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header>Loại</th>
                       <td mat-cell *matCellDef="let activity">
-                        {{activity.activityType === 'ATTENDANCE' ? 'Chấm công' :
-                          activity.activityType === 'REGISTRATION' ? 'Đăng ký hoạt động' :
-                          activity.activityType === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
+                        {{getActivityTypeName(activity)}}
                       </td>
                     </ng-container>
 
-                    <!-- Start Date Column -->
-                    <ng-container matColumnDef="startDate">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Từ ngày</th>
-                      <td mat-cell *matCellDef="let activity">{{activity.startDate | date:'dd/MM/yyyy'}}</td>
+                    <!-- Task Name Column -->
+                    <ng-container matColumnDef="taskName">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Tên công việc</th>
+                      <td mat-cell *matCellDef="let activity">{{activity.taskName || 'N/A'}}</td>
                     </ng-container>
 
-                    <!-- End Date Column -->
-                    <ng-container matColumnDef="endDate">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Đến ngày</th>
-                      <td mat-cell *matCellDef="let activity">{{activity.endDate | date:'dd/MM/yyyy'}}</td>
+                    <!-- Start Time Column -->
+                    <ng-container matColumnDef="startTime">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Bắt đầu</th>
+                      <td mat-cell *matCellDef="let activity">{{formatDateTime(activity.startTime)}}</td>
                     </ng-container>
 
-                    <!-- Reason Column -->
-                    <ng-container matColumnDef="reason">
-                      <th mat-header-cell *matHeaderCellDef>Lý do</th>
-                      <td mat-cell *matCellDef="let activity">{{activity.reason}}</td>
+                    <!-- End Time Column -->
+                    <ng-container matColumnDef="endTime">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Kết thúc</th>
+                      <td mat-cell *matCellDef="let activity">{{formatDateTime(activity.endTime)}}</td>
+                    </ng-container>
+                    
+                    <!-- Estimated Hours Column -->
+                    <ng-container matColumnDef="estimatedHours">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Giờ ước tính</th>
+                      <td mat-cell *matCellDef="let activity">{{activity.estimatedHours || 0}} giờ</td>
                     </ng-container>
 
                     <!-- Status Column -->
                     <ng-container matColumnDef="status">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header>Trạng thái</th>
                       <td mat-cell *matCellDef="let activity">
-                        <span [class]="'status-badge ' + activity.status.toLowerCase()">
-                          {{activity.status === 'PENDING' ? 'Chờ phê duyệt' :
-                            activity.status === 'APPROVED' ? 'Đã phê duyệt' : 'Từ chối'}}
+                        <span [class]="getStatusClass(activity.status)">
+                          {{getStatusDisplay(activity.status)}}
                         </span>
                       </td>
                     </ng-container>
@@ -256,11 +338,11 @@
                           <mat-icon>visibility</mat-icon>
                         </button>
                         <button mat-icon-button color="accent" (click)="onEditActivity(activity)" 
-                          *ngIf="activity.status === 'PENDING'" matTooltip="Chỉnh sửa">
+                          *ngIf="activity.status.toUpperCase() === 'PENDING'" matTooltip="Chỉnh sửa">
                           <mat-icon>edit</mat-icon>
                         </button>
                         <button mat-icon-button color="warn" (click)="onDeleteActivity(activity)"
-                          *ngIf="activity.status === 'PENDING' && activity.activityType === 'ATTENDANCE'" 
+                          *ngIf="activity.status.toUpperCase() === 'PENDING' && activity.activityType === ActivityType.ATTENDANCE" 
                           matTooltip="Xóa">
                           <mat-icon>delete</mat-icon>
                         </button>

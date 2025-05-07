@@ -17,6 +17,7 @@ export class ActivityFormDialogComponent implements OnInit {
   activityType: string = '';
   record?: Activity;
   title: string = '';
+  activityTypes: ActivityType[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -36,11 +37,22 @@ export class ActivityFormDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.record) {
-      this.activityType = this.record.activityType;
-    }
-    this.loadActivityFields();
-    this.setActivityTypeTitle();
+    // Tải danh sách loại hoạt động từ API
+    this.activityService.getActivityTypes().subscribe(types => {
+      this.activityTypes = types;
+      
+      if (this.record) {
+        // Set activityType từ activityId nếu chưa được thiết lập
+        if (!this.record.activityType && this.record.activityId) {
+          this.record.activityType = this.record.activityId;
+        }
+        
+        this.activityType = this.record.activityType || '';
+      }
+      
+      this.loadActivityFields();
+      this.setActivityTypeTitle();
+    });
   }
 
   loadActivityFields(): void {
@@ -53,12 +65,45 @@ export class ActivityFormDialogComponent implements OnInit {
   initForm(): void {
     const formGroup: any = {};
     
+    // Parse requestFlds if it exists
+    let requestFldsObj = {};
+    if (this.record?.requestFlds) {
+      try {
+        requestFldsObj = JSON.parse(this.record.requestFlds);
+      } catch (e) {
+        console.error('Lỗi khi parse requestFlds:', e);
+      }
+    }
+    
     this.activityFields.forEach(field => {
       const validators = [];
       if (field.required) {
         validators.push(Validators.required);
       }
-      formGroup[field.name] = [this.record?.[field.name as keyof Activity] || '', validators];
+      
+      // Get field value from the record or from parsed requestFlds
+      let fieldValue = '';
+      if (field.name === 'reason' && this.record?.reason) {
+        fieldValue = this.record.reason;
+      } else if (field.name === 'taskName' && this.record?.taskName) {
+        fieldValue = this.record.taskName;
+      } else if (field.name === 'estimatedHours' && this.record?.estimatedHours) {
+        fieldValue = this.record.estimatedHours.toString();
+      } else if (field.name === 'startTime' && this.record?.startTime) {
+        fieldValue = this.record.startTime;
+      } else if (field.name === 'endTime' && this.record?.endTime) {
+        fieldValue = this.record.endTime;
+      } else if (requestFldsObj[field.name]) {
+        fieldValue = requestFldsObj[field.name];
+      } else if (field.name === 'location' && requestFldsObj['Location']) {
+        fieldValue = requestFldsObj['Location'];
+      } else if (field.name === 'estimatedHours' && requestFldsObj['EstimatedHours']) {
+        fieldValue = requestFldsObj['EstimatedHours'];
+      } else if (field.name === 'taskName' && requestFldsObj['TaskName']) {
+        fieldValue = requestFldsObj['TaskName'];
+      }
+      
+      formGroup[field.name] = [fieldValue, validators];
     });
 
     this.form = this.fb.group(formGroup);
@@ -73,9 +118,9 @@ export class ActivityFormDialogComponent implements OnInit {
       const formData = this.form.value;
       
       if (this.isEdit && this.record) {
-        this.activityService.updateActivityRecord(this.record.id, {
+        this.activityService.updateActivityRecord(this.record.requestId, {
           ...formData,
-          activityType: this.activityType as ActivityType
+          activityType: this.activityType
         }).subscribe(() => {
           this.dialogRef.close(true);
         });
@@ -89,11 +134,11 @@ export class ActivityFormDialogComponent implements OnInit {
         };
 
         this.activityService.createActivityRecord({
-          employeeId: mockUser.id,
+          employeeId: mockUser.id.toString(),
           employeeName: mockUser.name,
-          departmentId: mockUser.departmentId,
+          departmentId: mockUser.departmentId.toString(),
           departmentName: mockUser.departmentName,
-          activityType: this.activityType as ActivityType,
+          activityType: this.activityType,
           ...formData
         }).subscribe(() => {
           this.dialogRef.close(true);
@@ -107,34 +152,16 @@ export class ActivityFormDialogComponent implements OnInit {
   }
 
   getActivityTypeLabel(type: string): string {
-    switch (type) {
-      case ActivityType.ATTENDANCE:
-        return 'Chấm công';
-      case ActivityType.REGISTRATION:
-        return 'Đăng ký hoạt động';
-      case ActivityType.OVERTIME:
-        return 'Tăng ca';
-      case ActivityType.BUSINESS_TRIP:
-        return 'Đăng ký công tác';
-      default:
-        return '';
-    }
+    const foundType = this.activityTypes.find(t => t.activityId === type || t.activityType === type);
+    return foundType ? foundType.activityDescription : type;
   }
 
   setActivityTypeTitle(): void {
-    switch (this.data.activityType) {
-      case ActivityType.ATTENDANCE:
-        this.title = 'Đăng ký chấm công';
-        break;
-      case ActivityType.REGISTRATION:
-        this.title = 'Đăng ký hoạt động';
-        break;
-      case ActivityType.OVERTIME:
-        this.title = 'Đăng ký tăng ca';
-        break;
-      case ActivityType.BUSINESS_TRIP:
-        this.title = 'Đăng ký công tác';
-        break;
+    if (this.data.activityType) {
+      const activityType = this.activityTypes.find(t => t.activityId === this.data.activityType || t.activityType === this.data.activityType);
+      if (activityType) {
+        this.title = `Đăng ký ${activityType.activityDescription}`;
+      }
     }
   }
 } 

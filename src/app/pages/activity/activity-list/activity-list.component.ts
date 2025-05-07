@@ -12,6 +12,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Project } from '../models/project.model';
 import { Position } from '../models/position.model';
 import { WorkLogDialogComponent } from '../work-log-dialog/work-log-dialog.component';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import { HttpClient } from '@angular/common/http';
+import { DepartmentService } from '../../../system/department/department.service';
+import { Department } from '../../../system/department/department.model';
+import { EmployeeDepartmentDTO } from 'src/app/system/salary/salary.model';
+import { tap, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-activity-list',
@@ -19,22 +25,26 @@ import { WorkLogDialogComponent } from '../work-log-dialog/work-log-dialog.compo
   styleUrls: ['./activity-list.component.scss']
 })
 export class ActivityListComponent implements OnInit, AfterViewInit {
+  //departments: Department[] = [];
+  employeeList: EmployeeDepartmentDTO[] = [];
   displayedColumns: string[] = [
     'employeeName',
     'departmentName',
     'activityType',
-    'startDate',
-    'endDate',
-    'reason',
+    'taskName',
+    'startTime',
+    'endTime',
+    'estimatedHours',
     'status',
     'actions'
   ];
   
   personalDisplayedColumns: string[] = [
     'activityType',
-    'startDate',
-    'endDate',
-    'reason',
+    'taskName',
+    'startTime',
+    'endTime',
+    'estimatedHours',
     'status',
     'actions'
   ];
@@ -43,10 +53,11 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   personalDataSource: MatTableDataSource<Activity> = new MatTableDataSource<Activity>([]);
   
   departments: string[] = [];
-  activityTypes = Object.values(ActivityType);
+  departmentsList: Department[] = [];
+  activityTypes: ActivityType[] = [];
   activityStatuses = Object.values(ActivityStatus);
   selectedDepartment: string = '';
-  selectedActivityType: ActivityType | '' = '';
+  selectedActivityType: string | '' = '';
   selectedStatus: ActivityStatus | '' = '';
   
   activeTab: 'all' | 'personal' = 'all';
@@ -66,29 +77,57 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   startDate: Date | null = null;
   endDate: Date | null = null;
 
+  // Add new filter form
+  advancedFilterForm: FormGroup;
+  filteredActivities: Activity[] = [];
+  filteredEmployees: EmployeeDepartmentDTO[] = [];
+  filteredDepartments: Department[] = [];
+  isLoading = false;
+
   constructor(
     private activityService: ActivityService,
     private dialog: MatDialog,
     private route: ActivatedRoute,
     private authService: AuthenticationService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private departmentService: DepartmentService
   ) {
     this.isAdmin = this.authService.isAdmin();
     this.currentUserId = this.authService.getCurrentUserId();
     this.initWorkLogForm();
+    
+    // Initialize advanced filter form
+    this.advancedFilterForm = this.fb.group({
+      managerID: [''],
+      departmentID: [''],
+      employeeID: [''],
+      activityType: [''],
+      activityStatus: [''],
+      startTime: [''],
+      endTime: ['']
+    });
   }
 
   ngOnInit(): void {
-    // Get activityType from route data
-    this.route.data.subscribe(data => {
-      if (data['activityType']) {
-        this.selectedActivityType = data['activityType'];
-      }
-      this.loadActivities();
-      this.loadPersonalActivities();
+    // Tải loại hoạt động từ API
+    this.activityService.getActivityTypes().subscribe(types => {
+      this.activityTypes = types;
+      
+      // Get activityType from route data
+      this.route.data.subscribe(data => {
+        if (data['activityType']) {
+          this.selectedActivityType = data['activityType'];
+        }
+        this.loadActivities();
+        this.loadPersonalActivities();
+      });
     });
+    
     this.loadProjects();
     this.loadPositions();
+    this.loadDepartments();
+    this.loadEmployeeData();
   }
 
   ngAfterViewInit() {
@@ -281,7 +320,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   }
 
   onApprove(activity: Activity): void {
-    this.activityService.approveActivity(activity.id).subscribe({
+    this.activityService.approveActivity(activity.requestId).subscribe({
       next: () => {
         this.loadActivities();
         this.loadPersonalActivities();
@@ -303,7 +342,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.activityService.rejectActivity(activity.id, result.reason).subscribe({
+        this.activityService.rejectActivity(activity.requestId, result.reason).subscribe({
           next: () => {
             this.loadActivities();
             this.loadPersonalActivities();
@@ -330,9 +369,9 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
         // Tạo object activity từ form data
         const activity = {
           ...result,
-          activityType: ActivityType.ATTENDANCE,
+          activityType: 'ATTENDANCE',
           status: 'PENDING',
-          employeeId: this.currentUserId,
+          employeeId: this.currentUserId.toString(),
           employeeName: 'Nguyễn Văn A', // TODO: Lấy tên thật từ AuthService
           projectName: this.projects.find(p => p.id === result.projectId)?.name,
           positionName: this.positions.find(p => p.id === result.positionId)?.name,
@@ -369,7 +408,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
     if (this.workLogForm.valid) {
       const workLog = {
         ...this.workLogForm.value,
-        activityType: ActivityType.ATTENDANCE,
+        activityType: 'ATTENDANCE',
         status: 'PENDING'
       };
 
@@ -409,7 +448,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
           positionName: this.positions.find(p => p.id === result.positionId)?.name,
         };
 
-        this.activityService.updateActivity(activity.id, updatedActivity).subscribe({
+        this.activityService.updateActivity(activity.requestId, updatedActivity).subscribe({
           next: () => {
             // Cập nhật lại danh sách
             this.loadPersonalActivities();
@@ -440,7 +479,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.activityService.deleteActivity(activity.id).subscribe({
+        this.activityService.deleteActivity(activity.requestId).subscribe({
           next: () => {
             // Cập nhật lại danh sách hoạt động
             this.loadPersonalActivities();
@@ -454,5 +493,188 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
         });
       }
     });
+  }
+
+  /**
+   * Tải danh sách phòng ban từ API
+   */
+  loadDepartments(): void {
+    this.departmentService.getDepartments().subscribe(
+      departments => {
+        console.log('📁 Danh sách phòng ban:', departments);
+        this.departmentsList = departments;
+      },
+      error => {
+        console.error('❌ Lỗi khi tải dữ liệu phòng ban:', error);
+        this.departmentsList = [];
+      }
+    );
+  }
+
+  /**
+   * Tải danh sách nhân viên từ API theo bộ lọc
+   */
+  loadEmployeeData(): void {
+    const formValues = this.advancedFilterForm.value;
+    
+    const employeeFilter = {
+      department: formValues.departmentID || '',
+      jobTitle: '',
+      managerId: formValues.managerID || '',
+      employeeId: formValues.employeeID || ''
+    };
+
+    console.log('🔍 Áp dụng bộ lọc nhân viên:', employeeFilter);
+
+    // Tải danh sách nhân viên dựa trên bộ lọc
+    this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeFilter })
+      .pipe(
+        tap(employees => {
+          console.log('📌 Danh sách nhân viên sau khi lọc:', employees);
+          this.employeeList = employees;
+        })
+      )
+      .subscribe({
+        error: error => {
+          console.error('❌ Lỗi khi tải dữ liệu nhân viên:', error);
+        }
+      });
+  }
+
+  
+  loadActivityDataWithFilters(): void {
+    this.isLoading = true;
+    // Tạo bản sao của form value để không ảnh hưởng đến form gốc
+    const filters = { ...this.advancedFilterForm.value };
+
+    // Gọi service để lấy dữ liệu
+    this.activityService.getActivityDataWithFilters(filters).subscribe({
+      next: (data) => {
+        this.filteredDepartments = data.departments;
+        this.filteredEmployees = data.employees;
+        
+        // Xử lý dữ liệu từ API để phù hợp với model
+        const activities: Activity[] = data.activities.map(item => {
+          let activityType = item.activityId; // Gán activityType = activityId
+          let reason = '';
+          let taskName = '';
+          let estimatedHours = 0;
+          
+          // Parse requestFlds nếu có
+          if (item.requestFlds) {
+            try {
+              const requestFldsObj = JSON.parse(item.requestFlds);
+              reason = requestFldsObj.TaskName || '';
+              taskName = requestFldsObj.TaskName || '';
+              estimatedHours = requestFldsObj.EstimatedHours || 0;
+            } catch (e) {
+              console.error('Lỗi khi parse requestFlds:', e);
+            }
+          }
+          
+          return {
+            ...item,
+            employeeName: this.getEmployeeName(item.employeeId),
+            departmentName: this.getDepartmentName(Number(item.employeeId)),
+            activityType: activityType,
+            taskName: taskName,
+            estimatedHours: estimatedHours,
+            reason: reason
+          };
+        });
+        
+        // Cập nhật danh sách hoạt động
+        this.filteredActivities = activities;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Lỗi khi tải dữ liệu:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  /**
+   * Áp dụng bộ lọc nâng cao
+   */
+  applyAdvancedFilter(): void {
+    this.loadActivityDataWithFilters();
+  }
+
+  /**
+   * Reset bộ lọc nâng cao
+   */
+  resetAdvancedFilter(): void {
+    this.advancedFilterForm.reset({
+      managerID: '',
+      departmentID: '',
+      employeeID: '',
+      activityType: '',
+      activityStatus: '',
+      startTime: '',
+      endTime: ''
+    });
+    
+    this.loadActivityDataWithFilters();
+  }
+
+  /**
+   * Lấy tên nhân viên từ ID
+   */
+  getEmployeeName(employeeId?: string): string {
+    if (!employeeId) return 'N/A';
+    const employee = this.employeeList.find(e => e.employeeID === employeeId);
+    return employee?.employeeName || 'N/A';
+  }
+
+  /**
+   * Lấy tên phòng ban từ ID
+   */
+  getDepartmentName(departmentId?: number): string {
+    if (!departmentId) return 'N/A';
+    const department = this.departmentsList.find(d => d.id === departmentId);
+    return department?.name || 'N/A';
+  }
+
+  // Phương thức lấy tên của loại hoạt động
+  getActivityTypeName(activity: Activity): string {
+    if (!activity.activityType) return '';
+    
+    const activityTypeObj = this.activityTypes.find(type => type.activityId === activity.activityType || type.activityType === activity.activityType);
+    return activityTypeObj ? activityTypeObj.activityDescription : activity.activityType;
+  }
+
+  // Phương thức định dạng thời gian
+  formatDateTime(dateTime: string): string {
+    if (!dateTime) return 'N/A';
+    return new Date(dateTime).toLocaleString('vi-VN');
+  }
+
+  // Phương thức lấy trạng thái hiển thị
+  getStatusDisplay(status: string): string {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'Chờ phê duyệt';
+      case 'APPROVED':
+        return 'Đã phê duyệt';
+      case 'REJECTED':
+        return 'Từ chối';
+      default:
+        return status;
+    }
+  }
+
+  // Phương thức lấy class cho trạng thái
+  getStatusClass(status: string): string {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'badge bg-warning';
+      case 'APPROVED':
+        return 'badge bg-success';
+      case 'REJECTED':
+        return 'badge bg-danger';
+      default:
+        return 'badge bg-secondary';
+    }
   }
 } 

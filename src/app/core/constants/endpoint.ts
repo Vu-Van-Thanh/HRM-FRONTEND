@@ -13,4 +13,6 @@ export const API_ENDPOINT = {
    getAllDepartment : 'https://localhost:7176/Department/',
    getAllSalary : 'http://localhost:5285/SalaryBase/payroll-info',
    getEmployeeID : 'https://localhost:7214/Employee/employeeIdList',
+   getAllActivity : 'http://localhost:5295/ActivityRequest/activity-request',
+   getAllActivityType : 'http://localhost:5295/Activity'
 };

@@ -29,7 +29,7 @@ export class ActivityRegistrationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.activityType = ActivityType.REGISTRATION;
+    this.activityType = 'REGISTRATION';
     this.registrationType = this.route.snapshot.params['type'] as 'leave' | 'remote';
     
     this.loadFormFields();
@@ -69,7 +69,7 @@ export class ActivityRegistrationComponent implements OnInit {
     const formValue = this.form.value;
     const activityData: Activity = {
       ...formValue,
-      activityType: this.activityType as ActivityType,
+      activityType: this.activityType,
       registrationType: this.registrationType,
       status: 'PENDING'
     };

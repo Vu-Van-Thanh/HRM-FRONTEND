@@ -1,31 +1,26 @@
 export interface Activity {
-  id: number;
-  employeeId: number;
-  employeeName: string;
-  departmentId: number;
-  departmentName: string;
-  activityType: ActivityType;
-  registrationType?: 'leave' | 'remote';
-  startDate: string;
-  endDate: string;
-  startTime?: string;
-  endTime?: string;
-  leaveType?: string;
-  remoteType?: string;
-  reason: string;
-  status: string;
-  approvedBy?: number;
-  approvedByName?: string;
-  approvedAt?: string;
-  createdAt: string;
-  updatedAt: string;
+  requestId: string;      // ID của request/hoạt động
+  employeeId: string;     // ID của nhân viên
+  employeeName?: string;  // Tên nhân viên (được set sau khi kết hợp với danh sách nhân viên)
+  activityId: string;     // ID của loại hoạt động
+  createdAt: string;      // Thời gian tạo
+  startTime: string;      // Thời gian bắt đầu
+  endTime: string;        // Thời gian kết thúc
+  status: string;         // Trạng thái
+  requestFlds: string;    // Thông tin bổ sung (dạng JSON string)
+  
+  // Trường bổ sung cho giao diện
+  departmentName?: string; // Tên phòng ban (được set sau khi kết hợp với danh sách nhân viên)
+  activityType?: string;   // Loại hoạt động (được set từ activityId)
+  reason?: string;        // Lý do (được parse từ requestFlds)
+  taskName?: string;      // Tên công việc (được parse từ requestFlds)
+  estimatedHours?: number; // Số giờ ước tính (được parse từ requestFlds)
 }
 
-export enum ActivityType {
-  ATTENDANCE = 'ATTENDANCE',      // Chấm công
-  REGISTRATION = 'REGISTRATION',  // Đăng ký hoạt động (nghỉ phép, làm việc từ xa)
-  OVERTIME = 'OVERTIME',         // Tăng ca
-  BUSINESS_TRIP = 'BUSINESS_TRIP'  // Công tác
+export interface ActivityType {
+  activityId: string;
+  activityDescription: string;
+  activityType: string;
 }
 
 export enum ActivityStatus {
