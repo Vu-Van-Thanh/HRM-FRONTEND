@@ -22,7 +22,10 @@ export class HttpInterceptor implements HttpSystemInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Set default baseurl
+    console.log('👉 Request URL:', request.url);
+
     if (!request.url.startsWith('http') && !request.url.startsWith('https')) {
+      console.log('👉 Request URL:', request.url);
       request = request.clone({ url: `${environment.apiBaseUrl}${request.url}` });
     }
 

@@ -58,6 +58,7 @@
                                     <th>Tên phòng ban</th>
                                     <th>Mô tả</th>
                                     <th>Trưởng phòng</th>
+                                    <th>Liên hệ</th>
                                     <th>Phòng ban cha</th>
                                     <th>Trạng thái</th>
                                     <th>Thao tác</th>
@@ -70,6 +71,7 @@
                                     <td>{{ dept.name }}</td>
                                     <td>{{ dept.description }}</td>
                                     <td>{{ dept.managerName }}</td>
+                                    <td>{{dept.contact}}</td>
                                     <td>{{ dept.parentName || '-' }}</td>
                                     <td>
                                         <span class="badge bg-{{ getStatusClass(dept.status) }}">

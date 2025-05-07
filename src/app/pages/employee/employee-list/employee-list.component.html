@@ -5,7 +5,7 @@
       <span class="total-count">Tổng số: {{dataSource.data.length}} nhân viên</span>
     </div>
     <div class="header-right">
-      <button mat-raised-button color="primary" (click)="onViewDetail(0)">
+      <button mat-raised-button color="primary" (click)="onViewDetail('0')">
         <mat-icon>add</mat-icon>
         Thêm nhân viên
       </button>
@@ -105,7 +105,7 @@
         <th mat-header-cell *matHeaderCellDef> Thao tác </th>
         <td mat-cell *matCellDef="let element">
           <div class="action-buttons">
-            <button mat-icon-button color="primary" (click)="onViewDetail(element.id)" matTooltip="Xem chi tiết">
+            <button mat-icon-button color="primary" (click)="onViewDetail(element.code)" matTooltip="Xem chi tiết">
               <mat-icon>visibility</mat-icon>
             </button>
             <button mat-icon-button color="accent" (click)="onEdit(element.id)" matTooltip="Chỉnh sửa">

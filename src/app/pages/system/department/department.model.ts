@@ -5,6 +5,7 @@ export interface Department {
   description: string;
   managerId: number;
   managerName: string;
+  contact: string;
   parentId: number | null;
   parentName: string | null;
   status: boolean;

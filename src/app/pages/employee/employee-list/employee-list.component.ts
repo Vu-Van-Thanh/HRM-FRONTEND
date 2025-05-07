@@ -90,11 +90,14 @@ export class EmployeeListComponent implements OnInit {
     this.loadEmployees();
   }
 
-  onViewDetail(id: number) {
+  onViewDetail(code: string) {
+    console.log('code:', code);
+    const employee = this.dataSource.data.find(emp => emp.code === code);
+    console.log('Employee:', employee);
     const dialogRef = this.dialog.open(EmployeeDetailDialogComponent, {
       width: '80%',
       maxWidth: '1200px',
-      data: { id, isEdit: false }
+      data: { code, isEdit: false }
     });
 
     dialogRef.afterClosed().subscribe(result => {

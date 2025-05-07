@@ -38,7 +38,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
 
   constructor(
     private dialogRef: MatDialogRef<EmployeeDetailDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { id: number, isEdit: boolean },
+    @Inject(MAT_DIALOG_DATA) public data: { code: string, isEdit: boolean },
     private employeeService: EmployeeService,
     private fb: FormBuilder,
     private dialog: MatDialog
@@ -48,7 +48,8 @@ export class EmployeeDetailDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    if (this.data.id) {
+    console.log('CODEEEEEEE:', this.data.code);
+    if (this.data.code) {
       this.loadEmployee();
     }
   }
@@ -73,9 +74,11 @@ export class EmployeeDetailDialogComponent implements OnInit {
   loadEmployee(): void {
     this.loading = true;
     this.error = null;
-    this.employeeService.getEmployeeById(this.data.id).subscribe({
+    this.employeeService.getEmployeeById(this.data.code).subscribe({
       next: (employee) => {
+        console.log('Inputemployee:', employee);
         this.employee = employee;
+        console.log('Outputemployee:', this.employee);
         this.employeeForm.patchValue(employee);
         this.loading = false;
         this.loadWorkHistory();
@@ -152,7 +155,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
   onAddRelative() {
     const dialogRef = this.dialog.open(RelativeDialogComponent, {
       width: '500px',
-      data: { employeeId: this.data.id }
+      data: { employeeId: this.data.code }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -170,7 +173,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
   onEditRelative(relative: any) {
     const dialogRef = this.dialog.open(RelativeDialogComponent, {
       width: '500px',
-      data: { employeeId: this.data.id, relative }
+      data: { employeeId: this.data.code, relative }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -194,7 +197,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
   onAddContract() {
     const dialogRef = this.dialog.open(ContractDialogComponent, {
       width: '500px',
-      data: { employeeId: this.data.id }
+      data: { employeeId: this.data.code }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -212,7 +215,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
   onEditContract(contract: any) {
     const dialogRef = this.dialog.open(ContractDialogComponent, {
       width: '500px',
-      data: { employeeId: this.data.id, contract }
+      data: { employeeId: this.data.code, contract }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -258,7 +261,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
         formData.photo = this.imagePreview;
       }
       if (this.isEditMode) {
-        this.employeeService.updateEmployee(this.data.id, formData).subscribe({
+        this.employeeService.updateEmployee(this.data.code, formData).subscribe({
           next: (updatedEmployee) => {
             this.dialogRef.close(updatedEmployee);
           },
