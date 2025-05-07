@@ -26,7 +26,6 @@ export class SalaryListComponent implements OnInit {
   employees: SalaryInfo[] = [];
   departments: Department[] = [];
   employeeList: EmployeeDepartmentDTO[] = [];
-  managers: EmployeeDepartmentDTO[] = [];
   positions: Position[] = [];
   today = new Date();
 
@@ -40,8 +39,7 @@ export class SalaryListComponent implements OnInit {
       department: [''],
       jobTitle: [''],
       managerId: [''],
-      employeeIds: [[]],
-      search: ['']
+      employeeId: ['']
     });
 
     // Khởi tạo danh sách vị trí công việc
@@ -57,31 +55,8 @@ export class SalaryListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadAllEmployees();
+    this.loadEmployeeData();
     this.loadDepartments();
-  }
-
-  loadAllEmployees(): void {
-    this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID)
-      .pipe(
-        tap(employees => {
-          console.log('📌 Tất cả nhân viên:', employees);
-          this.employeeList = employees;
-          
-          // Lọc ra danh sách người quản lý (chỉ lấy các nhân viên có thể là quản lý)
-          this.managers = this.employeeList.filter(
-            (emp, index, self) => 
-              emp.employeeID && 
-              self.findIndex(e => e.employeeID === emp.employeeID) === index
-          );
-          
-          // Tải dữ liệu lương sau khi đã có danh sách nhân viên
-          this.applyFilter();
-        })
-      )
-      .subscribe(null, error => {
-        console.error('❌ Lỗi khi tải danh sách nhân viên:', error);
-      });
   }
 
   loadEmployeeData(): void {
@@ -91,25 +66,16 @@ export class SalaryListComponent implements OnInit {
       department: formValues.department || '',
       jobTitle: formValues.jobTitle || '',
       managerId: formValues.managerId || '',
-      search: formValues.search || ''
+      employeeId: formValues.employeeId || ''
     };
 
     console.log('🔍 Áp dụng bộ lọc:', employeeFilter);
 
-    // Đầu tiên, lấy danh sách nhân viên từ API với bộ lọc
+    // Tải danh sách nhân viên dựa trên bộ lọc
     this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeFilter })
       .pipe(
         tap(employees => {
           console.log('📌 Danh sách nhân viên sau khi lọc:', employees);
-          
-          // Nếu có chọn employeeIds cụ thể, thì chỉ lấy những nhân viên đó
-          if (formValues.employeeIds && formValues.employeeIds.length > 0) {
-            employees = employees.filter(emp => 
-              formValues.employeeIds.includes(emp.employeeID)
-            );
-            console.log('📌 Danh sách nhân viên sau khi lọc theo ID:', employees);
-          }
-          
           this.employeeList = employees;
         })
       )
@@ -241,8 +207,7 @@ export class SalaryListComponent implements OnInit {
       department: '',
       jobTitle: '',
       managerId: '',
-      employeeIds: [],
-      search: ''
+      employeeId: ''
     });
     
     this.loadEmployeeData();

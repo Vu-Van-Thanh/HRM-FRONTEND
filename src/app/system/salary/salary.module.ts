@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { NgSelectModule } from '@ng-select/ng-select';
 import { SalaryRoutingModule } from './salary-routing.module';
 import { SalaryListComponent } from './salary-list/salary-list.component';
 import { SalaryDetailComponent } from './salary-detail/salary-detail.component';
@@ -17,7 +16,6 @@ import { SalaryDetailComponent } from './salary-detail/salary-detail.component';
     FormsModule,
     ReactiveFormsModule,
     NgbModule,
-    NgSelectModule,
     SalaryRoutingModule
   ],
   exports: [

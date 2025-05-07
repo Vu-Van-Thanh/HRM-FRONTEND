@@ -12,10 +12,10 @@
   <div class="card">
     <div class="card-body">
       <form [formGroup]="filterForm" (ngSubmit)="applyFilter()">
-        <div class="row mb-3">
+        <div class="row">
           <!-- Phòng ban -->
-          <div class="col-md-6 col-lg-3">
-            <div class="form-group">
+          <div class="col-md-3">
+            <div class="form-group mb-3">
               <label for="department" class="form-label">Phòng ban</label>
               <select class="form-select" id="department" formControlName="department">
                 <option value="">Tất cả phòng ban</option>
@@ -25,8 +25,8 @@
           </div>
           
           <!-- Vị trí công việc -->
-          <div class="col-md-6 col-lg-3">
-            <div class="form-group">
+          <div class="col-md-3">
+            <div class="form-group mb-3">
               <label for="jobTitle" class="form-label">Vị trí công việc</label>
               <select class="form-select" id="jobTitle" formControlName="jobTitle">
                 <option value="">Tất cả vị trí</option>
@@ -36,48 +36,18 @@
           </div>
           
           <!-- ID người quản lý -->
-          <div class="col-md-6 col-lg-3">
-            <div class="form-group">
-              <label for="managerId" class="form-label">Người quản lý</label>
-              <select class="form-select" id="managerId" formControlName="managerId">
-                <option value="">Tất cả quản lý</option>
-                <option *ngFor="let manager of managers" [value]="manager.employeeID">{{manager.employeeName}}</option>
-              </select>
+          <div class="col-md-3">
+            <div class="form-group mb-3">
+              <label for="managerId" class="form-label">ID người quản lý</label>
+              <input type="text" class="form-control" id="managerId" formControlName="managerId" placeholder="Nhập ID người quản lý">
             </div>
           </div>
           
-          <!-- Tìm kiếm -->
-          <div class="col-md-6 col-lg-3">
-            <div class="form-group">
-              <label for="search" class="form-label">Tìm kiếm</label>
-              <input type="text" class="form-control" id="search" formControlName="search" placeholder="Nhập tên nhân viên">
-            </div>
-          </div>
-        </div>
-        
-        <!-- Mã nhân viên (Multi-select) -->
-        <div class="row mb-3">
-          <div class="col-12">
-            <div class="form-group">
-              <label for="employeeIds" class="form-label">Mã nhân viên</label>
-              <ng-select
-                [items]="employeeList"
-                [multiple]="true"
-                bindLabel="employeeName"
-                bindValue="employeeID"
-                placeholder="Chọn nhân viên"
-                formControlName="employeeIds"
-                [searchable]="true"
-                [clearable]="true"
-                appendTo="body">
-                <ng-template ng-label-tmp let-item="item" let-clear="clear">
-                  <span class="ng-value-label">{{item.employeeID}} - {{item.employeeName}}</span>
-                  <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
-                </ng-template>
-                <ng-template ng-option-tmp let-item="item">
-                  {{item.employeeID}} - {{item.employeeName}}
-                </ng-template>
-              </ng-select>
+          <!-- ID nhân viên -->
+          <div class="col-md-3">
+            <div class="form-group mb-3">
+              <label for="employeeId" class="form-label">ID nhân viên</label>
+              <input type="text" class="form-control" id="employeeId" formControlName="employeeId" placeholder="Nhập ID nhân viên">
             </div>
           </div>
         </div>
