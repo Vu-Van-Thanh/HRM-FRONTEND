@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
-import { Activity, ActivityStatus, ActivityType } from '../models/activity.model';
+import { Activity, ActivityStatus } from '../models/activity.model';
 import { ActivityService } from '../services/activity.service';
 import { ActivityDetailDialogComponent } from '../activity-detail-dialog/activity-detail-dialog.component';
 import { AuthenticationService } from '../../../core/services/auth.service';
@@ -13,11 +13,11 @@ import { Project } from '../models/project.model';
 import { Position } from '../models/position.model';
 import { WorkLogDialogComponent } from '../work-log-dialog/work-log-dialog.component';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { DepartmentService } from '../../../system/department/department.service';
 import { Department } from '../../../system/department/department.model';
 import { EmployeeDepartmentDTO } from 'src/app/system/salary/salary.model';
-import { tap, forkJoin } from 'rxjs';
+import { tap, forkJoin, catchError, of, map, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-activity-list',
@@ -54,11 +54,13 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   
   departments: string[] = [];
   departmentsList: Department[] = [];
-  activityTypes: ActivityType[] = [];
+  activityTypes: any[] = [];
   activityStatuses = Object.values(ActivityStatus);
   selectedDepartment: string = '';
   selectedActivityType: string | '' = '';
   selectedStatus: ActivityStatus | '' = '';
+  selectedStartDate: string | '' = '';
+  selectedEndDate: string | '' = '';
   
   activeTab: 'all' | 'personal' = 'all';
   isAdmin = false;
@@ -105,7 +107,9 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
       activityType: [''],
       activityStatus: [''],
       startTime: [''],
-      endTime: ['']
+      endTime: [''],
+      selectedStartDate: [''],
+      selectedEndDate: ['']
     });
   }
 
@@ -113,21 +117,29 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
     // Tải loại hoạt động từ API
     this.activityService.getActivityTypes().subscribe(types => {
       this.activityTypes = types;
-      
-      // Get activityType from route data
       this.route.data.subscribe(data => {
         if (data['activityType']) {
           this.selectedActivityType = data['activityType'];
         }
-        this.loadActivities();
-        this.loadPersonalActivities();
       });
     });
-    
+    const currentUserProfileRaw = localStorage.getItem('currentUserProfile');
+    if (currentUserProfileRaw) {
+      try {
+        const currentUserProfile = JSON.parse(currentUserProfileRaw);
+        if (currentUserProfile.employeeID) {
+          this.currentUserId = currentUserProfile.employeeID;
+        }
+      } catch (error) {
+        console.error('❌ Lỗi khi parse currentUserProfile từ localStorage:', error);
+      }
+    }
     this.loadProjects();
     this.loadPositions();
-    this.loadDepartments();
-    this.loadEmployeeData();
+    //this.loadDepartments();
+    this.loadActivities();
+    this.loadPersonalActivities();
+    //this.loadEmployeeData();
   }
 
   ngAfterViewInit() {
@@ -149,132 +161,234 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   }
 
   loadProjects(): void {
-    // TODO: Replace with actual API call
-    this.projects = [
-      {
-        id: 1,
-        name: 'Dự án A',
-        description: 'Mô tả dự án A',
-        startDate: new Date('2024-01-01'),
-        endDate: new Date('2024-12-31'),
-        status: 'ACTIVE',
-        managerId: 1,
-        managerName: 'Nguyễn Văn A',
-        departmentId: 1,
-        departmentName: 'Phòng Phát triển',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-      },
-      {
-        id: 2,
-        name: 'Dự án B',
-        description: 'Mô tả dự án B',
-        startDate: new Date('2024-02-01'),
-        endDate: new Date('2024-12-31'),
-        status: 'COMPLETED',
-        managerId: 2,
-        managerName: 'Trần Thị B',
-        departmentId: 2,
-        departmentName: 'Phòng QA',
-        createdAt: new Date('2024-02-01'),
-        updatedAt: new Date('2024-02-01')
-      },
-      {
-        id: 3,
-        name: 'Dự án C',
-        description: 'Mô tả dự án C',
-        startDate: new Date('2024-03-01'),
-        endDate: new Date('2024-12-31'),
-        status: 'SUSPENDED',
-        managerId: 3,
-        managerName: 'Lê Văn C',
-        departmentId: 3,
-        departmentName: 'Phòng Design',
-        createdAt: new Date('2024-03-01'),
-        updatedAt: new Date('2024-03-01')
-      }
-    ];
+    // Replace mock data with API call
+    this.http.get<Project[]>(API_ENDPOINT.getAllProjects)
+      .pipe(
+        tap(projects => console.log('✅ Danh sách dự án:', projects)),
+        catchError(error => {
+          console.error('❌ Lỗi khi tải danh sách dự án:', error);
+          return of([]);
+        })
+      )
+      .subscribe(projects => {
+        this.projects = projects;
+      });
   }
 
   loadPositions(): void {
-    // TODO: Replace with actual API call
-    this.positions = [
-      {
-        id: 1,
-        name: 'Developer',
-        description: 'Lập trình viên',
-        departmentId: 1,
-        departmentName: 'Phòng Phát triển',
-        level: 'SENIOR',
-        status: 'ACTIVE',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-      },
-      {
-        id: 2,
-        name: 'Tester',
-        description: 'Kiểm thử viên',
-        departmentId: 2,
-        departmentName: 'Phòng QA',
-        level: 'MIDDLE',
-        status: 'ACTIVE',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-      },
-      {
-        id: 3,
-        name: 'Designer',
-        description: 'Thiết kế viên',
-        departmentId: 3,
-        departmentName: 'Phòng Design',
-        level: 'JUNIOR',
-        status: 'ACTIVE',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-      }
-    ];
+    // Replace mock data with API call
+    this.http.get<Position[]>(API_ENDPOINT.getAllPositions)
+      .pipe(
+        tap(positions => console.log('✅ Danh sách vị trí:', positions)),
+        catchError(error => {
+          console.error('❌ Lỗi khi tải danh sách vị trí:', error);
+          return of([]);
+        })
+      )
+      .subscribe(positions => {
+        this.positions = positions;
+      });
   }
 
   loadActivities(): void {
-    const params: any = {};
-    if (this.selectedDepartment) {
-      params.department = this.selectedDepartment;
-    }
-    if (this.selectedActivityType) {
-      params.activityType = this.selectedActivityType;
-    }
-    if (this.selectedStatus) {
-      params.status = this.selectedStatus;
-    }
+    const formValues = this.advancedFilterForm.value;
+    const employeeFilter = {
+      department: this.selectedDepartment || formValues.departmentID || '',
+      managerId: formValues.managerID || ''
+    };
 
-    this.activityService.getActivities(params).subscribe({
-      next: (activities) => {
-        this.dataSource.data = activities;
-        this.departments = [...new Set(activities.map(activity => activity.departmentName))];
+    // Đầu tiên tải danh sách phòng ban
+    this.departmentService.getDepartments().subscribe({
+      next: (departments) => {
+        this.departmentsList = departments;
+        
+        if (!this.departmentsList || this.departmentsList.length === 0) {
+          console.warn('⚠️ Không có dữ liệu phòng ban hoặc dữ liệu không đúng định dạng');
+        }
+        
+        this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeFilter })
+          .pipe(
+            tap(employees => {
+            }),
+            map(employees => {
+              return employees.map(emp => {
+                if (emp.departmentName?.trim()) return emp;
+                
+                if (!emp.departmentID) {
+                  return emp;
+                }
+                try {
+                  const deptIdStr = emp.departmentID.toString();
+                  let department = null;
+                  for(var i = 0; i < this.departmentsList.length; i++){
+                    if(this.departmentsList[i].code.toString() === deptIdStr){
+                      department = this.departmentsList[i];
+                      break;
+                    }
+                  }
+                  
+                  if (department && department.name) {
+                    return {
+                      ...emp,
+                      departmentName: department.name
+                    };
+                  } else {
+                    console.warn(`⚠️ Không tìm thấy tên phòng ban cho departmentID: ${deptIdStr}`);
+                  }
+                } catch (error) {
+                  console.error('❌ Lỗi khi map departmentID sang departmentName:', error);
+                }
+                
+                return emp;
+              });
+            }),
+            tap(employees => {
+              this.employeeList = employees;
+            })
+          )
+          .subscribe({
+            next: (employees) => {
+              const employeeIds = employees.map(emp => emp.employeeID).join(',');
+              console.log('📁 DEBUG: Employee IDs:', employeeIds);
+              const params: any = {};
+              
+              // Only add parameters that have values
+              if (employeeIds) params.EmployeeIdList = employeeIds;
+              if (this.selectedActivityType) params.ActivityId = this.selectedActivityType;
+              if (this.selectedStatus) params.Status = this.selectedStatus;
+              if (this.selectedStartDate) params.StartDate = new Date(this.selectedStartDate).toISOString();
+              if (this.selectedEndDate) params.EndDate = new Date(this.selectedEndDate).toISOString();
+              
+              // Gọi API để lấy danh sách hoạt động với danh sách nhân viên đã lọc
+              this.activityService.getActivities(params).subscribe({
+                next: (activities) => {
+                  // Map dữ liệu nhận được để hiển thị lên giao diện
+                  const mappedActivities = activities.map(activity => {
+                    // Tìm thông tin nhân viên từ employeeId
+                    const employee = this.employeeList.find(emp => emp.employeeID === activity.employeeId);
+                    
+                    // Lấy tên phòng ban từ employee đã được fill
+                    let departmentName = activity.departmentName || 'N/A';
+                    if ((!departmentName || departmentName === 'N/A') && employee && employee.departmentName) {
+                      departmentName = employee.departmentName;
+                    }
+                    else if ((!departmentName || departmentName === 'N/A') && employee && employee.departmentID) {
+                      const department = this.departmentsList.find(dept => 
+                        dept && dept.id && dept.id.toString() === employee.departmentID.toString()
+                      );
+                      departmentName = department ? department.name : 'N/A';
+                    }
+                    
+                    // Parse requestFlds nếu có
+                    let taskName = '';
+                    let reason = '';
+                    let estimatedHours = 0;
+                    if (activity.requestFlds) {
+                      try {
+                        const requestFldsObj = JSON.parse(activity.requestFlds);
+                        taskName = requestFldsObj.TaskName || '';
+                        reason = requestFldsObj.TaskName || '';
+                        estimatedHours = requestFldsObj.EstimatedHours || 0;
+                      } catch (e) {
+                        console.error('Lỗi khi parse requestFlds:', e);
+                      }
+                    }
+                    
+                    return {
+                      ...activity,
+                      employeeName: employee ? employee.employeeName : 'N/A',
+                      departmentName: departmentName,
+                      taskName: taskName,
+                      reason: reason,
+                      estimatedHours: estimatedHours,
+                      activityType: activity.activityId || activity.activityType
+                    };
+                  });
+                  
+                  this.dataSource.data = mappedActivities;
+                  console.log('🔍 Danh sách hoạt động đã map:', this.dataSource.data);
+                  this.departments = [...new Set(mappedActivities.map(activity => activity.departmentName))];
+                },
+                error: (error) => {
+                  console.error('Error loading activities:', error);
+                }
+              });
+            },
+            error: (error) => {
+              console.error('❌ Lỗi khi tải dữ liệu nhân viên:', error);
+            }
+          });
       },
       error: (error) => {
-        console.error('Error loading activities:', error);
+        console.error('❌ Lỗi khi tải dữ liệu phòng ban:', error);
       }
     });
   }
 
   loadPersonalActivities(): void {
-    const params: any = {
-      employeeId: this.currentUserId
-    };
-    if (this.selectedActivityType) {
-      params.activityType = this.selectedActivityType;
-    }
-    if (this.selectedStatus) {
-      params.status = this.selectedStatus;
-    }
+    // Với loadPersonalActivities, chúng ta cũng cần tải phòng ban để mapping
+    this.departmentService.getDepartments().subscribe({
+      next: (departments) => {
+        this.departmentsList = departments;
+        const params: any = {};
+              
+        // Only add parameters that have values
+        if (this.currentUserId) params.EmployeeIdList = this.currentUserId;
+        if (this.selectedActivityType) params.ActivityId = this.selectedActivityType;
+        if (this.selectedStatus) params.Status = this.selectedStatus;
+        if (this.selectedStartDate) params.StartDate = new Date(this.selectedStartDate).toISOString();
+        if (this.selectedEndDate) params.EndDate = new Date(this.selectedEndDate).toISOString();
 
-    this.activityService.getActivities(params).subscribe({
-      next: (activities) => {
-        this.personalDataSource.data = activities;
+        this.activityService.getActivities(params).subscribe({
+          next: (activities) => {
+            // Map dữ liệu nhận được để hiển thị lên giao diện
+            const mappedActivities = activities.map(activity => {
+              // Lấy thông tin phòng ban từ danh sách nhân viên nếu đã được fill
+              let departmentName = activity.departmentName || 'N/A';
+              
+              // Nếu không có departmentName hoặc employeeId, tìm kiếm trong departmentsList
+              if ((!departmentName || departmentName === 'N/A') && activity.employeeId) {
+                const employee = this.employeeList.find(emp => emp.employeeID === activity.employeeId);
+                if (employee && employee.departmentName) {
+                  departmentName = employee.departmentName;
+                }
+              }
+              
+              // Parse requestFlds nếu có
+              let taskName = '';
+              let reason = '';
+              let estimatedHours = 0;
+              if (activity.requestFlds) {
+                try {
+                  const requestFldsObj = JSON.parse(activity.requestFlds);
+                  taskName = requestFldsObj.TaskName || '';
+                  reason = requestFldsObj.TaskName || '';
+                  estimatedHours = requestFldsObj.EstimatedHours || 0;
+                } catch (e) {
+                  console.error('Lỗi khi parse requestFlds:', e);
+                }
+              }
+              
+              return {
+                ...activity,
+                departmentName: departmentName,
+                taskName: taskName,
+                reason: reason,
+                estimatedHours: estimatedHours,
+                activityType: activity.activityId || activity.activityType
+              };
+            });
+            
+            this.personalDataSource.data = mappedActivities;
+            console.log('🔍 Hoạt động cá nhân đã map:', mappedActivities);
+          },
+          error: (error) => {
+            console.error('Error loading personal activities:', error);
+          }
+        });
       },
       error: (error) => {
-        console.error('Error loading personal activities:', error);
+        console.error('❌ Lỗi khi tải dữ liệu phòng ban (personal):', error);
       }
     });
   }
@@ -501,7 +615,6 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   loadDepartments(): void {
     this.departmentService.getDepartments().subscribe(
       departments => {
-        console.log('📁 Danh sách phòng ban:', departments);
         this.departmentsList = departments;
       },
       error => {
@@ -544,51 +657,152 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   
   loadActivityDataWithFilters(): void {
     this.isLoading = true;
+    
     // Tạo bản sao của form value để không ảnh hưởng đến form gốc
     const filters = { ...this.advancedFilterForm.value };
 
-    // Gọi service để lấy dữ liệu
-    this.activityService.getActivityDataWithFilters(filters).subscribe({
-      next: (data) => {
-        this.filteredDepartments = data.departments;
-        this.filteredEmployees = data.employees;
+    // Trước tiên, tải danh sách phòng ban
+    this.activityService.getDepartments().subscribe({
+      next: (departments) => {
+        this.filteredDepartments = departments;
+        console.log('📁 Danh sách phòng ban (filtered):', departments);
         
-        // Xử lý dữ liệu từ API để phù hợp với model
-        const activities: Activity[] = data.activities.map(item => {
-          let activityType = item.activityId; // Gán activityType = activityId
-          let reason = '';
-          let taskName = '';
-          let estimatedHours = 0;
-          
-          // Parse requestFlds nếu có
-          if (item.requestFlds) {
-            try {
-              const requestFldsObj = JSON.parse(item.requestFlds);
-              reason = requestFldsObj.TaskName || '';
-              taskName = requestFldsObj.TaskName || '';
-              estimatedHours = requestFldsObj.EstimatedHours || 0;
-            } catch (e) {
-              console.error('Lỗi khi parse requestFlds:', e);
+        // Sau đó tải danh sách nhân viên theo bộ lọc
+        const employeeFilter = {
+          department: filters.departmentID || '',
+          managerId: filters.managerID || '',
+          employeeId: filters.employeeID || ''
+        };
+
+        // Tải danh sách nhân viên
+        this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeFilter })
+          .pipe(
+            tap(employees => {
+              console.log('📌 Danh sách nhân viên trước khi fill phòng ban (filtered):', employees);
+            }),
+            // Bổ sung departmentName nếu thiếu
+            map(employees => {
+              return employees.map(emp => {
+                // Nếu nhân viên đã có departmentName thì giữ nguyên
+                if (emp.departmentName) return emp;
+                
+                // Thêm kiểm tra an toàn cho departmentID
+                if (!emp.departmentID) {
+                  console.warn('⚠️ Employee missing departmentID:', emp);
+                  return emp;
+                }
+
+                try {
+                  // Chuyển đổi departmentID sang string để so sánh an toàn
+                  const deptIdStr = emp.departmentID.toString();
+                  
+                  // Tìm kiếm phòng ban với kiểm tra null/undefined
+                  const department = this.filteredDepartments.find(dept => 
+                    dept && dept.id && dept.id.toString() === deptIdStr
+                  );
+                  
+                  if (department && department.name) {
+                    return {
+                      ...emp,
+                      departmentName: department.name
+                    };
+                  } else {
+                    console.warn(`⚠️ Không tìm thấy tên phòng ban cho departmentID: ${deptIdStr}`);
+                  }
+                } catch (error) {
+                  console.error('❌ Lỗi khi map departmentID sang departmentName:', error);
+                }
+                
+                return emp;
+              });
+            }),
+            tap(employees => {
+              console.log('📌 Danh sách nhân viên sau khi fill phòng ban (filtered):', employees);
+              this.filteredEmployees = employees;
+            })
+          )
+          .subscribe({
+            next: (employees) => {
+              // Nối các ID nhân viên với dấu ","
+              const employeeIds = employees.map(emp => emp.employeeID).join(',');
+              
+              // Tạo parameters cho API lấy hoạt động
+              const activityParams = {
+                employeeIds: employeeIds,
+                activityType: filters.activityType || '',
+                activityStatus: filters.activityStatus || '',
+                startTime: filters.startTime || '',
+                endTime: filters.endTime || ''
+              };
+              
+              // Tải danh sách hoạt động
+              this.activityService.getActivitiesByFilter(activityParams).subscribe({
+                next: (activities) => {
+                  // Xử lý dữ liệu từ API để phù hợp với model
+                  const formattedActivities: Activity[] = activities.map(item => {
+                    // Tìm thông tin nhân viên và phòng ban
+                    const employee = this.filteredEmployees.find(emp => emp.employeeID === item.employeeId);
+                    
+                    // Lấy tên phòng ban từ employee đã được fill
+                    let departmentName = item.departmentName || 'N/A';
+                    if ((!departmentName || departmentName === 'N/A') && employee && employee.departmentName) {
+                      departmentName = employee.departmentName;
+                    }
+                    else if ((!departmentName || departmentName === 'N/A') && employee && employee.departmentID) {
+                      const department = this.filteredDepartments.find(dept => 
+                        dept && dept.id && dept.id.toString() === employee.departmentID.toString()
+                      );
+                      departmentName = department ? department.name : 'N/A';
+                    }
+                    
+                    // Parse requestFlds nếu có
+                    let activityType = item.activityId; // Gán activityType = activityId
+                    let reason = '';
+                    let taskName = '';
+                    let estimatedHours = 0;
+                    
+                    // Parse requestFlds nếu có
+                    if (item.requestFlds) {
+                      try {
+                        const requestFldsObj = JSON.parse(item.requestFlds);
+                        reason = requestFldsObj.TaskName || '';
+                        taskName = requestFldsObj.TaskName || '';
+                        estimatedHours = requestFldsObj.EstimatedHours || 0;
+                      } catch (e) {
+                        console.error('Lỗi khi parse requestFlds:', e);
+                      }
+                    }
+                    
+                    return {
+                      ...item,
+                      employeeName: employee ? employee.employeeName : this.getEmployeeName(item.employeeId),
+                      departmentName: departmentName,
+                      activityType: activityType,
+                      taskName: taskName,
+                      estimatedHours: estimatedHours,
+                      reason: reason
+                    };
+                  });
+                  
+                  // Cập nhật danh sách hoạt động
+                  this.filteredActivities = formattedActivities;
+                  this.isLoading = false;
+                  console.log('🔍 Danh sách hoạt động đã lọc và map:', formattedActivities);
+                },
+                error: (error) => {
+                  console.error('Lỗi khi tải dữ liệu hoạt động:', error);
+                  this.isLoading = false;
+                }
+              });
+            },
+            error: (error) => {
+              console.error('Lỗi khi tải dữ liệu nhân viên:', error);
+              this.isLoading = false;
             }
-          }
-          
-          return {
-            ...item,
-            employeeName: this.getEmployeeName(item.employeeId),
-            departmentName: this.getDepartmentName(Number(item.employeeId)),
-            activityType: activityType,
-            taskName: taskName,
-            estimatedHours: estimatedHours,
-            reason: reason
-          };
-        });
-        
-        // Cập nhật danh sách hoạt động
-        this.filteredActivities = activities;
-        this.isLoading = false;
+          });
       },
       error: (error) => {
-        console.error('Lỗi khi tải dữ liệu:', error);
+        console.error('Lỗi khi tải dữ liệu phòng ban:', error);
         this.isLoading = false;
       }
     });
@@ -612,7 +826,9 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
       activityType: '',
       activityStatus: '',
       startTime: '',
-      endTime: ''
+      endTime: '',
+      selectedStartDate: '',
+      selectedEndDate: ''
     });
     
     this.loadActivityDataWithFilters();
@@ -632,7 +848,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
    */
   getDepartmentName(departmentId?: number): string {
     if (!departmentId) return 'N/A';
-    const department = this.departmentsList.find(d => d.id === departmentId);
+    const department = this.departmentsList.find(d => d && d.id && d.id === departmentId);
     return department?.name || 'N/A';
   }
 
@@ -640,8 +856,8 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   getActivityTypeName(activity: Activity): string {
     if (!activity.activityType) return '';
     
-    const activityTypeObj = this.activityTypes.find(type => type.activityId === activity.activityType || type.activityType === activity.activityType);
-    return activityTypeObj ? activityTypeObj.activityDescription : activity.activityType;
+    const activityTypeObj = this.activityTypes.find(type => type.activityId === activity.activityType);
+    return activityTypeObj ? activityTypeObj.activityType : activity.activityType;
   }
 
   // Phương thức định dạng thời gian

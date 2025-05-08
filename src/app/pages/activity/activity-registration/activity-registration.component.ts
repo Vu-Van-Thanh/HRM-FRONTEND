@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivityService } from '../services/activity.service';
-import { Activity, ActivityType } from '../models/activity.model';
+import { Activity } from '../models/activity.model';
 
 @Component({
   selector: 'app-activity-registration',

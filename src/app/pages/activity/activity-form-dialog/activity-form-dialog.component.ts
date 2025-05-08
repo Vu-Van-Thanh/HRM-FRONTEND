@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ActivityService } from '../services/activity.service';
-import { Activity, ActivityField, ActivityType } from '../models/activity.model';
+import { Activity, ActivityField } from '../models/activity.model';
 
 @Component({
   selector: 'app-activity-form-dialog',
@@ -17,7 +17,13 @@ export class ActivityFormDialogComponent implements OnInit {
   activityType: string = '';
   record?: Activity;
   title: string = '';
-  activityTypes: ActivityType[] = [];
+  activityTypes: string[] = [];
+  activityDescriptions: {[key: string]: string} = {
+    'ATTENDANCE': 'Chấm công',
+    'REGISTRATION': 'Đăng ký hoạt động',
+    'OVERTIME': 'Tăng ca',
+    'BUSINESS_TRIP': 'Công tác'
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -152,16 +158,13 @@ export class ActivityFormDialogComponent implements OnInit {
   }
 
   getActivityTypeLabel(type: string): string {
-    const foundType = this.activityTypes.find(t => t.activityId === type || t.activityType === type);
-    return foundType ? foundType.activityDescription : type;
+    return this.activityDescriptions[type] || type;
   }
 
   setActivityTypeTitle(): void {
     if (this.data.activityType) {
-      const activityType = this.activityTypes.find(t => t.activityId === this.data.activityType || t.activityType === this.data.activityType);
-      if (activityType) {
-        this.title = `Đăng ký ${activityType.activityDescription}`;
-      }
+      const label = this.getActivityTypeLabel(this.data.activityType);
+      this.title = `Đăng ký ${label}`;
     }
   }
 } 

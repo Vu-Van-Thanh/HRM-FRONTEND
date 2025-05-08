@@ -54,10 +54,13 @@
                             <mat-label>Loại hoạt động</mat-label>
                             <mat-select formControlName="activityType">
                               <mat-option value="">Tất cả</mat-option>
-                              <mat-option *ngFor="let type of activityTypes" [value]="type">
-                                {{type === 'ATTENDANCE' ? 'Chấm công' :
-                                  type === 'REGISTRATION' ? 'Đăng ký hoạt động' :
-                                  type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
+                              <mat-option *ngFor="let type of activityTypes" [value]="type.activityId">
+                                {{type.activityType || (
+                                  type.activityId === 'ATTENDANCE' ? 'Chấm công' :
+                                  type.activityId === 'REGISTRATION' ? 'Đăng ký hoạt động' :
+                                  type.activityId === 'OVERTIME' ? 'Tăng ca' : 
+                                  type.activityId === 'BUSINESS_TRIP' ? 'Công tác' : type.activityId
+                                )}}
                               </mat-option>
                             </mat-select>
                           </mat-form-field>
@@ -209,38 +212,41 @@
                   <div class="card-body">
                     <form [formGroup]="advancedFilterForm" (ngSubmit)="applyAdvancedFilter()">
                       <div class="row">
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-3 mb-3" *ngIf="false">
                           <mat-form-field appearance="outline" class="w-100">
                             <mat-label>Mã quản lý</mat-label>
                             <input matInput formControlName="managerID" placeholder="Nhập mã quản lý">
                           </mat-form-field>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-3 mb-3" *ngIf="false">
                           <mat-form-field appearance="outline" class="w-100">
                             <mat-label>Mã phòng ban</mat-label>
                             <input matInput formControlName="departmentID" placeholder="Nhập mã phòng ban">
                           </mat-form-field>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-3 mb-3" *ngIf="false">
                           <mat-form-field appearance="outline" class="w-100">
                             <mat-label>Mã nhân viên</mat-label>
                             <input matInput formControlName="employeeID" placeholder="Nhập mã nhân viên">
                           </mat-form-field>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                           <mat-form-field appearance="outline" class="w-100">
                             <mat-label>Loại hoạt động</mat-label>
                             <mat-select formControlName="activityType">
                               <mat-option value="">Tất cả</mat-option>
-                              <mat-option *ngFor="let type of activityTypes" [value]="type">
-                                {{type === 'ATTENDANCE' ? 'Chấm công' :
-                                  type === 'REGISTRATION' ? 'Đăng ký hoạt động' :
-                                  type === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
+                              <mat-option *ngFor="let type of activityTypes" [value]="type.activityId">
+                                {{type.activityType || (
+                                  type.activityId === 'ATTENDANCE' ? 'Chấm công' :
+                                  type.activityId === 'REGISTRATION' ? 'Đăng ký hoạt động' :
+                                  type.activityId === 'OVERTIME' ? 'Tăng ca' : 
+                                  type.activityId === 'BUSINESS_TRIP' ? 'Công tác' : type.activityId
+                                )}}
                               </mat-option>
                             </mat-select>
                           </mat-form-field>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                           <mat-form-field appearance="outline" class="w-100">
                             <mat-label>Trạng thái</mat-label>
                             <mat-select formControlName="activityStatus">
@@ -252,18 +258,18 @@
                             </mat-select>
                           </mat-form-field>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                           <mat-form-field appearance="outline" class="w-100">
                             <mat-label>Thời gian bắt đầu</mat-label>
-                            <input matInput [matDatepicker]="personalStartTimePicker" formControlName="startTime">
+                            <input matInput [matDatepicker]="personalStartTimePicker" formControlName="selectedStartDate">
                             <mat-datepicker-toggle matSuffix [for]="personalStartTimePicker"></mat-datepicker-toggle>
                             <mat-datepicker #personalStartTimePicker></mat-datepicker>
                           </mat-form-field>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                           <mat-form-field appearance="outline" class="w-100">
                             <mat-label>Thời gian kết thúc</mat-label>
-                            <input matInput [matDatepicker]="personalEndTimePicker" formControlName="endTime">
+                            <input matInput [matDatepicker]="personalEndTimePicker" formControlName="selectedEndDate">
                             <mat-datepicker-toggle matSuffix [for]="personalEndTimePicker"></mat-datepicker-toggle>
                             <mat-datepicker #personalEndTimePicker></mat-datepicker>
                           </mat-form-field>
@@ -342,7 +348,7 @@
                           <mat-icon>edit</mat-icon>
                         </button>
                         <button mat-icon-button color="warn" (click)="onDeleteActivity(activity)"
-                          *ngIf="activity.status.toUpperCase() === 'PENDING' && activity.activityType === ActivityType.ATTENDANCE" 
+                          *ngIf="activity.status.toUpperCase() === 'PENDING' && activity.activityType === 'ATTENDANCE'" 
                           matTooltip="Xóa">
                           <mat-icon>delete</mat-icon>
                         </button>

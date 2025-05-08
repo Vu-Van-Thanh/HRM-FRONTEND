@@ -1,13 +1,13 @@
 export interface Activity {
-  requestId: string;      // ID của request/hoạt động
-  employeeId: string;     // ID của nhân viên
+  requestId?: string;      // ID của request/hoạt động
+  employeeId?: string;     // ID của nhân viên
   employeeName?: string;  // Tên nhân viên (được set sau khi kết hợp với danh sách nhân viên)
-  activityId: string;     // ID của loại hoạt động
-  createdAt: string;      // Thời gian tạo
-  startTime: string;      // Thời gian bắt đầu
-  endTime: string;        // Thời gian kết thúc
-  status: string;         // Trạng thái
-  requestFlds: string;    // Thông tin bổ sung (dạng JSON string)
+  activityId?: string;     // ID của loại hoạt động
+  createdAt?: string;      // Thời gian tạo
+  startTime?: string;      // Thời gian bắt đầu
+  endTime?: string;        // Thời gian kết thúc
+  status?: string;         // Trạng thái
+  requestFlds?: string;    // Thông tin bổ sung (dạng JSON string)
   
   // Trường bổ sung cho giao diện
   departmentName?: string; // Tên phòng ban (được set sau khi kết hợp với danh sách nhân viên)
@@ -15,12 +15,6 @@ export interface Activity {
   reason?: string;        // Lý do (được parse từ requestFlds)
   taskName?: string;      // Tên công việc (được parse từ requestFlds)
   estimatedHours?: number; // Số giờ ước tính (được parse từ requestFlds)
-}
-
-export interface ActivityType {
-  activityId: string;
-  activityDescription: string;
-  activityType: string;
 }
 
 export enum ActivityStatus {
