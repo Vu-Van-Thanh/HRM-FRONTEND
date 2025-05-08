@@ -454,13 +454,9 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   loadPersonalTimesheets(): void {
-    // Create filter object based on form values
     const filterParams: AttendanceFilterDTO = {};
-    
-    // Get current user's employeeID from localStorage
-    const currentUserProfileRaw = localStorage.getItem('currentUserProfile');
+        const currentUserProfileRaw = localStorage.getItem('currentUserProfile');
     let employeeID = '';
-    
     if (currentUserProfileRaw) {
       try {
         const currentUserProfile = JSON.parse(currentUserProfileRaw);
@@ -471,16 +467,10 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
         console.error('Error parsing currentUserProfile from localStorage:', error);
       }
     }
-    
-    // Add employeeID to filter
-    if (employeeID) {
+        if (employeeID) {
       filterParams.EmployeeIDList = employeeID;
     }
-    
-    // Get all form values
-    const formValues = this.dateRange.value;
-
-    // Add date filters
+        const formValues = this.dateRange.value;
     if (formValues.start) {
       filterParams.StartDate = new Date(formValues.start).toISOString();
     }
@@ -488,8 +478,6 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
     if (formValues.end) {
       filterParams.EndDate = new Date(formValues.end).toISOString();
     }
-    
-    // Add time filters
     if (formValues.startTime) {
       filterParams.Starttime = formValues.startTime;
     }
@@ -497,22 +485,16 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
     if (formValues.endTime) {
       filterParams.Endtime = formValues.endTime;
     }
-    
-    // Add project filter
     if (this.selectedProject) {
       filterParams.ProjectId = this.selectedProject.projectId;
     } else if (formValues.projectId) {
       filterParams.ProjectId = formValues.projectId;
     }
-    
-    // Add position filter
     if (formValues.position) {
       filterParams.Position = formValues.position;
     } else if (this.selectedPosition) {
       filterParams.Position = this.selectedPosition;
     }
-    
-    // Fetch real data from the API with filters
     this.http.get<AttendanceResponse[]>(API_ENDPOINT.getAllAttendace, { params: filterParams as any })
       .pipe(
         map(responses => this.mapAttendanceResponseToTimesheet(responses)),
