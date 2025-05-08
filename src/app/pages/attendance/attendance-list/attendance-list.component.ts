@@ -8,7 +8,37 @@ import { ToastService } from 'angular-toastify';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
 import { AttendanceFormComponent } from '../attendance-form/attendance-form.component';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { HttpClient } from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import { map, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
+// New model to match backend API response
+export interface AttendanceResponse {
+  attendanceId: string;
+  employeeId: string;
+  attendanceDate: string;
+  starttime: string;
+  endtime: string;
+  status: string;
+  position: string;
+  description: string;
+  activityId: string;
+  projectId: string;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+}
+
+// Updated Project interface to match backend
+export interface Project {
+  projectId: string;
+  name: string;
+  hours: number;
+}
+
+// Original interfaces for backward compatibility
 export interface Timesheet {
   id: number;
   date: string;
@@ -18,17 +48,13 @@ export interface Timesheet {
   total: number;
   customer: string;
   project: string;
+  projectName?: string;
   activity: string;
   description: string;
   username: string;
   status: string;
   approved: number;
   cleared: number;
-}
-
-export interface Project {
-  name: string;
-  hours: number;
 }
 
 export interface Activity {
@@ -51,6 +77,35 @@ export interface Month {
 export interface ApprovalTimesheet extends Timesheet {
   employeeName: string;
   department: string;
+}
+
+// Add this interface near the top with other interfaces
+export interface ProjectFilterDTO {
+  DeparmentID?: string;
+  StartTime?: string;
+  EndTime?: string;
+  Status?: string;
+}
+
+export interface ProjectResponse {
+  projectId: string;
+  name: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  departmentId?: string;
+}
+
+// Add this interface near the top with other interfaces
+export interface AttendanceFilterDTO {
+  StartDate?: string;
+  EndDate?: string;
+  Starttime?: string;
+  Endtime?: string;
+  ProjectId?: string;
+  Position?: string;
+  EmployeeIDList?: string;
 }
 
 @Component({
@@ -126,18 +181,39 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
   employeeFilter: string = '';
 
+  // Add the new raw data array
+  attendanceData: AttendanceResponse[] = [];
+
+  selectedProject: Project | null = null;
+
   constructor(
     private dialog: MatDialog,
     private router: Router,
     private toastService: ToastService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private http: HttpClient
   ) {
     this.dateRange = this.fb.group({
       start: [null],
       end: [null]
     });
 
-    // Initialize personal timesheet data
+    // Subscribe to date range changes
+    this.dateRange.valueChanges.subscribe(() => {
+      this.onDateRangeChange();
+    });
+
+    // Initialize mock data with correct Project structure
+    this.projects = [
+      { projectId: '1', name: 'TCB CBP Kinhdoanh HN', hours: 8.0 },
+      { projectId: '2', name: 'Viettel CRM', hours: 3.0 },
+      { projectId: '3', name: 'FPT ERP', hours: 4.0 },
+      { projectId: '4', name: 'VNPT Billing System', hours: 3.5 }
+    ];
+
+    this.filteredProjects = [...this.projects];
+
+    // Initialize remaining mock data
     const timesheets: Timesheet[] = [
       {
         id: 1,
@@ -331,15 +407,6 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
     this.approvalDataSource = new MatTableDataSource(approvalTimesheets);
 
-    // Initialize projects data
-    this.projects = [
-      { name: 'TCB CBP Kinhdoanh HN', hours: 220.5 },
-      { name: 'AAS FLE Bảo trì 24', hours: 45.0 },
-      { name: 'APG FLE Sảnphẩm 24', hours: 32.5 },
-      { name: 'CK Support Internal', hours: 24.0 }
-    ];
-    this.filteredProjects = [...this.projects];
-
     // Initialize activities data
     this.activities = [
       { name: 'Lập trình', hours: 180.5, percentage: 60, color: 'primary' },
@@ -361,74 +428,125 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
-    this.approvalDataSource.sort = this.sort;
-    this.approvalDataSource.paginator = this.paginator;
-  }
-
-  loadData(): void {
-    if (this.selectedTabIndex === 0) {
-      this.loadPersonalTimesheets();
-    } else {
-      this.loadApprovalTimesheets();
+    if (this.dataSource) {
+      this.dataSource.sort = this.sort;
+      this.dataSource.paginator = this.paginator;
     }
   }
 
+  loadData(): void {
+   this.loadPersonalTimesheets();
+    this.loadProjects();
+    this.loadApprovalTimesheets();
+  }
+
   loadPersonalTimesheets(): void {
-    this.personalTimesheets = [
-      {
-        id: 1,
-        date: '2024-03-18',
-        checkIn: '09:00',
-        checkOut: '17:00',
-        hours: 8,
-        total: 800000,
-        customer: 'ABC Corp',
-        project: 'Website Development',
-        activity: 'Frontend Development',
-        description: 'Implemented new UI components',
-        username: 'john.doe',
-        status: 'Approved',
-        approved: 1,
-        cleared: 1
-      },
-      {
-        id: 2,
-        date: '2024-03-19',
-        checkIn: '08:30',
-        checkOut: '17:30',
-        hours: 9,
-        total: 900000,
-        customer: 'XYZ Ltd',
-        project: 'Mobile App',
-        activity: 'Backend Integration',
-        description: 'API integration and testing',
-        username: 'john.doe',
-        status: 'Pending',
-        approved: 0,
-        cleared: 0
-      },
-      {
-        id: 3,
-        date: '2024-03-20',
-        checkIn: '09:15',
-        checkOut: '18:15',
-        hours: 9,
-        total: 900000,
-        customer: 'DEF Inc',
-        project: 'System Maintenance',
-        activity: 'Bug Fixes',
-        description: 'Fixed reported issues in production',
-        username: 'john.doe',
-        status: 'Pending',
-        approved: 0,
-        cleared: 0
-      }
-    ];
+    // Create filter object based on form values
+    const filterParams: AttendanceFilterDTO = {};
     
-    this.personalDataSource = new MatTableDataSource(this.personalTimesheets);
-    this.calculateTotals();
+    // Get current user's employeeID from localStorage
+    const currentUserProfileRaw = localStorage.getItem('currentUserProfile');
+    let employeeID = '';
+    
+    if (currentUserProfileRaw) {
+      try {
+        const currentUserProfile = JSON.parse(currentUserProfileRaw);
+        if (currentUserProfile.employeeID) {
+          employeeID = currentUserProfile.employeeID;
+        }
+      } catch (error) {
+        console.error('Error parsing currentUserProfile from localStorage:', error);
+      }
+    }
+    
+    // Add employeeID to filter
+    if (employeeID) {
+      filterParams.EmployeeIDList = employeeID;
+    }
+    
+    if (this.dateRange.value.start) {
+      filterParams.StartDate = this.dateRange.value.start.toISOString();
+    }
+    
+    if (this.dateRange.value.end) {
+      filterParams.EndDate = this.dateRange.value.end.toISOString();
+    }
+    
+    if (this.selectedProject) {
+      filterParams.ProjectId = this.selectedProject.projectId;
+    }
+    
+    // Fetch real data from the API with filters
+    this.http.get<AttendanceResponse[]>(API_ENDPOINT.getAllAttendace, { params: filterParams as any })
+      .pipe(
+        map(responses => this.mapAttendanceResponseToTimesheet(responses)),
+        catchError(error => {
+          console.error('Error fetching attendance data:', error);
+          return of([]);
+        })
+      )
+      .subscribe(timesheets => {
+        this.personalTimesheets = timesheets;
+        this.dataSource = new MatTableDataSource(this.personalTimesheets);
+        this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
+        
+        this.calculateStatistics(this.personalTimesheets);
+        this.calculateTotals();
+        this.calculateProjectHours(this.personalTimesheets);
+      });
+  }
+
+  // Get user-friendly status display
+  getStatusDisplay(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return 'Chờ duyệt';
+      case 'approved':
+        return 'Đã duyệt';
+      case 'rejected':
+        return 'Từ chối';
+      default:
+        return status || 'N/A';
+    }
+  }
+
+  // New function to map API response to the Timesheet format
+  private mapAttendanceResponseToTimesheet(responses: AttendanceResponse[]): Timesheet[] {
+    return responses.map((attendance, index) => {
+      // Calculate hours between start and end time
+      const startTime = new Date(attendance.starttime);
+      const endTime = new Date(attendance.endtime);
+      const hours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+      
+      // Find project name if project ID matches
+      const project = this.projects.find(p => p.projectId === attendance.projectId);
+      const projectName = project ? project.name : attendance.projectId;
+      
+      // Use position as activity name for better readability
+      const activityName = attendance.position || attendance.activityId || 'N/A';
+      
+      // Get user-friendly status
+      const statusDisplay = this.getStatusDisplay(attendance.status);
+      
+      return {
+        id: index + 1, // Generate a temporary ID
+        date: attendance.attendanceDate.split('T')[0], // Format as YYYY-MM-DD
+        checkIn: startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        checkOut: endTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        hours: parseFloat(hours.toFixed(2)),
+        total: parseFloat(hours.toFixed(2)),
+        customer: 'N/A', // Not provided in the response
+        project: attendance.projectId, // Store ID for filtering
+        projectName: projectName, // Store name for display
+        activity: activityName, // Use position as activity name
+        description: attendance.description,
+        username: attendance.employeeId, // Will need to fetch employee name from employee service
+        status: statusDisplay,
+        approved: attendance.status?.toLowerCase() === 'approved' ? 1 : 0,
+        cleared: attendance.status?.toLowerCase() === 'approved' ? parseFloat(hours.toFixed(2)) : 0
+      };
+    });
   }
 
   loadApprovalTimesheets(): void {
@@ -559,16 +677,16 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   getStatusClass(status: string): string {
-    switch (status) {
-      case 'pending':
-        return 'status-pending';
-      case 'approved':
-        return 'status-approved';
-      case 'rejected':
-        return 'status-rejected';
-      default:
-        return '';
+    if (!status) return '';
+    
+    if (status.includes('Chờ duyệt') || status.toLowerCase().includes('pending')) {
+      return 'status-pending';
+    } else if (status.includes('Đã duyệt') || status.toLowerCase().includes('approved')) {
+      return 'status-approved';
+    } else if (status.includes('Từ chối') || status.toLowerCase().includes('rejected')) {
+      return 'status-rejected';
     }
+    return '';
   }
 
   getStatusLabel(status: string): string {
@@ -590,5 +708,96 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
   calculateTotals() {
     this.totalAmount = this.personalTimesheets.reduce((sum, timesheet) => sum + timesheet.total, 0);
+  }
+
+  loadProjects(): void {
+    // Create filter object based on form values
+    const filterParams: ProjectFilterDTO = {};
+    
+    if (this.dateRange.value.start) {
+      filterParams.StartTime = this.dateRange.value.start.toISOString();
+    }
+    
+    if (this.dateRange.value.end) {
+      filterParams.EndTime = this.dateRange.value.end.toISOString();
+    }
+    
+    if (this.selectedDepartment) {
+      filterParams.DeparmentID = this.selectedDepartment.toString();
+    }
+    
+    if (this.selectedStatus && this.selectedStatus !== 'all') {
+      filterParams.Status = this.selectedStatus;
+    }
+    
+    // Fetch projects from the API with filters
+    this.http.get<ProjectResponse[]>(API_ENDPOINT.getAllProject, { params: filterParams as any })
+      .pipe(
+        map(response => {
+          console.log('Project API response:', response);
+          // Map API response to the Project model
+          return response.map(project => ({
+            projectId: project.projectId,
+            name: project.name || 'Unnamed Project',
+            hours: 0 // Default value, will be updated in calculateProjectHours
+          }));
+        }),
+        catchError(error => {
+          console.error('Error fetching projects:', error);
+          this.toastService.error('Failed to load projects: ' + error.message);
+          return of([]);
+        })
+      )
+      .subscribe(projects => {
+        this.projects = projects;
+        this.filteredProjects = [...this.projects];
+        this.totalProjects = this.projects.length;
+        
+        // If we have timesheet data, calculate project hours
+        if (this.personalTimesheets.length > 0) {
+          this.calculateProjectHours(this.personalTimesheets);
+        }
+      });
+  }
+
+  onDateRangeChange(): void {
+    this.loadPersonalTimesheets();
+  }
+
+  selectProject(project: Project): void {
+    this.selectedProject = project;
+    this.loadPersonalTimesheets();
+  }
+
+  calculateProjectHours(timesheets: Timesheet[]): void {
+    // Create a map to store project hours
+    const projectHoursMap = new Map<string, number>();
+    
+    // Calculate total hours for each project
+    timesheets.forEach(timesheet => {
+      const projectId = timesheet.project;
+      const hours = timesheet.hours || 0;
+      
+      if (projectId) {
+        const currentHours = projectHoursMap.get(projectId) || 0;
+        projectHoursMap.set(projectId, currentHours + hours);
+      }
+    });
+    
+    // Update projects with calculated hours
+    this.projects = this.projects.map(project => {
+      return {
+        ...project,
+        hours: projectHoursMap.get(project.projectId) || 0
+      };
+    });
+    
+    // Update filtered projects
+    this.filteredProjects = [...this.projects];
+  }
+
+  getProjectName(projectId: string): string {
+    const project = this.projects.find(p => p.projectId === projectId);
+    return project ? project.name : projectId;
   }
 }

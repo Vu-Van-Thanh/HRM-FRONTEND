@@ -473,3 +473,27 @@ table {
 .mat-cell:last-child, .mat-header-cell:last-child {
   border-right: none;
 }
+
+.status-pending {
+  color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.status-approved {
+  color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.status-rejected {
+  color: #f44336;
+  background-color: rgba(244, 67, 54, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
