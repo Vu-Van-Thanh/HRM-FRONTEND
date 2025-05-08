@@ -186,6 +186,15 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
   selectedProject: Project | null = null;
 
+  // Add these properties to the class
+  selectedPosition: string | null = null;
+  startTime: string | null = null;
+  endTime: string | null = null;
+  positions: string[] = ['Developer', 'Tester', 'Business Analyst', 'Project Manager', 'Designer', 'DevOps'];
+
+  // Add this property to handle debounce
+  private filterTimeout: any;
+
   constructor(
     private dialog: MatDialog,
     private router: Router,
@@ -195,7 +204,11 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   ) {
     this.dateRange = this.fb.group({
       start: [null],
-      end: [null]
+      end: [null],
+      startTime: [null],
+      endTime: [null],
+      projectId: [null],
+      position: [null]
     });
 
     // Subscribe to date range changes
@@ -435,7 +448,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   loadData(): void {
-   this.loadPersonalTimesheets();
+    this.loadPersonalTimesheets();
     this.loadProjects();
     this.loadApprovalTimesheets();
   }
@@ -464,16 +477,39 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       filterParams.EmployeeIDList = employeeID;
     }
     
-    if (this.dateRange.value.start) {
-      filterParams.StartDate = this.dateRange.value.start.toISOString();
+    // Get all form values
+    const formValues = this.dateRange.value;
+
+    // Add date filters
+    if (formValues.start) {
+      filterParams.StartDate = new Date(formValues.start).toISOString();
     }
     
-    if (this.dateRange.value.end) {
-      filterParams.EndDate = this.dateRange.value.end.toISOString();
+    if (formValues.end) {
+      filterParams.EndDate = new Date(formValues.end).toISOString();
     }
     
+    // Add time filters
+    if (formValues.startTime) {
+      filterParams.Starttime = formValues.startTime;
+    }
+    
+    if (formValues.endTime) {
+      filterParams.Endtime = formValues.endTime;
+    }
+    
+    // Add project filter
     if (this.selectedProject) {
       filterParams.ProjectId = this.selectedProject.projectId;
+    } else if (formValues.projectId) {
+      filterParams.ProjectId = formValues.projectId;
+    }
+    
+    // Add position filter
+    if (formValues.position) {
+      filterParams.Position = formValues.position;
+    } else if (this.selectedPosition) {
+      filterParams.Position = this.selectedPosition;
     }
     
     // Fetch real data from the API with filters
@@ -761,6 +797,28 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   onDateRangeChange(): void {
+    // Debounce the filter application to avoid too many API calls
+    if (this.filterTimeout) {
+      clearTimeout(this.filterTimeout);
+    }
+    
+    this.filterTimeout = setTimeout(() => {
+      this.loadPersonalTimesheets();
+    }, 500);
+  }
+
+  resetFilters(): void {
+    this.dateRange.reset({
+      start: null,
+      end: null,
+      startTime: null,
+      endTime: null,
+      projectId: null,
+      position: null
+    });
+    
+    this.selectedProject = null;
+    this.selectedPosition = null;
     this.loadPersonalTimesheets();
   }
 
@@ -799,5 +857,11 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   getProjectName(projectId: string): string {
     const project = this.projects.find(p => p.projectId === projectId);
     return project ? project.name : projectId;
+  }
+
+  // Add this method to handle position selection
+  selectPosition(position: string): void {
+    this.selectedPosition = position;
+    this.loadPersonalTimesheets();
   }
 }

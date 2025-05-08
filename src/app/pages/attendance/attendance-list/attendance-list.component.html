@@ -3,22 +3,64 @@
   <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
     <!-- Tab Khai công cá nhân -->
     <mat-tab label="Khai công cá nhân">
-      <!-- Add New Entry Button -->
+      <!-- Action bar with filters -->
       <div class="action-bar">
-        <div class="date-filter">
-          <mat-form-field appearance="outline">
-            <mat-label>Start Date</mat-label>
-            <input matInput [matDatepicker]="startPicker" formControlName="start">
-            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-            <mat-datepicker #startPicker></mat-datepicker>
-          </mat-form-field>
+        <div class="filter-section">
+          <!-- Date filters -->
+          <div class="date-time-filters">
+            <mat-form-field appearance="outline">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="start">
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>End Date</mat-label>
-            <input matInput [matDatepicker]="endPicker" formControlName="end">
-            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-            <mat-datepicker #endPicker></mat-datepicker>
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>End Date</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="end">
+              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+            
+            <!-- Time filters -->
+            <mat-form-field appearance="outline">
+              <mat-label>Start Time</mat-label>
+              <input matInput type="time" formControlName="startTime">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>End Time</mat-label>
+              <input matInput type="time" formControlName="endTime">
+            </mat-form-field>
+          </div>
+          
+          <!-- Project and Position filters -->
+          <div class="additional-filters">
+            <mat-form-field appearance="outline">
+              <mat-label>Project</mat-label>
+              <mat-select formControlName="projectId">
+                <mat-option [value]="">All Projects</mat-option>
+                <mat-option *ngFor="let project of projects" [value]="project.projectId">
+                  {{project.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Position</mat-label>
+              <mat-select formControlName="position">
+                <mat-option [value]="">All Positions</mat-option>
+                <mat-option *ngFor="let position of positions" [value]="position">
+                  {{position}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <!-- Reset button -->
+            <button mat-button color="warn" (click)="resetFilters()" class="reset-button">
+              <mat-icon>clear</mat-icon> Reset Filters
+            </button>
+          </div>
         </div>
         <button mat-raised-button color="primary" (click)="openTimesheetForm()">
           <mat-icon>add</mat-icon>
