@@ -192,6 +192,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
 
   loadActivities(): void {
     const formValues = this.advancedFilterForm.value;
+    console.log('📁 FORM VALUES:', formValues);
     const employeeFilter = {
       department: this.selectedDepartment || formValues.departmentID || '',
       managerId: formValues.managerID || ''
@@ -254,10 +255,11 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
               
               // Only add parameters that have values
               if (employeeIds) params.EmployeeIdList = employeeIds;
-              if (this.selectedActivityType) params.ActivityId = this.selectedActivityType;
-              if (this.selectedStatus) params.Status = this.selectedStatus;
-              if (this.selectedStartDate) params.StartDate = new Date(this.selectedStartDate).toISOString();
-              if (this.selectedEndDate) params.EndDate = new Date(this.selectedEndDate).toISOString();
+              if (formValues.activityType) params.ActivityId = formValues.activityType;
+              if (formValues.activityStatus) params.Status = formValues.activityStatus;
+              if (formValues.startTime) params.StartDate = new Date(formValues.startTime).toISOString();
+              if (formValues.endTime) params.EndDate = new Date(formValues.endTime).toISOString();
+              console.log('📁 PARAMS BEING SENT:', params);
               
               // Gọi API để lấy danh sách hoạt động với danh sách nhân viên đã lọc
               this.activityService.getActivities(params).subscribe({
@@ -327,6 +329,8 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
 
   loadPersonalActivities(): void {
     // Với loadPersonalActivities, chúng ta cũng cần tải phòng ban để mapping
+    const formValues = this.advancedFilterForm.value;
+    
     this.departmentService.getDepartments().subscribe({
       next: (departments) => {
         this.departmentsList = departments;
@@ -334,10 +338,10 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
               
         // Only add parameters that have values
         if (this.currentUserId) params.EmployeeIdList = this.currentUserId;
-        if (this.selectedActivityType) params.ActivityId = this.selectedActivityType;
-        if (this.selectedStatus) params.Status = this.selectedStatus;
-        if (this.selectedStartDate) params.StartDate = new Date(this.selectedStartDate).toISOString();
-        if (this.selectedEndDate) params.EndDate = new Date(this.selectedEndDate).toISOString();
+        if (formValues.activityType) params.ActivityId = formValues.activityType;
+        if (formValues.activityStatus) params.Status = formValues.activityStatus;
+        if (formValues.startTime) params.StartDate = new Date(formValues.startTime).toISOString();
+        if (formValues.endTime) params.EndDate = new Date(formValues.endTime).toISOString();
 
         this.activityService.getActivities(params).subscribe({
           next: (activities) => {
@@ -434,7 +438,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
   }
 
   onApprove(activity: Activity): void {
-    this.activityService.approveActivity(activity.requestId).subscribe({
+    this.activityService.approveActivity(activity).subscribe({
       next: () => {
         this.loadActivities();
         this.loadPersonalActivities();
@@ -456,7 +460,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.activityService.rejectActivity(activity.requestId, result.reason).subscribe({
+        this.activityService.rejectActivity(activity, result.reason).subscribe({
           next: () => {
             this.loadActivities();
             this.loadPersonalActivities();
@@ -662,7 +666,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
     const filters = { ...this.advancedFilterForm.value };
 
     // Trước tiên, tải danh sách phòng ban
-    this.activityService.getDepartments().subscribe({
+    this.departmentService.getDepartments().subscribe({
       next: (departments) => {
         this.filteredDepartments = departments;
         console.log('📁 Danh sách phòng ban (filtered):', departments);
@@ -812,7 +816,12 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
    * Áp dụng bộ lọc nâng cao
    */
   applyAdvancedFilter(): void {
-    this.loadActivityDataWithFilters();
+    console.log('Applying advanced filter with values:', this.advancedFilterForm.value);
+    if (this.activeTab === 'all') {
+      this.loadActivities();
+    } else {
+      this.loadPersonalActivities();
+    }
   }
 
   /**
@@ -831,7 +840,11 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
       selectedEndDate: ''
     });
     
-    this.loadActivityDataWithFilters();
+    if (this.activeTab === 'all') {
+      this.loadActivities();
+    } else {
+      this.loadPersonalActivities();
+    }
   }
 
   /**

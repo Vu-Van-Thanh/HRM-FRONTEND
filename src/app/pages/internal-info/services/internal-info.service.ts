@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { catchError, Observable, of, tap, map } from 'rxjs';
 import { InternalInfo } from '../models/internal-info.model';
 import { environment } from '../../../../environments/environment';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
 @Injectable({
   providedIn: 'root'
@@ -69,18 +70,41 @@ export class InternalInfoService {
   constructor(private http: HttpClient) { }
 
   getInternalInfos(params?: any): Observable<InternalInfo[]> {
-    // Return mock data instead of making HTTP request
-    let filteredInfos = [...this.mockInternalInfos];
-
+    let httpParams = new HttpParams();
+    
     if (params) {
-      if (params.department) {
-        filteredInfos = filteredInfos.filter(info => 
-          info.departmentName === params.department
-        );
-      }
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+          httpParams = httpParams.set(key, params[key]);
+        }
+      });
     }
-
-    return of(filteredInfos);
+    console.log('📁 DEBUG: Query Params:', httpParams.toString());
+    return this.http.get<any[]>(API_ENDPOINT.getAllArticle, { params: httpParams })
+    .pipe(
+      map(articles => {
+        // Map the response to the InternalInfo model
+        return articles.map(article => ({
+          id: article.id || 0,
+          title: article.title || '',
+          content: article.content || '',
+          departmentId: article.departmentId || '',
+          departmentName: '', 
+          createdBy: article.createdBy || 0,
+          createdByName: article.createdByName || 'System',
+          createdAt: article.dateCreated ? new Date(article.dateCreated) : new Date(),
+          updatedAt: article.updatedAt ? new Date(article.updatedAt) : new Date(),
+          isActive: true,
+          documentId: article.departmentId || '',
+          type: article.type || 'Normal'
+        }));
+      }),
+      tap(articles => console.log('✅ Mapped internal info articles:', articles)),
+      catchError(error => {
+        console.error('❌ Error loading articles:', error);
+        return of([]);
+      })
+    );
   }
 
   getInternalInfoById(id: number): Observable<InternalInfo> {

@@ -7,6 +7,8 @@ import { InternalInfo } from '../models/internal-info.model';
 import { InternalInfoService } from '../services/internal-info.service';
 import { InternalInfoFormDialogComponent } from '../internal-info-form-dialog/internal-info-form-dialog.component';
 import { WordDocumentDialogComponent } from '../word-document-dialog/word-document-dialog.component';
+import { DepartmentService } from 'src/app/system/department/department.service';
+import { Department } from 'src/app/system/department/department.model';
 
 @Component({
   selector: 'app-internal-info-list',
@@ -22,7 +24,8 @@ export class InternalInfoListComponent implements OnInit {
     'actions'
   ];
   dataSource: MatTableDataSource<InternalInfo> = new MatTableDataSource<InternalInfo>([]);
-  departments: string[] = [];
+  departments: Department[] = [];
+  departmentMap: Map<string, string> = new Map(); // Map from departmentId to name
   selectedDepartment: string = '';
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -30,10 +33,12 @@ export class InternalInfoListComponent implements OnInit {
 
   constructor(
     private internalInfoService: InternalInfoService,
+    private departmentService: DepartmentService,
     private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
+    this.loadDepartments();
     this.loadInternalInfos();
   }
 
@@ -42,22 +47,56 @@ export class InternalInfoListComponent implements OnInit {
     this.dataSource.sort = this.sort;
   }
 
+  loadDepartments(): void {
+    this.departmentService.getDepartments().subscribe({
+      next: (departments) => {
+        this.departments = departments;
+        
+        // Create a mapping from department ID to department name
+        this.departments.forEach(dept => {
+          if (dept.code) {
+            this.departmentMap.set(dept.code, dept.name || 'Unknown');
+          }
+        });
+        
+        console.log('✅ Department mapping:', this.departmentMap);
+      },
+      error: (error) => {
+        console.error('❌ Error loading departments:', error);
+      }
+    });
+  }
+
   loadInternalInfos(): void {
     const params: any = {};
     if (this.selectedDepartment) {
-      params.department = this.selectedDepartment;
+      params.DepartmentId = this.selectedDepartment;
     }
 
     this.internalInfoService.getInternalInfos(params).subscribe({
       next: (infos) => {
-        this.dataSource.data = infos;
-        // Extract unique departments from infos
-        this.departments = this.internalInfoService.getDepartments();
+        // Map department IDs to names
+        const mappedInfos = infos.map(info => {
+          return {
+            ...info,
+            departmentName: this.getDepartmentName(info.departmentId)
+          };
+        });
+        
+        this.dataSource.data = mappedInfos;
       },
       error: (error) => {
         console.error('Error loading internal infos:', error);
       }
     });
+  }
+
+  // Helper function to get department name from ID
+  getDepartmentName(departmentId: any): string {
+    if (!departmentId) return 'N/A';
+    
+    const deptIdStr = departmentId.toString();
+    return this.departmentMap.get(deptIdStr) || 'Unknown';
   }
 
   applyFilter(event: Event): void {
@@ -76,7 +115,10 @@ export class InternalInfoListComponent implements OnInit {
   onAddNew(): void {
     const dialogRef = this.dialog.open(InternalInfoFormDialogComponent, {
       width: '800px',
-      data: { isEdit: false }
+      data: { 
+        isEdit: false,
+        departments: this.departments
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -91,7 +133,8 @@ export class InternalInfoListComponent implements OnInit {
       width: '800px',
       data: { 
         info,
-        isEdit: true
+        isEdit: true,
+        departments: this.departments
       }
     });
 
@@ -125,5 +168,28 @@ export class InternalInfoListComponent implements OnInit {
     } else {
       alert('Không có tài liệu Word nào được đính kèm.');
     }
+  }
+
+  onPreviewContent(info: InternalInfo): void {
+    // Use the same dialog component but with content instead of documentId
+    const previewInfo = {
+      ...info,
+      documentId: 'preview-content' // Dummy ID to avoid alert
+    };
+    
+    const dialogRef = this.dialog.open(WordDocumentDialogComponent, {
+      width: '900px',
+      height: '80vh',
+      data: { 
+        info: previewInfo,
+        isContentPreview: true,
+        htmlContent: info.content
+      }
+    });
+  }
+
+  formatDate(date: any): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('vi-VN');
   }
 } 

@@ -16,5 +16,8 @@ export const API_ENDPOINT = {
    getAllActivity : 'https://localhost:7030/ActivityRequest/activity-request',
    getAllActivityType : 'http://localhost:5295/Activity',
    getAllProjects : 'https://localhost:7176/Project',
-   getAllPositions : 'https://localhost:7176/JobPosition'
+   getAllPositions : 'https://localhost:7176/JobPosition',
+   approveActivity : 'https://localhost:7030/ActivityRequest',
+   getAllArticle : 'https://localhost:7176/Article/filter-article',
+   uploadArticle : 'https://localhost:7176/Article/upload-word'
 };

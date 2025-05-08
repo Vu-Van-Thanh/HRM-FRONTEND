@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { InternalInfoService } from '../services/internal-info.service';
 import { InternalInfo } from '../models/internal-info.model';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-word-document-dialog',
@@ -10,17 +11,34 @@ import { InternalInfo } from '../models/internal-info.model';
 })
 export class WordDocumentDialogComponent implements OnInit {
   htmlContent: string = '';
+  safeHtmlContent: SafeHtml;
   loading: boolean = true;
   error: string = '';
+  isPreview: boolean = false;
   
   constructor(
     public dialogRef: MatDialogRef<WordDocumentDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { info: InternalInfo },
-    private internalInfoService: InternalInfoService
+    @Inject(MAT_DIALOG_DATA) public data: { 
+      info: InternalInfo, 
+      isContentPreview?: boolean,
+      htmlContent?: string 
+    },
+    private internalInfoService: InternalInfoService,
+    private sanitizer: DomSanitizer
   ) { }
   
   ngOnInit(): void {
-    this.loadDocumentContent();
+    this.isPreview = this.data.isContentPreview || false;
+    
+    if (this.isPreview && this.data.htmlContent) {
+      // If it's a preview with provided HTML content
+      this.htmlContent = this.data.htmlContent;
+      this.safeHtmlContent = this.sanitizer.bypassSecurityTrustHtml(this.htmlContent);
+      this.loading = false;
+    } else {
+      // Otherwise load document from API
+      this.loadDocumentContent();
+    }
   }
   
   loadDocumentContent(): void {
@@ -31,6 +49,7 @@ export class WordDocumentDialogComponent implements OnInit {
       this.internalInfoService.getWordDocumentContent(this.data.info.documentId).subscribe({
         next: (content) => {
           this.htmlContent = content;
+          this.safeHtmlContent = this.sanitizer.bypassSecurityTrustHtml(content);
           this.loading = false;
         },
         error: (err) => {

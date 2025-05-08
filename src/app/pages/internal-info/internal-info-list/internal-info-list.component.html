@@ -58,6 +58,9 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Thao tác</th>
                 <td mat-cell *matCellDef="let info">
+                  <button mat-icon-button color="primary" (click)="onPreviewContent(info)" matTooltip="Xem trước nội dung">
+                    <mat-icon>preview</mat-icon>
+                  </button>
                   <button mat-icon-button color="primary" (click)="onViewDocument(info)" matTooltip="Xem tài liệu" *ngIf="info.documentId">
                     <mat-icon>description</mat-icon>
                   </button>

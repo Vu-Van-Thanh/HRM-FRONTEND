@@ -1,16 +1,27 @@
-<h2 mat-dialog-title>{{data.info.title}}</h2>
+<h2 mat-dialog-title>{{isPreview ? 'Xem trước: ' + data.info.title : data.info.title}}</h2>
 
 <mat-dialog-content>
   <div *ngIf="error" class="alert alert-danger">
     {{error}}
   </div>
   
-  <app-word-content-viewer 
-    *ngIf="!error"
-    [htmlContent]="htmlContent" 
-    [title]="data.info.title"
-    [loading]="loading">
-  </app-word-content-viewer>
+  <div *ngIf="loading" class="text-center p-5">
+    <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+    <p class="mt-3">Đang tải nội dung...</p>
+  </div>
+  
+  <div *ngIf="!loading && !error" class="document-content">
+    <!-- Show HTML content directly if it's a preview -->
+    <div *ngIf="isPreview" [innerHTML]="safeHtmlContent"></div>
+    
+    <!-- Use document viewer for Word documents -->
+    <app-word-content-viewer 
+      *ngIf="!isPreview"
+      [htmlContent]="htmlContent" 
+      [title]="data.info.title"
+      [loading]="loading">
+    </app-word-content-viewer>
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

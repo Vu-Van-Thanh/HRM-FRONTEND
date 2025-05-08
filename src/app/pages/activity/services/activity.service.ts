@@ -29,7 +29,6 @@ export class ActivityService {
       });
     }
     
-    console.log('📁 DEBUG: Query Params:', httpParams.toString());
     
     return this.http.get<Activity[]>(API_ENDPOINT.getAllActivity, { params: httpParams })
       .pipe(
@@ -52,8 +51,9 @@ export class ActivityService {
       );
   }
 
-  approveActivity(id: string): Observable<Activity> {
-    return this.http.put<Activity>(`${this.activityBaseUrl}/approve/${id}`, {})
+  approveActivity(activity: Activity): Observable<Activity> {
+    activity.status = 'APPROVED';
+    return this.http.post<Activity>(API_ENDPOINT.approveActivity, activity)
       .pipe(
         tap(activity => console.log('✅ Phê duyệt hoạt động thành công:', activity)),
         catchError(error => {
@@ -63,8 +63,19 @@ export class ActivityService {
       );
   }
 
-  rejectActivity(id: string, reason: string): Observable<Activity> {
-    return this.http.put<Activity>(`${this.activityBaseUrl}/reject/${id}`, { reason })
+  rejectActivity(activity: Activity, reason: string): Observable<Activity> {
+    activity.status = 'REJECTED';
+    let requestFldsObj = {};
+    try {
+      requestFldsObj = activity.requestFlds ? JSON.parse(activity.requestFlds) : {};
+    } catch (error) {
+      console.error('Lỗi parse JSON:', error);
+    }
+  
+    requestFldsObj['reason'] = reason;
+      activity.requestFlds = JSON.stringify(requestFldsObj);
+  
+    return this.http.post<Activity>(API_ENDPOINT.approveActivity, activity)
       .pipe(
         tap(activity => console.log('✅ Từ chối hoạt động thành công:', activity)),
         catchError(error => {
