@@ -4,6 +4,9 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { InternalInfo } from '../models/internal-info.model';
 import { InternalInfoService } from '../services/internal-info.service';
 import { Observable } from 'rxjs';
+import { Department } from 'src/app/system/department/department.model';
+import { HttpClient } from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
 @Component({
   selector: 'app-internal-info-form-dialog',
@@ -12,7 +15,7 @@ import { Observable } from 'rxjs';
 })
 export class InternalInfoFormDialogComponent implements OnInit {
   form: FormGroup;
-  departments: string[] = [];
+  departments: Department[] = [];
   isEdit: boolean = false;
   selectedFile: File | null = null;
   fileName: string = '';
@@ -22,17 +25,30 @@ export class InternalInfoFormDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private internalInfoService: InternalInfoService,
+    private http: HttpClient,
     public dialogRef: MatDialogRef<InternalInfoFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { info?: InternalInfo; isEdit: boolean }
+    @Inject(MAT_DIALOG_DATA) public data: { 
+      info?: InternalInfo; 
+      isEdit: boolean;
+      departments?: Department[];
+    }
   ) {
     this.isEdit = data.isEdit;
-    this.departments = this.internalInfoService.getDepartments();
+    if (data.departments) {
+      this.departments = data.departments;
+    }
   }
 
   ngOnInit(): void {
     this.initForm();
     if (this.isEdit && this.data.info) {
-      this.form.patchValue(this.data.info);
+      this.form.patchValue({
+        title: this.data.info.title,
+        content: this.data.info.content,
+        departmentId: this.data.info.departmentId,
+        isActive: this.data.info.isActive
+      });
+      
       if (this.data.info.documentId) {
         this.fileName = `Document ID: ${this.data.info.documentId}`;
       }
@@ -44,9 +60,7 @@ export class InternalInfoFormDialogComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(3)]],
       content: ['', [Validators.required, Validators.minLength(10)]],
       departmentId: ['', Validators.required],
-      departmentName: ['', Validators.required],
-      isActive: [true],
-      documentId: ['']
+      isActive: [true]
     });
   }
 
@@ -57,9 +71,8 @@ export class InternalInfoFormDialogComponent implements OnInit {
       this.fileName = this.selectedFile.name;
       
       // Check if file is a Word document
-      const fileType = this.selectedFile.type;
-      if (!fileType.includes('word') && !fileType.includes('doc') && !fileType.includes('docx')) {
-        alert('Vui lòng chọn file Word (.doc, .docx)');
+      if (!this.fileName.endsWith('.docx')) {
+        alert('Vui lòng chọn file Word (.docx)');
         this.selectedFile = null;
         this.fileName = '';
         input.value = '';
@@ -70,85 +83,67 @@ export class InternalInfoFormDialogComponent implements OnInit {
   removeFile(): void {
     this.selectedFile = null;
     this.fileName = '';
-    this.form.patchValue({ documentId: '' });
   }
 
   onSubmit(): void {
     if (this.form.valid) {
-      const formData = this.form.value;
-      
-      if (this.selectedFile) {
-        this.isUploading = true;
-        this.uploadProgress = 0;
-        
-        // Simulate file upload with progress
-        this.simulateFileUpload().subscribe({
-          next: (documentId) => {
-            formData.documentId = documentId;
-            this.saveInternalInfo(formData);
+      if (this.isEdit && this.data.info) {
+        // Handle edit mode
+        const formData = this.form.value;
+        this.internalInfoService.updateInternalInfo(this.data.info.id, formData).subscribe({
+          next: () => {
+            this.dialogRef.close(true);
           },
           error: (error) => {
-            console.error('Error uploading file:', error);
-            this.isUploading = false;
-            alert('Lỗi khi tải lên file. Vui lòng thử lại.');
+            console.error('Error updating internal info:', error);
+            alert('Lỗi khi cập nhật thông tin. Vui lòng thử lại.');
           }
         });
+      } else if (this.selectedFile) {
+        // Handle create mode with file upload
+        this.uploadFile();
       } else {
-        this.saveInternalInfo(formData);
+        alert('Vui lòng chọn file Word (.docx) để tải lên');
       }
     }
   }
   
-  private simulateFileUpload(): Observable<string> {
-    // In a real application, you would use FormData to upload the file
-    // const formData = new FormData();
-    // formData.append('file', this.selectedFile);
-    // return this.internalInfoService.uploadFile(formData);
-    
-    // For now, we'll simulate the upload with a delay
-    return new Observable(observer => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        this.uploadProgress = progress;
-        
-        if (progress >= 100) {
-          clearInterval(interval);
-          // Generate a random document ID
-          const documentId = 'doc' + Math.floor(Math.random() * 10000);
-          observer.next(documentId);
-          observer.complete();
-        }
-      }, 300);
-    });
-  }
-  
-  private saveInternalInfo(formData: any): void {
-    if (this.isEdit && this.data.info) {
-      this.internalInfoService.updateInternalInfo(this.data.info.id, formData).subscribe({
-        next: () => {
-          this.isUploading = false;
-          this.dialogRef.close(true);
-        },
-        error: (error) => {
-          console.error('Error updating internal info:', error);
-          this.isUploading = false;
-          alert('Lỗi khi cập nhật thông tin. Vui lòng thử lại.');
-        }
-      });
-    } else {
-      this.internalInfoService.createInternalInfo(formData).subscribe({
-        next: () => {
-          this.isUploading = false;
-          this.dialogRef.close(true);
-        },
-        error: (error) => {
-          console.error('Error creating internal info:', error);
-          this.isUploading = false;
-          alert('Lỗi khi tạo thông tin mới. Vui lòng thử lại.');
-        }
-      });
+  uploadFile(): void {
+    if (!this.selectedFile) {
+      alert('Vui lòng chọn file Word (.docx) để tải lên');
+      return;
     }
+    
+    const formData = new FormData();
+    formData.append('formFile', this.selectedFile);
+    formData.append('Title', this.form.get('title').value);
+    formData.append('DepartmentID', this.form.get('departmentId').value);
+    
+    this.isUploading = true;
+    this.uploadProgress = 0;
+    
+    // Simulate progress
+    const progressInterval = setInterval(() => {
+      if (this.uploadProgress < 90) {
+        this.uploadProgress += 10;
+      }
+    }, 300);
+    
+    this.http.post(API_ENDPOINT.uploadArticle, formData).subscribe({
+      next: (response) => {
+        clearInterval(progressInterval);
+        this.uploadProgress = 100;
+        console.log('✅ Upload successful:', response);
+        this.isUploading = false;
+        this.dialogRef.close(true);
+      },
+      error: (error) => {
+        clearInterval(progressInterval);
+        console.error('❌ Error uploading file:', error);
+        this.isUploading = false;
+        alert('Lỗi khi tải lên file. Vui lòng thử lại.');
+      }
+    });
   }
 
   onCancel(): void {

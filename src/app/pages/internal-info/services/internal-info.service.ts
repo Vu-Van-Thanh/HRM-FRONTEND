@@ -196,4 +196,20 @@ export class InternalInfoService {
       }, 1500);
     });
   }
+
+  /**
+   * Upload a Word document to create a new article
+   * @param formData FormData containing the file, title, and departmentID
+   * @returns Observable of the API response
+   */
+  uploadArticle(formData: FormData): Observable<any> {
+    return this.http.post(API_ENDPOINT.uploadArticle, formData)
+      .pipe(
+        tap(response => console.log('✅ Article uploaded successfully:', response)),
+        catchError(error => {
+          console.error('❌ Error uploading article:', error);
+          throw error;
+        })
+      );
+  }
 } 

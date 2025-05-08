@@ -32,12 +32,12 @@
       <div class="col-12 mb-3">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Phòng ban</mat-label>
-          <mat-select formControlName="departmentName" (selectionChange)="form.patchValue({departmentId: $event.value})">
-            <mat-option *ngFor="let dept of departments" [value]="dept">
-              {{dept}}
+          <mat-select formControlName="departmentId">
+            <mat-option *ngFor="let dept of departments" [value]="dept.code">
+              {{dept.name}}
             </mat-option>
           </mat-select>
-          <mat-error *ngIf="form.get('departmentName').hasError('required')">
+          <mat-error *ngIf="form.get('departmentId').hasError('required')">
             Phòng ban là bắt buộc
           </mat-error>
         </mat-form-field>
@@ -47,7 +47,7 @@
         <div class="file-upload-container">
           <label class="file-upload-label">
             <span class="file-upload-text">Đính kèm tài liệu Word</span>
-            <input type="file" (change)="onFileSelected($event)" accept=".doc,.docx" class="file-input" #fileInput>
+            <input type="file" (change)="onFileSelected($event)" accept=".docx" class="file-input" #fileInput>
           </label>
           
           <div *ngIf="fileName" class="selected-file">
