@@ -1,11 +1,36 @@
 <app-loader></app-loader>
 
 <div class="container-fluid">
-  <app-page-title title="Calendar" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+  <app-page-title title="Activity Calendar" [breadcrumbItems]="breadCrumbItems"></app-page-title>
   <div class="row">
     <div class="col-12">
       <div class="card">
         <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-12">
+              <div class="d-flex justify-content-end align-items-center">
+                <button class="btn btn-sm btn-outline-primary me-3" (click)="loadUserActivities()">
+                  <i class="bx bx-refresh me-1"></i> Refresh
+                </button>
+                <div class="me-3 d-flex align-items-center">
+                  <span class="badge bg-warning me-1">&nbsp;</span>
+                  <small>Pending</small>
+                </div>
+                <div class="me-3 d-flex align-items-center">
+                  <span class="badge bg-success me-1">&nbsp;</span>
+                  <small>Approved</small>
+                </div>
+                <div class="me-3 d-flex align-items-center">
+                  <span class="badge bg-danger me-1">&nbsp;</span>
+                  <small>Rejected</small>
+                </div>
+                <div class="me-3 d-flex align-items-center">
+                  <span class="badge bg-info me-1">&nbsp;</span>
+                  <small>Other</small>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="app-calendar">
             <!-- calendar -->
             <full-calendar [options]="calendarOptions"></full-calendar>
