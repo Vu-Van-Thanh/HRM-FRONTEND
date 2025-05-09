@@ -10,7 +10,7 @@ import { AttendanceFormComponent } from '../attendance-form/attendance-form.comp
 import { MatMenuTrigger } from '@angular/material/menu';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 // New model to match backend API response
@@ -48,6 +48,7 @@ export interface Timesheet {
   total: number;
   customer: string;
   project: string;
+  projectId?: string;
   projectName?: string;
   activity: string;
   description: string;
@@ -64,9 +65,14 @@ export interface Activity {
   color: string;
 }
 
+// Update the Department interface to match API response
 export interface Department {
-  id: number;
-  name: string;
+  departmentId?: string;
+  name?: string;
+  description?: string;
+  status?: string;
+  code?: string;
+  id?: number;
 }
 
 export interface Month {
@@ -117,6 +123,14 @@ export interface EmployeeResponse {
   managerId?: string;
 }
 
+// Add EmployeeDepartmentDTO interface
+export interface EmployeeDepartmentDTO {
+  employeeID?: string;
+  departmentID?: string;
+  employeeName?: string;
+  departmentName?: string;
+}
+
 @Component({
   selector: 'app-attendance-list',
   templateUrl: './attendance-list.component.html',
@@ -162,12 +176,8 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   selectedStatus: string = '';
   selectedMonth: number = new Date().getMonth() + 1;
 
-  departments: Department[] = [
-    { id: 1, name: 'Phòng Kỹ thuật' },
-    { id: 2, name: 'Phòng Kinh doanh' },
-    { id: 3, name: 'Phòng Nhân sự' },
-    { id: 4, name: 'Phòng Tài chính' }
-  ];
+  // Update departments property
+  departments: Department[] = [];
 
   months: Month[] = [
     { value: 1, label: 'Tháng 1' },
@@ -214,6 +224,9 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   // Form group for approval tab filters
   approvalFilters: FormGroup;
 
+  // Add property for employee details
+  employeeList: EmployeeDepartmentDTO[] = [];
+
   constructor(
     private dialog: MatDialog,
     private router: Router,
@@ -239,7 +252,6 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       endTime: [null],
       departmentId: [this.selectedDepartment],
       status: [this.selectedStatus],
-      month: [this.selectedMonth],
       employeeFilter: ['']
     });
 
@@ -474,6 +486,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.loadDepartments();
     this.loadData();
   }
 
@@ -598,7 +611,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       
       // Find project name if project ID matches
       const project = this.projects.find(p => p.projectId === attendance.projectId);
-      const projectName = project ? project.name : attendance.projectId;
+      const projectName = project ? project.name : this.getProjectName(attendance.projectId);
       
       // Use position as activity name for better readability
       const activityName = attendance.position || attendance.activityId || 'N/A';
@@ -614,7 +627,8 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
         hours: parseFloat(hours.toFixed(2)),
         total: parseFloat(hours.toFixed(2)),
         customer: 'N/A', // Not provided in the response
-        project: attendance.projectId, // Store ID for filtering
+        project: projectName, // Use the project name instead of ID
+        projectId: attendance.projectId, // Store ID for filtering
         projectName: projectName, // Store name for display
         activity: activityName, // Use position as activity name
         description: attendance.description,
@@ -654,8 +668,32 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
     if (this.selectedDepartment) {
       employeeParams.Department = this.selectedDepartment;
     }
-    this.http.get<EmployeeResponse[]>(API_ENDPOINT.getEmployeeID, { params: employeeParams })
+    
+    console.log('this.selectedDepartment', this.selectedDepartment);
+    console.log('employeeParams', employeeParams);
+    
+    // First, get employees with their department information
+    this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeParams })
       .pipe(
+        tap(employees => {
+          console.log('Raw employee data:', employees);
+          
+          // If employee doesn't have departmentName but has departmentID, try to find it
+          employees.forEach(emp => {
+            if (!emp.departmentName && emp.departmentID) {
+              const department = this.departments.find(dept => 
+                dept.departmentId === emp.departmentID || 
+                dept.code === emp.departmentID ||
+                (dept.id && dept.id.toString() === emp.departmentID)
+              );
+              if (department) {
+                emp.departmentName = department.name;
+              }
+            }
+          });
+          
+          this.employeeList = employees;
+        }),
         catchError(error => {
           console.error('Error fetching employees by manager:', error);
           this.toastService.error('Failed to load employees under management');
@@ -664,7 +702,8 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       )
       .subscribe(employees => {
         // Extract employee IDs
-        this.managerEmployeeIds = employees.map(emp => emp.employeeID);
+        this.managerEmployeeIds = employees.map(emp => emp.employeeID || '').filter(id => id !== '');
+        
         if (this.managerEmployeeIds.length === 0) {
           console.log('No employees found under this manager');
           this.approvalDataSource.data = [];
@@ -677,15 +716,18 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
   
   fetchAttendanceForApproval(): void {
-    // Prepare attendance filter params
-    const attendanceParams: AttendanceFilterDTO = {
-      EmployeeIDList: this.managerEmployeeIds.join(',')
-    };
-    
-    // Get form values
     const formValues = this.approvalFilters.value;
     
-    // Add date filters if selected
+    let employeeIds = [...this.managerEmployeeIds];
+    
+    if (formValues.employeeFilter && formValues.employeeFilter.trim() !== '') {
+      employeeIds.push(formValues.employeeFilter.trim());
+    }
+    
+    const attendanceParams: AttendanceFilterDTO = {
+      EmployeeIDList: employeeIds.join(',')
+    };
+    
     if (formValues.start) {
       attendanceParams.StartDate = new Date(formValues.start).toISOString();
     }
@@ -703,26 +745,19 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       attendanceParams.Endtime = formValues.endTime;
     }
     
-    // Add month filter if selected and no specific dates
-    if (!formValues.start && !formValues.end && formValues.month) {
-      const year = new Date().getFullYear();
-      const month = formValues.month - 1; // JS months are 0-based
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      
-      attendanceParams.StartDate = firstDay.toISOString();
-      attendanceParams.EndDate = lastDay.toISOString();
-    }
-    
     // Add status filter if selected
     if (formValues.status) {
       attendanceParams.Status = formValues.status.toUpperCase();
     }
     
     console.log('attendanceParams', attendanceParams);
+    
     // Fetch attendance data
     this.http.get<AttendanceResponse[]>(API_ENDPOINT.getAllAttendace, { params: attendanceParams as any })
       .pipe(
+        tap(responses => {
+          console.log('Raw attendance response:', responses);
+        }),
         map(responses => this.mapAttendanceToApprovalTimesheets(responses)),
         catchError(error => {
           console.error('Error fetching attendance data for approval:', error);
@@ -731,16 +766,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
         })
       )
       .subscribe(timesheets => {
-        // Apply employee filter if specified
-        let filteredData = timesheets;
-        if (formValues.employeeFilter) {
-          const searchTerm = formValues.employeeFilter.toLowerCase();
-          filteredData = filteredData.filter(item => 
-            item.employeeName && item.employeeName.toLowerCase().includes(searchTerm)
-          );
-        }
-        
-        this.approvalDataSource.data = filteredData;
+        this.approvalDataSource.data = timesheets;
       });
   }
   
@@ -756,10 +782,26 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       const project = this.projects.find(p => p.projectId === attendance.projectId);
       const projectName = project ? project.name : attendance.projectId;
       
+      // Find employee information
+      const employee = this.employeeList.find(emp => emp.employeeID === attendance.employeeId);
+      
+      // Get department name from employee if available
+      let departmentName = 'Not specified';
+      if (employee && employee.departmentName) {
+        departmentName = employee.departmentName;
+      } else if (employee && employee.departmentID) {
+        const department = this.departments.find(dept => 
+          dept.departmentId === employee.departmentID || 
+          dept.code === employee.departmentID ||
+          (dept.id && dept.id.toString() === employee.departmentID)
+        );
+        departmentName = department ? department.name || 'Unknown Department' : 'Not specified';
+      }
+      
       return {
         id: index + 1,
-        employeeName: attendance.employeeId, // This should ideally be replaced with actual name
-        department: attendance.position || 'Not specified',
+        employeeName: employee?.employeeName || attendance.employeeId,
+        department: departmentName,
         date: attendance.attendanceDate.split('T')[0],
         checkIn: startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
         checkOut: endTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
@@ -839,14 +881,6 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onMonthChange(): void {
-    const currentValue = this.approvalFilters.get('month')?.value;
-    this.approvalFilters.patchValue({ month: this.selectedMonth });
-    if (currentValue !== this.selectedMonth) {
-      this.loadApprovalTimesheets();
-    }
-  }
-
   onEmployeeFilterChange(): void {
     const currentValue = this.approvalFilters.get('employeeFilter')?.value;
     this.approvalFilters.patchValue({ employeeFilter: this.employeeFilter });
@@ -864,13 +898,11 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       endTime: null,
       departmentId: null,
       status: null,
-      month: null,
       employeeFilter: ''
     });
     
     this.selectedDepartment = null;
     this.selectedStatus = '';
-    this.selectedMonth = new Date().getMonth() + 1;
     this.employeeFilter = '';
     
     this.loadApprovalTimesheets();
@@ -1079,7 +1111,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
     
     // Calculate total hours for each project
     timesheets.forEach(timesheet => {
-      const projectId = timesheet.project;
+      const projectId = timesheet.projectId || timesheet.project;
       const hours = timesheet.hours || 0;
       
       if (projectId) {
@@ -1129,10 +1161,68 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       const formValues = this.approvalFilters.value;
       this.selectedDepartment = formValues.departmentId;
       this.selectedStatus = formValues.status;
-      this.selectedMonth = formValues.month;
       this.employeeFilter = formValues.employeeFilter;
       
       this.loadApprovalTimesheets();
     }, 500);
+  }
+
+  // Add method to load departments
+  loadDepartments(): void {
+    if (!API_ENDPOINT.getAllDepartment) {
+      console.error('API_ENDPOINT.getAllDepartment is undefined!');
+      this.toastService.error('API endpoint for departments not configured');
+      this.useFallbackDepartments();
+      return;
+    }
+    
+    console.log('Loading departments from:', API_ENDPOINT.getAllDepartment);
+    this.http.get<any>(API_ENDPOINT.getAllDepartment)
+      .pipe(
+        map(response => {
+          console.log('Raw department response:', response);
+          // Check if response is an array or has a data property
+          let departments: any[] = [];
+          if (Array.isArray(response)) {
+            departments = response;
+          } else if (response && response.data && Array.isArray(response.data)) {
+            departments = response.data;
+          } else {
+            console.error('Unexpected department response format:', response);
+            departments = [];
+          }
+          
+          // Make sure departments have the expected structure
+          return departments.map(dept => ({
+            departmentId: dept.departmentId || (dept as any).id || '',
+            name: dept.departmentName || 'Unknown Department',
+            description: dept.description,
+            status: dept.status
+          }));
+        }),
+        catchError(error => {
+          console.error('Error fetching departments:', error);
+          this.toastService.error('Failed to load departments');
+          return of([]);
+        })
+      )
+      .subscribe(departments => {
+        this.departments = departments;
+        console.log('Departments loaded:', this.departments);
+        // If no departments were loaded, create a fallback
+        if (!this.departments || this.departments.length === 0) {
+          this.useFallbackDepartments();
+        }
+      });
+  }
+  
+  private useFallbackDepartments(): void {
+    this.departments = [
+      { departmentId: '1', name: 'Phòng HR', status: 'active' },
+      { departmentId: '2', name: 'Phòng Marketing', status: 'active' },
+      { departmentId: '3', name: 'Phòng Sales', status: 'active' },
+      { departmentId: '4', name: 'Phòng IT', status: 'active' }
+    ];
+    console.log('Using fallback departments:', this.departments);
   }
 }

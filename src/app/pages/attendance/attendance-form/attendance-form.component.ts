@@ -1,7 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ToastService } from 'angular-toastify';
+import { HttpClient } from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import { catchError, map } from 'rxjs/operators';
+import { of } from 'rxjs';
+
+interface Project {
+  projectId: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-attendance-form',
@@ -13,13 +22,8 @@ export class AttendanceFormComponent implements OnInit {
   isEditMode = false;
   duration: string = '00:00';
 
-  projects: string[] = [
-    'JSI FLE Bảo trì 20 (JSI)',
-    'KAF FDS Sản phẩm 24 (ROS - KAFI)',
-    'KSS FLE Bảo trì 24 (KSS)',
-    'MISC (FSS)',
-    'TCB CBP Kinh doanh HN (TCB)'
-  ];
+  projects: Project[] = [];
+  projectNames: string[] = [];
 
   activities: string[] = [
     'Lập trình',
@@ -39,7 +43,9 @@ export class AttendanceFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AttendanceFormComponent>,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private http: HttpClient,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.attendanceForm = this.fb.group({
       project: ['', Validators.required],
@@ -53,12 +59,79 @@ export class AttendanceFormComponent implements OnInit {
       costCenter: [''],
       estimatedCost: [0]
     });
+
+    if (data) {
+      this.isEditMode = true;
+      // Populate form with existing data
+      this.attendanceForm.patchValue({
+        project: data.project || data.projectName,
+        activity: data.activity,
+        description: data.description,
+        date: data.date ? new Date(data.date) : new Date(),
+        checkIn: data.checkIn,
+        checkOut: data.checkOut,
+        notes: data.notes || '',
+        costCenter: data.costCenter || '',
+        estimatedCost: data.estimatedCost || 0
+      });
+    }
   }
 
   ngOnInit(): void {
+    this.loadProjects();
     this.attendanceForm.valueChanges.subscribe(() => {
       this.calculateDuration();
     });
+  }
+
+  loadProjects(): void {
+    console.log('Loading projects from:', API_ENDPOINT.getAllProject);
+    this.http.get<any>(API_ENDPOINT.getAllProject)
+      .pipe(
+        map(response => {
+          console.log('Raw project response:', response);
+          let projects: Project[] = [];
+          if (Array.isArray(response)) {
+            projects = response;
+          } else if (response && response.data && Array.isArray(response.data)) {
+            projects = response.data;
+          } else {
+            console.error('Unexpected project response format:', response);
+            projects = [];
+          }
+          
+          return projects.map(project => ({
+            projectId: project.projectId || '',
+            name: project.name || 'Unknown Project'
+          }));
+        }),
+        catchError(error => {
+          console.error('Error fetching projects:', error);
+          this.toastService.error('Failed to load projects');
+          return of([]);
+        })
+      )
+      .subscribe(projects => {
+        this.projects = projects;
+        this.projectNames = projects.map(p => p.name);
+        console.log('Projects loaded:', this.projects);
+        
+        // If no projects were loaded, create a fallback
+        if (!this.projects || this.projects.length === 0) {
+          this.useFallbackProjects();
+        }
+      });
+  }
+  
+  private useFallbackProjects(): void {
+    this.projects = [
+      { projectId: '1', name: 'TCB CBP Kinh doanh HN' },
+      { projectId: '2', name: 'Viettel CRM' },
+      { projectId: '3', name: 'FPT ERP' },
+      { projectId: '4', name: 'VNPT Billing System' }
+    ];
+    this.projectNames = this.projects.map(p => p.name);
+    console.log('Using fallback projects:', this.projects);
   }
 
   calculateDuration(): void {
@@ -82,8 +155,18 @@ export class AttendanceFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.attendanceForm.valid) {
+      // Find the project by name to get the projectId
+      const projectName = this.attendanceForm.get('project')?.value;
+      const selectedProject = this.projects.find(p => p.name === projectName);
+      
+      const formValue = this.attendanceForm.value;
+      const result = {
+        ...formValue,
+        projectId: selectedProject?.projectId || ''
+      };
+      
       this.toastService.success('Attendance saved successfully!');
-      this.dialogRef.close(this.attendanceForm.value);
+      this.dialogRef.close(result);
     }
   }
 
