@@ -46,6 +46,10 @@ const routes: Routes = [
     data: { activityType: 'REGISTRATION' }
   },
   {
+    path: 'register',
+    component: ActivityRegistrationComponent
+  },
+  {
     path: 'register/:type',
     component: ActivityRegistrationComponent
   }

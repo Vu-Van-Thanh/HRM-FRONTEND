@@ -10,11 +10,8 @@
                 selectedActivityType === 'OVERTIME' ? 'Quản lý tăng ca' : 'Quản lý công tác'}}
             </h4>
             <div class="d-flex">
-              <button *ngIf="selectedActivityType === 'REGISTRATION'" class="btn btn-primary me-2" routerLink="/system/activity/register/leave">
-                <i class="bx bx-plus"></i> Đăng ký nghỉ phép
-              </button>
-              <button *ngIf="selectedActivityType === 'REGISTRATION'" class="btn btn-primary me-2" routerLink="/system/activity/register/remote">
-                <i class="bx bx-plus"></i> Đăng ký làm việc từ xa
+              <button *ngIf="selectedActivityType === 'REGISTRATION'" class="btn btn-primary me-2" (click)="showActivityTypeSelector()">
+                <i class="bx bx-plus"></i> Đăng ký hoạt động
               </button>
             </div>
           </div>

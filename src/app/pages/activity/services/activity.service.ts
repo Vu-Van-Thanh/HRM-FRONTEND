@@ -107,7 +107,7 @@ export class ActivityService {
   }
 
   createActivity(activity: Partial<Activity>): Observable<Activity> {
-    return this.http.post<Activity>(`${this.activityBaseUrl}/activity-request`, activity)
+    return this.http.post<Activity>(API_ENDPOINT.approveActivity, activity)
       .pipe(
         tap(newActivity => console.log('✅ Tạo hoạt động thành công:', newActivity)),
         catchError(error => {

@@ -23,4 +23,5 @@ export const API_ENDPOINT = {
    getAllProject : 'https://localhost:7176/Project/filter-project',
    getAllAttendace : 'https://localhost:7030/Attendance/filter-attendance',
    createAttendance : 'https://localhost:7030/Attendance',
+   getAllActivityFld : 'https://localhost:7030/activities/fields',
 };

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -18,6 +18,7 @@ import { DepartmentService } from '../../../system/department/department.service
 import { Department } from '../../../system/department/department.model';
 import { EmployeeDepartmentDTO } from 'src/app/system/salary/salary.model';
 import { tap, forkJoin, catchError, of, map, Observable } from 'rxjs';
+import { ActivityRegistrationComponent } from '../activity-registration/activity-registration.component';
 
 @Component({
   selector: 'app-activity-list',
@@ -93,7 +94,8 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
     private authService: AuthenticationService,
     private fb: FormBuilder,
     private http: HttpClient,
-    private departmentService: DepartmentService
+    private departmentService: DepartmentService,
+    private router: Router
   ) {
     this.isAdmin = this.authService.isAdmin();
     this.currentUserId = this.authService.getCurrentUserId();
@@ -264,6 +266,9 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
               // Gọi API để lấy danh sách hoạt động với danh sách nhân viên đã lọc
               this.activityService.getActivities(params).subscribe({
                 next: (activities) => {
+
+                  
+                  console.log('🔍 ZZZZZZZZZZZZZZZZZZDanh sách hoạt động đã nhận được:', activities);
                   // Map dữ liệu nhận được để hiển thị lên giao diện
                   const mappedActivities = activities.map(activity => {
                     // Tìm thông tin nhân viên từ employeeId
@@ -285,12 +290,24 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
                     let taskName = '';
                     let reason = '';
                     let estimatedHours = 0;
+                    
+                    if (activity.startTime && activity.endTime) {
+                      const startTime = new Date(activity.startTime);
+                      const endTime = new Date(activity.endTime);
+                      const diffMs = endTime.getTime() - startTime.getTime();
+                      // Chuyển đổi từ mili giây sang giờ và làm tròn đến 2 chữ số thập phân
+                      estimatedHours = Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
+                    }
+                    
                     if (activity.requestFlds) {
                       try {
                         const requestFldsObj = JSON.parse(activity.requestFlds);
                         taskName = requestFldsObj.TaskName || '';
                         reason = requestFldsObj.TaskName || '';
-                        estimatedHours = requestFldsObj.EstimatedHours || 0;
+                        // Sử dụng estimatedHours từ requestFlds nếu có, nếu không sử dụng giá trị đã tính
+                        if (requestFldsObj.estimatedHours) {
+                          estimatedHours = requestFldsObj.estimatedHours.value || estimatedHours;
+                        }
                       } catch (e) {
                         console.error('Lỗi khi parse requestFlds:', e);
                       }
@@ -362,12 +379,25 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
               let taskName = '';
               let reason = '';
               let estimatedHours = 0;
+              
+              // Tính toán estimatedHours từ startTime và endTime
+              if (activity.startTime && activity.endTime) {
+                const startTime = new Date(activity.startTime);
+                const endTime = new Date(activity.endTime);
+                const diffMs = endTime.getTime() - startTime.getTime();
+                // Chuyển đổi từ mili giây sang giờ và làm tròn đến 2 chữ số thập phân
+                estimatedHours = Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
+              }
+              
               if (activity.requestFlds) {
                 try {
                   const requestFldsObj = JSON.parse(activity.requestFlds);
                   taskName = requestFldsObj.TaskName || '';
                   reason = requestFldsObj.TaskName || '';
-                  estimatedHours = requestFldsObj.EstimatedHours || 0;
+                  // Sử dụng estimatedHours từ requestFlds nếu có, nếu không sử dụng giá trị đã tính
+                  if (requestFldsObj.estimatedHours) {
+                    estimatedHours = requestFldsObj.estimatedHours.value || estimatedHours;
+                  }
                 } catch (e) {
                   console.error('Lỗi khi parse requestFlds:', e);
                 }
@@ -895,15 +925,27 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
 
   // Phương thức lấy class cho trạng thái
   getStatusClass(status: string): string {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return 'badge bg-warning';
-      case 'APPROVED':
-        return 'badge bg-success';
-      case 'REJECTED':
-        return 'badge bg-danger';
-      default:
-        return 'badge bg-secondary';
-    }
+    if (!status) return '';
+    
+    const upperStatus = status.toUpperCase();
+    return upperStatus === 'PENDING' ? 'badge bg-warning' :
+           upperStatus === 'APPROVED' ? 'badge bg-success' :
+           upperStatus === 'REJECTED' ? 'badge bg-danger' : '';
+  }
+
+  showActivityTypeSelector(): void {
+    const dialogRef = this.dialog.open(ActivityRegistrationComponent, {
+      width: '800px',
+      height: '80%',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Refresh activities after successful registration
+        this.loadActivities();
+        this.loadPersonalActivities();
+      }
+    });
   }
 } 

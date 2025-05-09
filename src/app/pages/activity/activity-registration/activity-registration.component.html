@@ -1,65 +1,93 @@
-<div class="container">
-  <div class="card">
-    <h2 class="card-title">
-      {{ registrationType === 'leave' ? 'Đăng ký nghỉ phép' : 'Đăng ký làm việc từ xa' }}
-    </h2>
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2>Đăng ký hoạt động</h2>
+    <button mat-icon-button (click)="onBack()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
+  <div class="dialog-content">
     <div *ngIf="isLoading" class="spinner-container">
       <mat-spinner></mat-spinner>
-      <p>Đang tải form đăng ký...</p>
+      <p>Đang tải...</p>
     </div>
 
-    <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="form-field" *ngFor="let field of formFields">
+    <div *ngIf="!isLoading && !selectedActivity">
+      <div class="activity-selector mb-4">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ field.label }}</mat-label>
-          <input
-            *ngIf="field.type === 'text' || field.type === 'number' || field.type === 'date' || field.type === 'time'"
-            matInput
-            [type]="field.type"
-            [formControlName]="field.name"
-            [required]="field.required"
-          />
-          <mat-select
-            *ngIf="field.type === 'select'"
-            [formControlName]="field.name"
-            [required]="field.required"
-          >
-            <mat-option *ngFor="let option of field.options" [value]="option.value">
+          <mat-label>Chọn loại hoạt động</mat-label>
+          <mat-select [(ngModel)]="selectedActivityId" (selectionChange)="onActivityTypeChange()">
+            <mat-option *ngFor="let activity of activityTypes" [value]="activity.activityId">
+              {{ activity.activityDescription }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <form *ngIf="!isLoading && selectedActivity" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="activity-info mb-4">
+        <h3>{{ selectedActivity.activityDescription }}</h3>
+        <p class="text-muted">{{ selectedActivity.activityType }}</p>
+      </div>
+
+      <!-- Standard date fields -->
+      <div class="row">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Thời gian bắt đầu</mat-label>
+            <input matInput [matDatepicker]="startTimePicker" formControlName="startTime" (dateChange)="updateDateTime('start')">
+            <mat-datepicker-toggle matSuffix [for]="startTimePicker"></mat-datepicker-toggle>
+            <mat-datepicker #startTimePicker></mat-datepicker>
+          </mat-form-field>
+          <div class="time-input">
+            <label>Giờ bắt đầu:</label>
+            <input type="time" class="form-control" (change)="updateDateTime('start')" [(ngModel)]="startTimeInput" [ngModelOptions]="{standalone: true}">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Thời gian kết thúc</mat-label>
+            <input matInput [matDatepicker]="endTimePicker" formControlName="endTime" (dateChange)="updateDateTime('end')">
+            <mat-datepicker-toggle matSuffix [for]="endTimePicker"></mat-datepicker-toggle>
+            <mat-datepicker #endTimePicker></mat-datepicker>
+          </mat-form-field>
+          <div class="time-input">
+            <label>Giờ kết thúc:</label>
+            <input type="time" class="form-control" (change)="updateDateTime('end')" [(ngModel)]="endTimeInput" [ngModelOptions]="{standalone: true}">
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic fields from server -->
+      <div class="form-field" *ngFor="let field of formFields">
+        <!-- Text input -->
+        <mat-form-field appearance="outline" class="full-width" *ngIf="field.fieldType === 'Text'">
+          <mat-label>{{ field.fieldName }}</mat-label>
+          <input matInput [formControlName]="field.fieldId" type="text">
+        </mat-form-field>
+        
+        <!-- DateTime input -->
+        <mat-form-field appearance="outline" class="full-width" *ngIf="field.fieldType === 'DateTime'">
+          <mat-label>{{ field.fieldName }}</mat-label>
+          <input matInput [matDatepicker]="fieldDatePicker" [formControlName]="field.fieldId">
+          <mat-datepicker-toggle matSuffix [for]="fieldDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #fieldDatePicker></mat-datepicker>
+        </mat-form-field>
+        
+        <!-- ComboBox input -->
+        <mat-form-field appearance="outline" class="full-width" *ngIf="field.fieldType === 'ComboBox'">
+          <mat-label>{{ field.fieldName }}</mat-label>
+          <mat-select [formControlName]="field.fieldId">
+            <mat-option *ngFor="let option of getFieldOptions(field)" [value]="option.value">
               {{ option.label }}
             </mat-option>
           </mat-select>
-          <textarea
-            *ngIf="field.type === 'textarea'"
-            matInput
-            [formControlName]="field.name"
-            [required]="field.required"
-            rows="4"
-          ></textarea>
-          <mat-checkbox
-            *ngIf="field.type === 'checkbox'"
-            [formControlName]="field.name"
-            [required]="field.required"
-          >
-            {{ field.label }}
-          </mat-checkbox>
-          <mat-radio-group
-            *ngIf="field.type === 'radio'"
-            [formControlName]="field.name"
-            [required]="field.required"
-          >
-            <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
-              {{ option.label }}
-            </mat-radio-button>
-          </mat-radio-group>
         </mat-form-field>
-        <mat-error *ngIf="form.get(field.name)?.hasError('required')">
-          {{ field.label }} là bắt buộc
-        </mat-error>
       </div>
 
-      <div class="button-container">
-        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || isLoading">
+      <div class="dialog-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting">
           Gửi đăng ký
         </button>
         <button mat-button type="button" (click)="onBack()">Quay lại</button>
