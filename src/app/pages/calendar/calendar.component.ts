@@ -14,6 +14,8 @@ import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { HttpClient } from '@angular/common/http';
 
 import Swal from 'sweetalert2';
+// For tooltips
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-calendar',
@@ -68,6 +70,65 @@ export class CalendarComponent implements OnInit {
       minute: '2-digit',
       meridiem: false,
       hour12: true
+    },
+    eventDidMount: (info) => {
+      // Add tooltip when hovering over events
+      const activity = info.event.extendedProps?.activityData;
+      if (activity) {
+        // Format dates for tooltip
+        const startTime = new Date(activity.startTime).toLocaleString();
+        const endTime = new Date(activity.endTime).toLocaleString();
+        
+        // Parse requestFlds to show all fields
+        let fieldsHtml = '';
+        if (activity.requestFlds) {
+          try {
+            const requestFldsObj = JSON.parse(activity.requestFlds);
+            // Handle different structures of requestFlds
+            Object.entries(requestFldsObj).forEach(([key, field]: [string, any]) => {
+              // Handle the case where field has fieldName and value properties
+              if (field && typeof field === 'object' && 'fieldName' in field && 'value' in field) {
+                fieldsHtml += `<div><strong>${field.fieldName}:</strong> ${field.value}</div>`;
+              } 
+              // Handle the case where the key itself is a field name
+              else if (typeof field !== 'object' || (typeof field === 'object' && !('fieldName' in field))) {
+                fieldsHtml += `<div><strong>${key}:</strong> ${field}</div>`;
+              }
+            });
+          } catch (e) {
+            console.error('Error parsing requestFlds for tooltip:', e);
+          }
+        }
+        
+        // Create tooltip content
+        const tooltipContent = `
+          <div class="tooltip-content">
+            <div><strong>Start:</strong> ${startTime}</div>
+            <div><strong>End:</strong> ${endTime}</div>
+            ${fieldsHtml}
+          </div>
+        `;
+        
+        // Try using Bootstrap tooltips if available
+        try {
+          if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+            const tooltip = new bootstrap.Tooltip(info.el, {
+              title: tooltipContent,
+              html: true,
+              placement: 'top',
+              trigger: 'hover',
+              container: 'body'
+            });
+          } else {
+            // Fallback to basic title attribute
+            info.el.title = `Start: ${startTime} | End: ${endTime}`;
+          }
+        } catch (error) {
+          console.error('Error creating tooltip:', error);
+          // Fallback to basic title attribute
+          info.el.title = `Start: ${startTime} | End: ${endTime}`;
+        }
+      }
     }
   };
   currentEvents: EventApi[] = [];
@@ -320,13 +381,23 @@ export class CalendarComponent implements OnInit {
                 if (activity.requestFlds) {
                   try {
                     const requestFldsObj = JSON.parse(activity.requestFlds);
-                    // Look for any field that might contain task information
+                    // First try to find TaskName or Lý do field
                     const taskField = Object.values(requestFldsObj).find((field: any) => 
-                      field.fieldName === 'TaskName' || field.fieldName === 'Lý do' || field.fieldType === 'Text'
+                      field && typeof field === 'object' && 
+                      'fieldName' in field && 
+                      (field.fieldName === 'TaskName' || field.fieldName === 'Lý do' || field.fieldName === 'Nội dung' || field.fieldType === 'Text')
                     );
                     
                     if (taskField && typeof taskField === 'object' && 'value' in taskField) {
                       taskName = (taskField.value as string) || '';
+                    } 
+                    // If no taskField found, try direct properties
+                    else if (requestFldsObj['TaskName']) {
+                      taskName = requestFldsObj['TaskName'];
+                    } else if (requestFldsObj['Lý do']) {
+                      taskName = requestFldsObj['Lý do'];
+                    } else if (requestFldsObj['Nội dung']) {
+                      taskName = requestFldsObj['Nội dung'];
                     }
                   } catch (e) {
                     console.error('Error parsing requestFlds:', e);

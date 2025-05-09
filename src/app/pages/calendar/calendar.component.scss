@@ -1,0 +1,32 @@
+/* Custom tooltip styling */
+.tooltip-content {
+  text-align: left;
+  font-size: 12px;
+  max-width: 300px;
+}
+
+.tooltip-content div {
+  margin-bottom: 4px;
+}
+
+/* Make the tooltip wider and more readable */
+.tooltip-inner {
+  max-width: 300px !important;
+  padding: 10px !important;
+  background-color: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Make calendar events more visible */
+.fc-event {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.fc-event-title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
