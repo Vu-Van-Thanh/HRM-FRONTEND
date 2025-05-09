@@ -156,6 +156,7 @@ export class AttendanceFormComponent implements OnInit {
   onSubmit(): void {
     if (this.attendanceForm.valid) {
       // Find the project by name to get the projectId
+     
       const projectName = this.attendanceForm.get('project')?.value;
       const selectedProject = this.projects.find(p => p.name === projectName);
       
@@ -164,12 +165,59 @@ export class AttendanceFormComponent implements OnInit {
         ...formValue,
         projectId: selectedProject?.projectId || ''
       };
-      
-      this.toastService.success('Attendance saved successfully!');
-      this.dialogRef.close(result);
+      const currentUserProfileRaw = localStorage.getItem('currentUserProfile');
+      const currentUserProfile = JSON.parse(currentUserProfileRaw);
+      let currentUserId = '';
+      if (currentUserProfile.employeeID) {
+        currentUserId = currentUserProfile.employeeID;
+      }
+
+      console.log('Date Arrange:', formValue.checkIn, formValue.checkOut, formValue.date);
+      console.log('Project Name:', this.attendanceForm.get('project')?.value);
+      console.log('Project ID:', selectedProject?.projectId);
+      const attendance = {
+        EmployeeId: currentUserId,
+        projectId: selectedProject?.projectId || '',
+        position: formValue.activity,
+        description: formValue.description,
+        AttendanceDate: formValue.date,
+        Starttime: this.formatTime(formValue.checkIn, formValue.date),
+        Endtime: this.formatTime(formValue.checkOut, formValue.date),
+        Status: 'PENDING',
+
+      }
+      console.log('Attendance data post:', attendance);
+      this.http.post(API_ENDPOINT.createAttendance, attendance).subscribe(response => {
+        console.log('Attendance created:', response);
+        this.toastService.success('Attendance saved successfully!');
+        this.dialogRef.close(result);
+      }, error => {
+        console.error('Error creating attendance:', error);
+        this.toastService.error('Failed to create attendance');
+      });
     }
   }
-
+ formatTime(timeStr: string, dateStr: string): string {
+    const [time, modifier] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+  
+    if (modifier === 'PM' && hours < 12) hours += 12;
+    if (modifier === 'AM' && hours === 12) hours = 0;
+  
+    const date = new Date(dateStr);
+    date.setHours(hours, minutes, 0, 0);
+  
+    // Trả về dạng YYYY-MM-DDTHH:mm:ss (local time, không có Z)
+    const yyyy = date.getFullYear();
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    const hh = date.getHours().toString().padStart(2, '0');
+    const min = date.getMinutes().toString().padStart(2, '0');
+    const ss = '00';
+  
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+  }
+  
   onCancel(): void {
     this.dialogRef.close();
   }

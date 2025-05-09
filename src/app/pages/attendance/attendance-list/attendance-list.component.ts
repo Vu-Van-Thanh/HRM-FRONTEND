@@ -498,8 +498,8 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   loadData(): void {
-    this.loadPersonalTimesheets();
     this.loadProjects();
+    this.loadPersonalTimesheets();
     this.loadApprovalTimesheets();
   }
 
