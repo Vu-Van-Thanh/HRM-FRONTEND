@@ -5,7 +5,7 @@
     <mat-tab label="Khai công cá nhân">
       <!-- Action bar with filters -->
       <div class="action-bar">
-        <div class="filter-section">
+        <div class="filter-section" [formGroup]="dateRange">
           <!-- Date filters -->
           <div class="date-time-filters">
             <mat-form-field appearance="outline">
@@ -52,6 +52,17 @@
                 <mat-option [value]="">All Positions</mat-option>
                 <mat-option *ngFor="let position of positions" [value]="position">
                   {{position}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <!-- Status filter -->
+            <mat-form-field appearance="outline">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                <mat-option [value]="">All Statuses</mat-option>
+                <mat-option *ngFor="let status of statusOptions" [value]="status">
+                  {{status}}
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -145,7 +156,9 @@
               <ng-container matColumnDef="approved">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Approved</th>
                 <td mat-cell *matCellDef="let row">
-                  <mat-icon *ngIf="row.approved" color="primary">check_circle</mat-icon>
+                  <mat-icon *ngIf="row.status?.includes('Đã duyệt') || row.status?.toLowerCase().includes('APPROVED')" color="primary">check_circle</mat-icon>
+                  <mat-icon *ngIf="row.status?.includes('Chờ duyệt') || row.status?.toLowerCase().includes('PENDING')" color="accent">help</mat-icon>
+                  <mat-icon *ngIf="row.status?.includes('Từ chối') || row.status?.toLowerCase().includes('REJECTED')" color="warn">cancel</mat-icon>
                 </td>
               </ng-container>
 
@@ -260,47 +273,91 @@
     <mat-tab label="Duyệt khai công">
       <div class="approval-container">
         <!-- Filters -->
-        <div class="filter-section">
-          <mat-form-field class="department-filter">
-            <mat-label>Phòng ban</mat-label>
-            <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onDepartmentChange()">
-              <mat-option [value]="null">Tất cả</mat-option>
-              <mat-option *ngFor="let dept of departments" [value]="dept.id">
-                {{dept.name}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+        <div class="filter-section" [formGroup]="approvalFilters">
+          <!-- Date and Time filters -->
+          <div class="date-time-filters">
+            <mat-form-field appearance="outline">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="approvalStartPicker" formControlName="start">
+              <mat-datepicker-toggle matSuffix [for]="approvalStartPicker"></mat-datepicker-toggle>
+              <mat-datepicker #approvalStartPicker></mat-datepicker>
+            </mat-form-field>
 
-          <mat-form-field class="employee-filter">
-            <mat-label>Mã nhân viên</mat-label>
-            <input matInput [(ngModel)]="employeeFilter" (keyup)="onEmployeeFilterChange()" placeholder="Nhập mã nhân viên">
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>End Date</mat-label>
+              <input matInput [matDatepicker]="approvalEndPicker" formControlName="end">
+              <mat-datepicker-toggle matSuffix [for]="approvalEndPicker"></mat-datepicker-toggle>
+              <mat-datepicker #approvalEndPicker></mat-datepicker>
+            </mat-form-field>
+            
+            <!-- Time filters -->
+            <mat-form-field appearance="outline">
+              <mat-label>Start Time</mat-label>
+              <input matInput type="time" formControlName="startTime">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>End Time</mat-label>
+              <input matInput type="time" formControlName="endTime">
+            </mat-form-field>
+          </div>
+          
+          <!-- Additional filters -->
+          <div class="additional-filters">
+            <mat-form-field class="department-filter">
+              <mat-label>Phòng ban</mat-label>
+              <mat-select formControlName="departmentId">
+                <mat-option [value]="null">Tất cả</mat-option>
+                <mat-option *ngFor="let dept of departments" [value]="dept.id">
+                  {{dept.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
-          <mat-form-field class="month-filter">
-            <mat-label>Tháng</mat-label>
-            <mat-select [(ngModel)]="selectedMonth" (selectionChange)="onMonthChange()">
-              <mat-option [value]="null">Tất cả</mat-option>
-              <mat-option *ngFor="let month of months" [value]="month.value">
-                {{month.label}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field class="employee-filter">
+              <mat-label>Mã nhân viên</mat-label>
+              <input matInput formControlName="employeeFilter" placeholder="Nhập mã nhân viên">
+            </mat-form-field>
 
-          <mat-form-field class="status-filter">
-            <mat-label>Trạng thái</mat-label>
-            <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onStatusChange()">
-              <mat-option [value]="null">Tất cả</mat-option>
-              <mat-option value="pending">Chờ duyệt</mat-option>
-              <mat-option value="approved">Đã duyệt</mat-option>
-              <mat-option value="rejected">Từ chối</mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field class="month-filter">
+              <mat-label>Tháng</mat-label>
+              <mat-select formControlName="month">
+                <mat-option [value]="null">Tất cả</mat-option>
+                <mat-option *ngFor="let month of months" [value]="month.value">
+                  {{month.label}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="status-filter">
+              <mat-label>Trạng thái</mat-label>
+              <mat-select formControlName="status">
+                <mat-option [value]="null">Tất cả</mat-option>
+                <mat-option value="PENDING">Chờ duyệt</mat-option>
+                <mat-option value="APPROVED">Đã duyệt</mat-option>
+                <mat-option value="REJECTED">Từ chối</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          
+          <!-- Reset button -->
+          <div class="filter-actions">
+            <button mat-button color="warn" (click)="resetApprovalFilters()" class="reset-button">
+              <mat-icon>clear</mat-icon> Reset Filters
+            </button>
+          </div>
         </div>
 
         <!-- Approval Table -->
         <div class="table-section">
           <div class="table-container mat-elevation-z8">
             <table mat-table [dataSource]="approvalDataSource" matSort>
+              <!-- Date Column -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Ngày</th>
+                <td mat-cell *matCellDef="let row">{{row.date | date:'dd/MM/yyyy'}}</td>
+              </ng-container>
+
               <!-- Employee Column -->
               <ng-container matColumnDef="employee">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Nhân viên</th>
@@ -313,10 +370,16 @@
                 <td mat-cell *matCellDef="let row">{{row.department}}</td>
               </ng-container>
 
-              <!-- Date Column -->
-              <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Ngày</th>
-                <td mat-cell *matCellDef="let row">{{row.date | date:'dd/MM/yyyy'}}</td>
+              <!-- Check In Column -->
+              <ng-container matColumnDef="checkIn">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>In</th>
+                <td mat-cell *matCellDef="let row">{{row.checkIn}}</td>
+              </ng-container>
+
+              <!-- Check Out Column -->
+              <ng-container matColumnDef="checkOut">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Out</th>
+                <td mat-cell *matCellDef="let row">{{row.checkOut}}</td>
               </ng-container>
 
               <!-- Hours Column -->
@@ -333,7 +396,7 @@
 
               <!-- Activity Column -->
               <ng-container matColumnDef="activity">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Hoạt động</th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Vị trí</th>
                 <td mat-cell *matCellDef="let row">{{row.activity}}</td>
               </ng-container>
 

@@ -106,6 +106,15 @@ export interface AttendanceFilterDTO {
   ProjectId?: string;
   Position?: string;
   EmployeeIDList?: string;
+  Status?: string;
+}
+
+// Add a new interface for employee response
+export interface EmployeeResponse {
+  employeeId: string;
+  employeeName?: string;
+  departmentId?: string;
+  managerId?: string;
 }
 
 @Component({
@@ -144,13 +153,13 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
   // Approval timesheet
   approvalDisplayedColumns: string[] = [
-    'employee', 'department', 'date', 'hours',
+    'date', 'employee', 'department', 'checkIn', 'checkOut', 'hours',
     'project', 'activity', 'description', 'status', 'actions'
   ];
   approvalDataSource: MatTableDataSource<ApprovalTimesheet>;
   
   selectedDepartment: number | null = null;
-  selectedStatus: string = 'all';
+  selectedStatus: string = '';
   selectedMonth: number = new Date().getMonth() + 1;
 
   departments: Department[] = [
@@ -195,6 +204,16 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   // Add this property to handle debounce
   private filterTimeout: any;
 
+  // Add this property for the personal tab status filter
+  selectedPersonalStatus: string | null = null;
+  statusOptions: string[] = ['Chờ duyệt', 'Đã duyệt', 'Từ chối'];
+
+  // Add property for manager's employees
+  managerEmployeeIds: string[] = [];
+
+  // Form group for approval tab filters
+  approvalFilters: FormGroup;
+
   constructor(
     private dialog: MatDialog,
     private router: Router,
@@ -208,12 +227,30 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       startTime: [null],
       endTime: [null],
       projectId: [null],
-      position: [null]
+      position: [null],
+      status: [null]
+    });
+
+    // Initialize approval filters form group
+    this.approvalFilters = this.fb.group({
+      start: [null],
+      end: [null],
+      startTime: [null],
+      endTime: [null],
+      departmentId: [this.selectedDepartment],
+      status: [this.selectedStatus],
+      month: [this.selectedMonth],
+      employeeFilter: ['']
     });
 
     // Subscribe to date range changes
     this.dateRange.valueChanges.subscribe(() => {
       this.onDateRangeChange();
+    });
+
+    // Subscribe to approval filters changes
+    this.approvalFilters.valueChanges.subscribe(() => {
+      this.onApprovalFiltersChange();
     });
 
     // Initialize mock data with correct Project structure
@@ -455,7 +492,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
   loadPersonalTimesheets(): void {
     const filterParams: AttendanceFilterDTO = {};
-        const currentUserProfileRaw = localStorage.getItem('currentUserProfile');
+    const currentUserProfileRaw = localStorage.getItem('currentUserProfile');
     let employeeID = '';
     if (currentUserProfileRaw) {
       try {
@@ -467,10 +504,10 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
         console.error('Error parsing currentUserProfile from localStorage:', error);
       }
     }
-        if (employeeID) {
+    if (employeeID) {
       filterParams.EmployeeIDList = employeeID;
     }
-        const formValues = this.dateRange.value;
+    const formValues = this.dateRange.value;
     if (formValues.start) {
       filterParams.StartDate = new Date(formValues.start).toISOString();
     }
@@ -495,6 +532,14 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
     } else if (this.selectedPosition) {
       filterParams.Position = this.selectedPosition;
     }
+    
+    // Add status filter
+    if (formValues.status) {
+      filterParams.Status = formValues.status;
+    } else if (this.selectedPersonalStatus) {
+      filterParams.Status = this.selectedPersonalStatus;
+    }
+    
     this.http.get<AttendanceResponse[]>(API_ENDPOINT.getAllAttendace, { params: filterParams as any })
       .pipe(
         map(responses => this.mapAttendanceResponseToTimesheet(responses)),
@@ -531,6 +576,20 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
   // New function to map API response to the Timesheet format
   private mapAttendanceResponseToTimesheet(responses: AttendanceResponse[]): Timesheet[] {
+    // Get current user from localStorage
+    let currentUserFullName = '';
+    const currentUserRaw = localStorage.getItem('currentUser');
+    if (currentUserRaw) {
+      try {
+        const currentUser = JSON.parse(currentUserRaw);
+        if (currentUser.FullName) {
+          currentUserFullName = currentUser.FullName;
+        }
+      } catch (error) {
+        console.error('Error parsing currentUser from localStorage:', error);
+      }
+    }
+
     return responses.map((attendance, index) => {
       // Calculate hours between start and end time
       const startTime = new Date(attendance.starttime);
@@ -559,7 +618,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
         projectName: projectName, // Store name for display
         activity: activityName, // Use position as activity name
         description: attendance.description,
-        username: attendance.employeeId, // Will need to fetch employee name from employee service
+        username: currentUserFullName, // Use the FullName from currentUser in localStorage
         status: statusDisplay,
         approved: attendance.status?.toLowerCase() === 'approved' ? 1 : 0,
         cleared: attendance.status?.toLowerCase() === 'approved' ? parseFloat(hours.toFixed(2)) : 0
@@ -568,8 +627,155 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   loadApprovalTimesheets(): void {
-    // TODO: Call API to load approval timesheets
-    // For now, we're using mock data initialized in constructor
+    // First get the current user's employeeID to use as managerId
+    const currentUserProfileRaw = localStorage.getItem('currentUserProfile');
+    let managerId = '';
+    
+    if (currentUserProfileRaw) {
+      try {
+        const currentUserProfile = JSON.parse(currentUserProfileRaw);
+        if (currentUserProfile.employeeID) {
+          managerId = currentUserProfile.employeeID;
+        }
+      } catch (error) {
+        console.error('Error parsing currentUserProfile from localStorage:', error);
+      }
+    }
+    
+    if (!managerId) {
+      console.error('Manager ID not found');
+      return;
+    }
+    
+    const employeeParams: any = {
+      ManagerId: managerId
+    };
+    
+    if (this.selectedDepartment) {
+      employeeParams.Department = this.selectedDepartment;
+    }
+    this.http.get<EmployeeResponse[]>(API_ENDPOINT.getEmployeeID, { params: employeeParams })
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching employees by manager:', error);
+          this.toastService.error('Failed to load employees under management');
+          return of([]);
+        })
+      )
+      .subscribe(employees => {
+        // Extract employee IDs
+        this.managerEmployeeIds = employees.map(emp => emp.employeeID);
+        if (this.managerEmployeeIds.length === 0) {
+          console.log('No employees found under this manager');
+          this.approvalDataSource.data = [];
+          return;
+        }
+        
+        // Now fetch attendance for these employees
+        this.fetchAttendanceForApproval();
+      });
+  }
+  
+  fetchAttendanceForApproval(): void {
+    // Prepare attendance filter params
+    const attendanceParams: AttendanceFilterDTO = {
+      EmployeeIDList: this.managerEmployeeIds.join(',')
+    };
+    
+    // Get form values
+    const formValues = this.approvalFilters.value;
+    
+    // Add date filters if selected
+    if (formValues.start) {
+      attendanceParams.StartDate = new Date(formValues.start).toISOString();
+    }
+    
+    if (formValues.end) {
+      attendanceParams.EndDate = new Date(formValues.end).toISOString();
+    }
+    
+    // Add time filters if selected
+    if (formValues.startTime) {
+      attendanceParams.Starttime = formValues.startTime;
+    }
+    
+    if (formValues.endTime) {
+      attendanceParams.Endtime = formValues.endTime;
+    }
+    
+    // Add month filter if selected and no specific dates
+    if (!formValues.start && !formValues.end && formValues.month) {
+      const year = new Date().getFullYear();
+      const month = formValues.month - 1; // JS months are 0-based
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      
+      attendanceParams.StartDate = firstDay.toISOString();
+      attendanceParams.EndDate = lastDay.toISOString();
+    }
+    
+    // Add status filter if selected
+    if (formValues.status) {
+      attendanceParams.Status = formValues.status.toUpperCase();
+    }
+    
+    console.log('attendanceParams', attendanceParams);
+    // Fetch attendance data
+    this.http.get<AttendanceResponse[]>(API_ENDPOINT.getAllAttendace, { params: attendanceParams as any })
+      .pipe(
+        map(responses => this.mapAttendanceToApprovalTimesheets(responses)),
+        catchError(error => {
+          console.error('Error fetching attendance data for approval:', error);
+          this.toastService.error('Failed to load attendance data for approval');
+          return of([]);
+        })
+      )
+      .subscribe(timesheets => {
+        // Apply employee filter if specified
+        let filteredData = timesheets;
+        if (formValues.employeeFilter) {
+          const searchTerm = formValues.employeeFilter.toLowerCase();
+          filteredData = filteredData.filter(item => 
+            item.employeeName && item.employeeName.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        this.approvalDataSource.data = filteredData;
+      });
+  }
+  
+  // New method to map API responses to approval timesheets
+  private mapAttendanceToApprovalTimesheets(responses: AttendanceResponse[]): ApprovalTimesheet[] {
+    return responses.map((attendance, index) => {
+      // Calculate hours between start and end time
+      const startTime = new Date(attendance.starttime);
+      const endTime = new Date(attendance.endtime);
+      const hours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+      
+      // Find project name if project ID matches
+      const project = this.projects.find(p => p.projectId === attendance.projectId);
+      const projectName = project ? project.name : attendance.projectId;
+      
+      return {
+        id: index + 1,
+        employeeName: attendance.employeeId, // This should ideally be replaced with actual name
+        department: attendance.position || 'Not specified',
+        date: attendance.attendanceDate.split('T')[0],
+        checkIn: startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        checkOut: endTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        hours: parseFloat(hours.toFixed(2)),
+        total: parseFloat(hours.toFixed(2)),
+        customer: 'N/A',
+        project: attendance.projectId,
+        projectName: projectName,
+        activity: attendance.position || attendance.activityId || 'N/A',
+        description: attendance.description,
+        username: attendance.employeeId,
+        status: attendance.status?.toLowerCase() || 'pending',
+        approved: attendance.status?.toLowerCase() === 'approved' ? 1 : 0,
+        cleared: attendance.status?.toLowerCase() === 'approved' ? parseFloat(hours.toFixed(2)) : 0
+      };
+    });
   }
 
   onTabChange(index: number): void {
@@ -618,51 +824,56 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
   // Approval timesheet methods
   onDepartmentChange(): void {
-    this.filterApprovalTimesheets();
+    const currentValue = this.approvalFilters.get('departmentId')?.value;
+    this.approvalFilters.patchValue({ departmentId: this.selectedDepartment });
+    if (currentValue !== this.selectedDepartment) {
+      this.loadApprovalTimesheets();
+    }
   }
 
   onStatusChange(): void {
-    this.filterApprovalTimesheets();
+    const currentValue = this.approvalFilters.get('status')?.value;
+    this.approvalFilters.patchValue({ status: this.selectedStatus });
+    if (currentValue !== this.selectedStatus) {
+      this.loadApprovalTimesheets();
+    }
   }
 
   onMonthChange(): void {
-    this.filterApprovalTimesheets();
+    const currentValue = this.approvalFilters.get('month')?.value;
+    this.approvalFilters.patchValue({ month: this.selectedMonth });
+    if (currentValue !== this.selectedMonth) {
+      this.loadApprovalTimesheets();
+    }
   }
 
-  onEmployeeFilterChange() {
-    this.filterApprovalTimesheets();
+  onEmployeeFilterChange(): void {
+    const currentValue = this.approvalFilters.get('employeeFilter')?.value;
+    this.approvalFilters.patchValue({ employeeFilter: this.employeeFilter });
+    if (currentValue !== this.employeeFilter) {
+      this.loadApprovalTimesheets();
+    }
   }
-
-  filterApprovalTimesheets() {
-    let filteredData = [...this.approvalDataSource.data];
+  
+  // Reset approval filters
+  resetApprovalFilters(): void {
+    this.approvalFilters.reset({
+      start: null,
+      end: null,
+      startTime: null,
+      endTime: null,
+      departmentId: null,
+      status: null,
+      month: null,
+      employeeFilter: ''
+    });
     
-    // Filter by department
-    if (this.selectedDepartment) {
-      filteredData = filteredData.filter(item => item.department === this.departments.find(d => d.id === this.selectedDepartment)?.name);
-    }
+    this.selectedDepartment = null;
+    this.selectedStatus = '';
+    this.selectedMonth = new Date().getMonth() + 1;
+    this.employeeFilter = '';
     
-    // Filter by month
-    if (this.selectedMonth) {
-      filteredData = filteredData.filter(item => {
-        const itemDate = new Date(item.date);
-        return itemDate.getMonth() === this.selectedMonth - 1;
-      });
-    }
-    
-    // Filter by status
-    if (this.selectedStatus) {
-      filteredData = filteredData.filter(item => item.status === this.selectedStatus);
-    }
-    
-    // Filter by employee code
-    if (this.employeeFilter) {
-      const searchTerm = this.employeeFilter.toLowerCase();
-      filteredData = filteredData.filter(item => 
-        item.employeeName && item.employeeName.toLowerCase().includes(searchTerm)
-      );
-    }
-    
-    this.approvalDataSource.data = filteredData;
+    this.loadApprovalTimesheets();
   }
 
   approveTimesheet(row: ApprovalTimesheet): void {
@@ -697,11 +908,11 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   getStatusClass(status: string): string {
     if (!status) return '';
     
-    if (status.includes('Chờ duyệt') || status.toLowerCase().includes('pending')) {
+    if (status.includes('Chờ duyệt') || status.toLowerCase().includes('PENDING')) {
       return 'status-pending';
-    } else if (status.includes('Đã duyệt') || status.toLowerCase().includes('approved')) {
+    } else if (status.includes('Đã duyệt') || status.toLowerCase().includes('APPROVED')) {
       return 'status-approved';
-    } else if (status.includes('Từ chối') || status.toLowerCase().includes('rejected')) {
+    } else if (status.includes('Từ chối') || status.toLowerCase().includes('REJECTED')) {
       return 'status-rejected';
     }
     return '';
@@ -721,7 +932,58 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   calculateStatistics(timesheets: Timesheet[]): void {
-    // Implementation of calculateStatistics method
+    // Group by position/activity
+    const positionMap = new Map<string, { hours: number, count: number }>();
+    
+    // Process all timesheet entries
+    timesheets.forEach(timesheet => {
+      const position = timesheet.activity; // Use activity which contains position
+      const hours = timesheet.hours || 0;
+      
+      if (position) {
+        const current = positionMap.get(position) || { hours: 0, count: 0 };
+        positionMap.set(position, {
+          hours: current.hours + hours,
+          count: current.count + 1
+        });
+      }
+    });
+    
+    // Calculate total hours for percentage
+    const totalHours = Array.from(positionMap.values())
+      .reduce((sum, item) => sum + item.hours, 0);
+    
+    // Update activities array
+    this.activities = Array.from(positionMap.entries()).map(([name, data]) => {
+      return {
+        name,
+        hours: parseFloat(data.hours.toFixed(2)),
+        percentage: totalHours > 0 ? (data.hours / totalHours) * 100 : 0,
+        color: this.getPositionColor(name)
+      };
+    });
+    
+    // Sort by hours descending
+    this.activities.sort((a, b) => b.hours - a.hours);
+    
+    // Update filtered activities and totals
+    this.filteredActivities = [...this.activities];
+    this.totalHours = parseFloat(totalHours.toFixed(2));
+    this.totalActivities = this.activities.length;
+  }
+
+  // Helper method to assign colors to positions
+  getPositionColor(position: string): string {
+    const colors = ['primary', 'accent', 'warn'];
+    
+    // Create a simple hash of the position name to get consistent colors
+    let hash = 0;
+    for (let i = 0; i < position.length; i++) {
+      hash = position.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    // Use modulo to select a color from our array
+    return colors[Math.abs(hash % colors.length)];
   }
 
   calculateTotals() {
@@ -796,11 +1058,13 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       startTime: null,
       endTime: null,
       projectId: null,
-      position: null
+      position: null,
+      status: null
     });
     
     this.selectedProject = null;
     this.selectedPosition = null;
+    this.selectedPersonalStatus = null;
     this.loadPersonalTimesheets();
   }
 
@@ -845,5 +1109,30 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   selectPosition(position: string): void {
     this.selectedPosition = position;
     this.loadPersonalTimesheets();
+  }
+
+  // Add this method to handle status selection
+  selectStatus(status: string): void {
+    this.selectedPersonalStatus = status;
+    this.loadPersonalTimesheets();
+  }
+
+  // Add this method to handle approval filters changes
+  onApprovalFiltersChange(): void {
+    // Debounce the filter application to avoid too many API calls
+    if (this.filterTimeout) {
+      clearTimeout(this.filterTimeout);
+    }
+    
+    this.filterTimeout = setTimeout(() => {
+      // Update class variables from form values for backward compatibility
+      const formValues = this.approvalFilters.value;
+      this.selectedDepartment = formValues.departmentId;
+      this.selectedStatus = formValues.status;
+      this.selectedMonth = formValues.month;
+      this.employeeFilter = formValues.employeeFilter;
+      
+      this.loadApprovalTimesheets();
+    }, 500);
   }
 }
