@@ -1,7 +1,54 @@
 import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
-import { NgChartsModule } from 'ng2-charts';
+import { SalaryService } from 'src/app/services/salary.service';
+
+interface SalaryInfo {
+  employeeId: string;
+  salaryBase: {
+    salaryId: string;
+    baseIndex: number;
+    baseSalary: number;
+    effectiveDate: string;
+    createdAt: string | null;
+  };
+  adjustments: {
+    adjustmentId: string;
+    baseId: string;
+    adjustType: string;
+    adjustmentName: string;
+    amount: number;
+    percentage: number | null;
+    resultPercentage: number | null;
+    resultAmount: number;
+    result: any;
+  }[];
+}
+
+interface SalaryChange {
+  histId: string;
+  baseId: string;
+  oldSalary: number;
+  newSalary: number;
+  oldSalaryCoefficient: number;
+  newSalaryCoefficient: number;
+  reason: string;
+  createdAt: string;
+  effectiveDate: string;
+}
+
+interface SalaryPayment {
+  paymentId: string;
+  baseId: string;
+  baseSalary: number;
+  bonusAmount: number;
+  deductionAmount: number;
+  adjustmentAmount: number;
+  netSalary: number;
+  amount: number;
+  paymentDate: string;
+  createdAt: string;
+  status: string;
+}
 
 @Component({
   selector: 'app-salary',
@@ -9,52 +56,108 @@ import { NgChartsModule } from 'ng2-charts';
   styleUrls: ['./salary.component.scss']
 })
 export class SalaryComponent implements OnInit, AfterViewInit {
-  salaryHistory: any[] = [];
-  salaryDetails: any = {
-    basicSalary: 0,
-    allowances: 0,
-    deductions: 0,
-    netSalary: 0,
-    effectiveDate: new Date(),
-    status: 'Active'
-  };
+  // API data
+  salaryInfo: SalaryInfo | null = null;
+  salaryHistory: SalaryChange[] = [];
+  salaryPayments: SalaryPayment[] = [];
+  isLoading = true;
+  error: string | null = null;
+  
+  // Current employee
+  employeeId: string = '';
+  baseId: string = '';
+  
+  // Calculated data
+  totalBonuses = 0;
+  totalDeductions = 0;
+  totalOtherAdjustments = 0;
+  netSalary = 0;
+  bonusPercentage = 0;
+  deductionPercentage = 0;
+  otherAdjustmentsPercentage = 0;
+  
+  // UI data
+  bonusAdjustments: any[] = [];
+  deductionAdjustments: any[] = [];
+  otherAdjustments: any[] = [];
 
-  // Chart data
+  // Chart data for salary payments
   salaryChartData: ChartConfiguration<'line'>['data'] = {
-    datasets: [
-      {
-        data: [],
-        label: 'Lương cơ bản',
-        fill: true,
-        tension: 0.5,
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)'
-      },
-      {
-        data: [],
-        label: 'Lương thực lãnh',
-        fill: true,
-        tension: 0.5,
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)'
-      }
-    ],
-    labels: []
-  };
-
-  allowanceChartData: ChartConfiguration<'pie'>['data'] = {
     labels: [],
     datasets: [
       {
         data: [],
-        backgroundColor: [
-          'rgba(85, 110, 230, 0.8)',
-          'rgba(52, 195, 143, 0.8)',
-          'rgba(250, 92, 124, 0.8)',
-          'rgba(251, 188, 5, 0.8)',
-          'rgba(116, 97, 239, 0.8)'
-        ],
-        borderWidth: 1
+        label: 'Lương cơ bản',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        fill: false,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(75, 192, 192, 1)'
+      },
+      {
+        data: [],
+        label: 'Thưởng & Phụ cấp',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        fill: false,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+      },
+      {
+        data: [],
+        label: 'Khấu trừ',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        fill: false,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+      },
+      {
+        data: [],
+        label: 'Lương thực lãnh',
+        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+        borderColor: 'rgba(153, 102, 255, 1)',
+        fill: false,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(153, 102, 255, 1)'
+      }
+    ]
+  };
+
+  bonusChartData: ChartConfiguration<'bar'>['data'] = {
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        label: 'Thưởng cố định',
+        backgroundColor: 'rgba(52, 195, 143, 0.8)',
+        borderColor: 'rgba(52, 195, 143, 1)',
+        borderWidth: 1,
+        stack: 'stack0'
+      },
+      {
+        data: [],
+        label: 'Thưởng theo %',
+        backgroundColor: 'rgba(85, 110, 230, 0.8)',
+        borderColor: 'rgba(85, 110, 230, 1)',
+        borderWidth: 1,
+        stack: 'stack0'
       }
     ]
   };
@@ -64,81 +167,169 @@ export class SalaryComponent implements OnInit, AfterViewInit {
     datasets: [
       {
         data: [],
-        label: 'Số tiền khấu trừ',
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.8)',
-          'rgba(54, 162, 235, 0.8)',
-          'rgba(255, 206, 86, 0.8)',
-          'rgba(75, 192, 192, 0.8)',
-          'rgba(153, 102, 255, 0.8)'
-        ],
-        borderWidth: 1
+        label: 'Khấu trừ cố định',
+        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+        stack: 'stack0'
+      },
+      {
+        data: [],
+        label: 'Khấu trừ theo %',
+        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+        stack: 'stack0'
       }
     ]
   };
 
-  bonusChartData: ChartConfiguration<'doughnut'>['data'] = {
+  otherAdjustmentsChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
     datasets: [
       {
         data: [],
-        backgroundColor: [
-          'rgba(255, 159, 64, 0.8)',
-          'rgba(75, 192, 192, 0.8)',
-          'rgba(54, 162, 235, 0.8)',
-          'rgba(153, 102, 255, 0.8)',
-          'rgba(255, 99, 132, 0.8)'
-        ],
-        borderWidth: 1
+        label: 'Điều chỉnh cố định',
+        backgroundColor: 'rgba(153, 102, 255, 0.8)',
+        borderColor: 'rgba(153, 102, 255, 1)',
+        borderWidth: 1,
+        stack: 'stack0'
+      },
+      {
+        data: [],
+        label: 'Điều chỉnh theo %',
+        backgroundColor: 'rgba(255, 159, 64, 0.8)',
+        borderColor: 'rgba(255, 159, 64, 1)',
+        borderWidth: 1,
+        stack: 'stack0'
       }
     ]
   };
 
-  allowanceTypes = [
-    { name: 'Phụ cấp chức vụ', value: 500000, isPercentage: false, percentage: 0 },
-    { name: 'Phụ cấp thâm niên', value: 300000, isPercentage: false, percentage: 0 },
-    { name: 'Phụ cấp ăn trưa', value: 100000, isPercentage: false, percentage: 0 },
-    { name: 'Phụ cấp đi lại', value: 200000, isPercentage: false, percentage: 0 },
-    { name: 'Phụ cấp khác', value: 100000, isPercentage: false, percentage: 0 }
-  ];
+  salaryHistoryChartData: ChartConfiguration<'line'>['data'] = {
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        label: 'Lương cũ',
+        borderColor: 'rgba(75, 192, 192, 0.8)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(75, 192, 192, 1)'
+      },
+      {
+        data: [],
+        label: 'Lương mới',
+        borderColor: 'rgba(54, 162, 235, 0.8)',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+      }
+    ]
+  };
 
-  deductionTypes = [
-    { name: 'Bảo hiểm xã hội', value: 250000, isPercentage: true, percentage: 8 },
-    { name: 'Bảo hiểm y tế', value: 100000, isPercentage: true, percentage: 1.5 },
-    { name: 'Bảo hiểm thất nghiệp', value: 50000, isPercentage: true, percentage: 1 },
-    { name: 'Thuế thu nhập', value: 75000, isPercentage: true, percentage: 5 },
-    { name: 'Các khoản khác', value: 25000, isPercentage: false, percentage: 0 }
-  ];
-
-  bonusTypes = [
-    { name: 'Thưởng tháng 13', value: 5000000, isPercentage: false, percentage: 0 },
-    { name: 'Thưởng hiệu suất', value: 2000000, isPercentage: false, percentage: 0 },
-    { name: 'Thưởng dự án', value: 3000000, isPercentage: false, percentage: 0 },
-    { name: 'Thưởng đột xuất', value: 1000000, isPercentage: false, percentage: 0 },
-    { name: 'Thưởng khác', value: 500000, isPercentage: false, percentage: 0 }
-  ];
-
+  // Chart options
   lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
+    layout: {
+      padding: 10
+    },
     scales: {
-      y: {
-        beginAtZero: false,
+      x: {
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          lineWidth: 1
+        },
         ticks: {
+          font: {
+            size: 10
+          },
+          color: 'rgba(0, 0, 0, 0.7)',
+          maxRotation: 45,
+          minRotation: 45
+        }
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          lineWidth: 1
+        },
+        ticks: {
+          font: {
+            size: 10
+          },
+          color: 'rgba(0, 0, 0, 0.7)',
           callback: function(value) {
-            return value.toLocaleString() + ' VNĐ';
+            if (Number(value) >= 1000000) {
+              return (Number(value) / 1000000).toFixed(1) + 'M VNĐ';
+            } else if (Number(value) >= 1000) {
+              return (Number(value) / 1000).toFixed(0) + 'K VNĐ';
+            }
+            return value + ' VNĐ';
           }
         }
       }
     },
     plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+        labels: {
+          boxWidth: 12,
+          padding: 15,
+          font: {
+            size: 11
+          },
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 13,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 12
+        },
+        padding: 10,
+        cornerRadius: 5,
+        displayColors: true,
         callbacks: {
           label: function(context) {
-            return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' VNĐ';
+            return context.dataset.label + ': ' + Number(context.parsed.y).toLocaleString() + ' VNĐ';
           }
         }
       }
+    },
+    elements: {
+      line: {
+        tension: 0.4,
+        borderWidth: 2
+      },
+      point: {
+        radius: 4,
+        hitRadius: 10,
+        hoverRadius: 6
+      }
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    hover: {
+      mode: 'nearest',
+      intersect: true
+    },
+    animation: {
+      duration: 1000
     }
   };
 
@@ -147,8 +338,158 @@ export class SalaryComponent implements OnInit, AfterViewInit {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'bottom'
+        position: 'bottom',
+        display: true
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.parsed.toLocaleString() + ' VNĐ';
+            return label + ': ' + value;
+          }
+        }
       }
+    }
+  };
+
+  doughnutChartOptions: ChartOptions<'doughnut'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '65%',
+    layout: {
+      padding: 20
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        display: true,
+        labels: {
+          boxWidth: 12,
+          padding: 15,
+          font: {
+            size: 11
+          },
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 13,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 12
+        },
+        padding: 10,
+        cornerRadius: 5,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.parsed.toLocaleString() + ' VNĐ';
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = ((context.parsed / total) * 100).toFixed(1) + '%';
+            return `${label}: ${value} (${percentage})`;
+          }
+        }
+      }
+    },
+    animation: {
+      animateScale: true,
+      animateRotate: true,
+      duration: 1000
+    },
+    elements: {
+      arc: {
+        borderWidth: 2
+      }
+    }
+  };
+
+  polarAreaChartOptions: ChartOptions<'polarArea'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: 10
+    },
+    scales: {
+      r: {
+        ticks: {
+          backdropColor: 'rgba(255, 255, 255, 0.8)',
+          color: 'rgba(0, 0, 0, 0.7)',
+          font: {
+            size: 10
+          },
+          z: 1,
+          callback: function(value) {
+            const numValue = Number(value);
+            if (numValue >= 1000000) {
+              return (numValue / 1000000).toFixed(1) + 'M';
+            } else if (numValue >= 1000) {
+              return (numValue / 1000).toFixed(0) + 'K';
+            }
+            return value;
+          }
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        },
+        angleLines: {
+          color: 'rgba(0, 0, 0, 0.1)',
+          lineWidth: 1
+        },
+        pointLabels: {
+          font: {
+            size: 11
+          },
+          color: 'rgba(0, 0, 0, 0.7)'
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        display: true,
+        labels: {
+          boxWidth: 12,
+          padding: 15,
+          font: {
+            size: 11
+          },
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 13,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 12
+        },
+        padding: 10,
+        cornerRadius: 5,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = Number(context.raw).toLocaleString() + ' VNĐ';
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = ((Number(context.raw) / total) * 100).toFixed(1) + '%';
+            return `${label}: ${value} (${percentage})`;
+          }
+        }
+      }
+    },
+    animation: {
+      animateScale: true,
+      animateRotate: true,
+      duration: 1000
     }
   };
 
@@ -167,296 +508,920 @@ export class SalaryComponent implements OnInit, AfterViewInit {
     },
     plugins: {
       legend: {
-        display: false
+        display: true,
+        position: 'top'
       },
       tooltip: {
         callbacks: {
           label: function(context) {
-            return 'Số tiền: ' + context.parsed.y.toLocaleString() + ' VNĐ';
+            return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' VNĐ';
           }
         }
       }
     }
   };
 
-  doughnutChartOptions: ChartOptions<'doughnut'> = {
+  stackedBarChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
+    scales: {
+      x: {
+        stacked: true,
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        ticks: {
+          callback: function(value) {
+            return value.toLocaleString() + ' VNĐ';
+          }
+        }
+      }
+    },
     plugins: {
       legend: {
-        position: 'bottom'
+        display: true,
+        position: 'top'
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' VNĐ';
+          }
+        }
       }
     }
   };
 
-  // Thêm biến cho chức năng lọc theo tháng năm
-  selectedMonth: number = new Date().getMonth();
-  selectedYear: number = new Date().getFullYear();
-  availableMonths = [
-    { value: 0, label: 'Tháng 1' },
-    { value: 1, label: 'Tháng 2' },
-    { value: 2, label: 'Tháng 3' },
-    { value: 3, label: 'Tháng 4' },
-    { value: 4, label: 'Tháng 5' },
-    { value: 5, label: 'Tháng 6' },
-    { value: 6, label: 'Tháng 7' },
-    { value: 7, label: 'Tháng 8' },
-    { value: 8, label: 'Tháng 9' },
-    { value: 9, label: 'Tháng 10' },
-    { value: 10, label: 'Tháng 11' },
-    { value: 11, label: 'Tháng 12' }
-  ];
-  availableYears: number[] = [];
+  radarChartOptions: ChartOptions<'radar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        angleLines: {
+          display: true,
+          color: 'rgba(0, 0, 0, 0.1)',
+          lineWidth: 1
+        },
+        suggestedMin: 0,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)',
+          circular: true
+        },
+        pointLabels: {
+          font: {
+            size: 11
+          },
+          color: 'rgba(0, 0, 0, 0.7)'
+        },
+        ticks: {
+          backdropColor: 'rgba(255, 255, 255, 0.8)',
+          color: 'rgba(0, 0, 0, 0.7)',
+          font: {
+            size: 10
+          },
+          callback: function(value: any) {
+            const numValue = Number(value);
+            if (numValue >= 1000000) {
+              return (numValue / 1000000).toFixed(1) + 'M';
+            } else if (numValue >= 1000) {
+              return (numValue / 1000).toFixed(0) + 'K';
+            }
+            return value;
+          }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 15,
+          padding: 15,
+          font: {
+            size: 11
+          },
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 13,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 12
+        },
+        padding: 10,
+        cornerRadius: 5,
+        callbacks: {
+          label: function(context) {
+            const numValue = Number(context.raw);
+            return context.dataset.label + ': ' + numValue.toLocaleString() + ' VNĐ';
+          }
+        }
+      }
+    },
+    elements: {
+      line: {
+        borderWidth: 2
+      },
+      point: {
+        radius: 4,
+        hitRadius: 10,
+        hoverRadius: 6
+      }
+    },
+    animation: {
+      duration: 1000
+    }
+  };
 
-  // Thêm biến cho bộ lọc thời gian
-  startMonth: number = 0;
-  startYear: number = 0;
-  endMonth: number = new Date().getMonth();
-  endYear: number = new Date().getFullYear();
-  filteredSalaryHistory: any[] = [];
+  stackedDeductionChartOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: 10
+    },
+    scales: {
+      x: {
+        stacked: true,
+        grid: {
+          display: false
+        },
+        ticks: {
+          font: {
+            size: 10
+          },
+          color: 'rgba(0, 0, 0, 0.7)'
+        }
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        },
+        ticks: {
+          font: {
+            size: 10
+          },
+          color: 'rgba(0, 0, 0, 0.7)',
+          callback: function(value) {
+            const numValue = Number(value);
+            if (numValue >= 1000000) {
+              return (numValue / 1000000).toFixed(1) + 'M';
+            } else if (numValue >= 1000) {
+              return (numValue / 1000).toFixed(0) + 'K';
+            }
+            return value;
+          }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          boxWidth: 12,
+          padding: 15,
+          font: {
+            size: 11
+          },
+          usePointStyle: true,
+          pointStyle: 'rect'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 13,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 12
+        },
+        padding: 10,
+        cornerRadius: 5,
+        callbacks: {
+          label: function(context) {
+            const label = context.dataset.label || '';
+            const value = Number(context.parsed.y).toLocaleString() + ' VNĐ';
+            return `${label}: ${value}`;
+          },
+          afterBody: function(context) {
+            const total = context[0].parsed._stacks.y[context[0].datasetIndex] + 
+                         (context[1] ? context[1].parsed._stacks.y[context[1].datasetIndex] : 0);
+            return [`Tổng: ${total.toLocaleString()} VNĐ`];
+          }
+        }
+      }
+    },
+    animation: {
+      duration: 1000
+    }
+  };
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  stackedBonusChartOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: 10
+    },
+    scales: {
+      x: {
+        stacked: true,
+        grid: {
+          display: false
+        },
+        ticks: {
+          font: {
+            size: 10
+          },
+          color: 'rgba(0, 0, 0, 0.7)'
+        }
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        },
+        ticks: {
+          font: {
+            size: 10
+          },
+          color: 'rgba(0, 0, 0, 0.7)',
+          callback: function(value) {
+            const numValue = Number(value);
+            if (numValue >= 1000000) {
+              return (numValue / 1000000).toFixed(1) + 'M';
+            } else if (numValue >= 1000) {
+              return (numValue / 1000).toFixed(0) + 'K';
+            }
+            return value;
+          }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          boxWidth: 12,
+          padding: 15,
+          font: {
+            size: 11
+          },
+          usePointStyle: true,
+          pointStyle: 'rect'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 13,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 12
+        },
+        padding: 10,
+        cornerRadius: 5,
+        callbacks: {
+          label: function(context) {
+            const label = context.dataset.label || '';
+            const value = Number(context.parsed.y).toLocaleString() + ' VNĐ';
+            return `${label}: ${value}`;
+          },
+          afterBody: function(context) {
+            const total = context[0].parsed._stacks.y[context[0].datasetIndex] + 
+                         (context[1] ? context[1].parsed._stacks.y[context[1].datasetIndex] : 0);
+            return [`Tổng: ${total.toLocaleString()} VNĐ`];
+          }
+        }
+      }
+    },
+    animation: {
+      duration: 1000
+    }
+  };
+
+  paymentChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: 10
+    },
+    scales: {
+      x: {
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          lineWidth: 1
+        },
+        ticks: {
+          font: {
+            size: 10
+          },
+          color: 'rgba(0, 0, 0, 0.7)',
+          maxRotation: 45,
+          minRotation: 45
+        }
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          lineWidth: 1
+        },
+        ticks: {
+          font: {
+            size: 10
+          },
+          color: 'rgba(0, 0, 0, 0.7)',
+          callback: function(value) {
+            if (Number(value) >= 1000000) {
+              return (Number(value) / 1000000).toFixed(1) + 'M VNĐ';
+            } else if (Number(value) >= 1000) {
+              return (Number(value) / 1000).toFixed(0) + 'K VNĐ';
+            }
+            return value + ' VNĐ';
+          }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+        labels: {
+          boxWidth: 12,
+          padding: 15,
+          font: {
+            size: 11
+          },
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 13,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 12
+        },
+        padding: 10,
+        cornerRadius: 5,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            return context.dataset.label + ': ' + Number(context.parsed.y).toLocaleString() + ' VNĐ';
+          }
+        }
+      }
+    },
+    elements: {
+      line: {
+        tension: 0.4,
+        borderWidth: 2
+      },
+      point: {
+        radius: 4,
+        hitRadius: 10,
+        hoverRadius: 6
+      }
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    hover: {
+      mode: 'nearest',
+      intersect: true
+    },
+    animation: {
+      duration: 1000
+    }
+  };
+
+  constructor(
+    private salaryService: SalaryService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
-    this.loadSalaryHistory();
-    this.loadSalaryDetails();
-    this.prepareChartData();
-    this.initializeYearOptions();
-    this.initializeDateRange();
-    this.filterSalaryHistory();
+    // Get current employee ID from localStorage
+    try {
+      const userProfileString = localStorage.getItem('currentUserProfile');
+      if (userProfileString) {
+        const userProfile = JSON.parse(userProfileString);
+        this.employeeId = userProfile.employeeID || '';
+      }
+    } catch (error) {
+      console.error('Error parsing user profile from localStorage:', error);
+    }
+    
+    if (this.employeeId) {
+      this.loadSalaryInfo();
+    } else {
+      this.error = 'Không thể xác định nhân viên hiện tại';
+      this.isLoading = false;
+    }
   }
 
   ngAfterViewInit(): void {
     // Force chart update after view is initialized
     setTimeout(() => {
-      this.allowanceChartData = { ...this.allowanceChartData };
-      this.bonusChartData = { ...this.bonusChartData };
-      this.deductionChartData = { ...this.deductionChartData };
-      this.salaryChartData = { ...this.salaryChartData };
-      this.cdr.detectChanges();
-    }, 100);
-  }
-
-  // Khởi tạo danh sách năm (từ năm hiện tại trở về 3 năm trước)
-  initializeYearOptions(): void {
-    const currentYear = new Date().getFullYear();
-    for (let i = 0; i < 4; i++) {
-      this.availableYears.push(currentYear - i);
-    }
-    this.availableYears.sort((a, b) => b - a); // Sắp xếp giảm dần
-  }
-
-  // Xử lý khi người dùng thay đổi tháng hoặc năm
-  onMonthChange(): void {
-    // Tìm dữ liệu lương tương ứng với tháng và năm đã chọn
-    const selectedSalary = this.salaryHistory.find(salary => {
-      const salaryDate = new Date(salary.paymentDate);
-      return salaryDate.getMonth() === this.selectedMonth && 
-             salaryDate.getFullYear() === this.selectedYear;
-    });
-
-    if (selectedSalary) {
-      // Cập nhật dữ liệu phụ cấp
-      this.updateAllowanceData(selectedSalary);
-      
-      // Cập nhật dữ liệu khấu trừ
-      this.updateDeductionData(selectedSalary);
-      
-      // Cập nhật dữ liệu thưởng
-      this.updateBonusData(selectedSalary);
-      
-      // Cập nhật biểu đồ
+      console.log('ngAfterViewInit - forcing chart update');
+      this.updateBonusChart();
+      this.updateDeductionChart();
+      this.updateSalaryHistoryChart();
+      this.updatePaymentsChart();
       this.updateCharts();
-    } else {
-      // Nếu không tìm thấy dữ liệu, hiển thị dữ liệu mặc định
-      this.resetToDefaultData();
-    }
+      this.cdr.detectChanges();
+    }, 500); // Increase timeout to ensure data is loaded
   }
 
-  // Cập nhật dữ liệu phụ cấp
-  updateAllowanceData(salary: any): void {
-    // Trong thực tế, đây sẽ là dữ liệu từ API
-    // Ở đây chúng ta chỉ cập nhật tổng phụ cấp
-    this.salaryDetails.allowances = salary.allowances;
+  /**
+   * Load salary information from API
+   */
+  loadSalaryInfo(): void {
+    this.isLoading = true;
     
-    // Cập nhật dữ liệu cho biểu đồ
-    this.allowanceChartData.labels = this.allowanceTypes.map(item => item.name);
-    this.allowanceChartData.datasets[0].data = this.allowanceTypes.map(item => item.value);
-  }
-
-  // Cập nhật dữ liệu khấu trừ
-  updateDeductionData(salary: any): void {
-    // Trong thực tế, đây sẽ là dữ liệu từ API
-    // Ở đây chúng ta chỉ cập nhật tổng khấu trừ
-    this.salaryDetails.deductions = salary.deductions;
-    
-    // Cập nhật dữ liệu cho biểu đồ
-    this.deductionChartData.labels = this.deductionTypes.map(item => item.name);
-    this.deductionChartData.datasets[0].data = this.deductionTypes.map(item => item.value);
-  }
-
-  // Cập nhật dữ liệu thưởng
-  updateBonusData(salary: any): void {
-    // Trong thực tế, đây sẽ là dữ liệu từ API
-    // Ở đây chúng ta giữ nguyên dữ liệu mẫu
-    
-    // Cập nhật dữ liệu cho biểu đồ
-    this.bonusChartData.labels = this.bonusTypes.map(item => item.name);
-    this.bonusChartData.datasets[0].data = this.bonusTypes.map(item => item.value);
-  }
-
-  // Cập nhật tất cả biểu đồ
-  updateCharts(): void {
-    this.allowanceChartData = { ...this.allowanceChartData };
-    this.bonusChartData = { ...this.bonusChartData };
-    this.deductionChartData = { ...this.deductionChartData };
-    this.cdr.detectChanges();
-  }
-
-  // Đặt lại dữ liệu mặc định
-  resetToDefaultData(): void {
-    // Trong thực tế, đây sẽ là dữ liệu từ API
-    this.loadSalaryDetails();
-    this.prepareChartData();
-    this.updateCharts();
-  }
-
-  loadSalaryHistory() {
-    // Mock data - replace with actual API call
-    this.salaryHistory = [
-      {
-        month: 'March 2024',
-        paymentDate: new Date(2024, 2, 15), // March 15, 2024
-        basicSalary: 5000000,
-        allowances: 1000000,
-        deductions: 500000,
-        netSalary: 5500000,
-        status: 'Paid'
+    this.salaryService.getPayrollInfo(this.employeeId).subscribe({
+      next: (data) => {
+        console.log('Salary info response:', data);
+        
+        // Check if data is an array and has at least one element
+        if (Array.isArray(data) && data.length > 0) {
+          // Get the first element of the array
+          const salaryInfo = data[0];
+          
+          // Check if salaryInfo has the expected structure
+          if (salaryInfo && salaryInfo.salaryBase) {
+            this.salaryInfo = salaryInfo;
+            this.baseId = salaryInfo.salaryBase.salaryId;
+            
+            // Process adjustments
+            this.processAdjustments();
+            
+            // Load salary history and payments
+            this.loadSalaryHistory();
+            this.loadSalaryPayments();
+          } else {
+            console.error('Invalid salary info structure:', salaryInfo);
+            this.error = 'Dữ liệu lương không đúng định dạng';
+            this.isLoading = false;
+          }
+        } else {
+          console.error('Invalid salary info response structure:', data);
+          this.error = 'Không tìm thấy dữ liệu lương';
+          this.isLoading = false;
+        }
       },
-      {
-        month: 'February 2024',
-        paymentDate: new Date(2024, 1, 15), // February 15, 2024
-        basicSalary: 5000000,
-        allowances: 1000000,
-        deductions: 500000,
-        netSalary: 5500000,
-        status: 'Paid'
-      },
-      {
-        month: 'January 2024',
-        paymentDate: new Date(2024, 0, 15), // January 15, 2024
-        basicSalary: 4500000,
-        allowances: 800000,
-        deductions: 400000,
-        netSalary: 4900000,
-        status: 'Paid'
-      },
-      {
-        month: 'December 2023',
-        paymentDate: new Date(2023, 11, 15), // December 15, 2023
-        basicSalary: 4500000,
-        allowances: 800000,
-        deductions: 400000,
-        netSalary: 4900000,
-        status: 'Paid'
-      },
-      {
-        month: 'November 2023',
-        paymentDate: new Date(2023, 10, 15), // November 15, 2023
-        basicSalary: 4000000,
-        allowances: 600000,
-        deductions: 300000,
-        netSalary: 4300000,
-        status: 'Paid'
-      },
-      {
-        month: 'October 2023',
-        paymentDate: new Date(2023, 9, 15), // October 15, 2023
-        basicSalary: 4000000,
-        allowances: 600000,
-        deductions: 300000,
-        netSalary: 4300000,
-        status: 'Paid'
+      error: (error) => {
+        console.error('Error loading salary info:', error);
+        this.error = 'Không thể tải thông tin lương';
+        this.isLoading = false;
       }
-    ];
+    });
   }
 
-  loadSalaryDetails() {
-    // Mock data - replace with actual API call
-    this.salaryDetails = {
-      basicSalary: 5000000,
-      allowances: 1000000,
-      deductions: 500000,
-      netSalary: 5500000,
-      effectiveDate: new Date(),
-      status: 'Active'
-    };
+  /**
+   * Load salary history from API
+   */
+  loadSalaryHistory(): void {
+    if (!this.baseId) {
+      this.isLoading = false;
+      return;
+    }
+    
+    this.salaryService.getSalaryHistory(this.baseId).subscribe({
+      next: (data) => {
+        console.log('Salary history response:', data);
+        
+        if (data && Array.isArray(data)) {
+          this.salaryHistory = data;
+          this.updateSalaryHistoryChart();
+          this.updateCharts();
+        } else {
+          console.warn('Unexpected salary history format:', data);
+          this.salaryHistory = [];
+        }
+        
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading salary history:', error);
+        this.error = 'Không thể tải lịch sử lương';
+        this.isLoading = false;
+      }
+    });
   }
 
-  prepareChartData() {
-    // Prepare data for salary history chart
-    this.salaryChartData.labels = this.salaryHistory.map(item => item.month).reverse();
-    this.salaryChartData.datasets[0].data = this.salaryHistory.map(item => item.basicSalary).reverse();
-    this.salaryChartData.datasets[1].data = this.salaryHistory.map(item => item.netSalary).reverse();
-
-    // Prepare data for allowance chart
-    this.allowanceChartData.labels = this.allowanceTypes.map(item => item.name);
-    this.allowanceChartData.datasets[0].data = this.allowanceTypes.map(item => item.value);
-
-    // Prepare data for deduction chart
-    this.deductionChartData.labels = this.deductionTypes.map(item => item.name);
-    this.deductionChartData.datasets[0].data = this.deductionTypes.map(item => item.value);
-
-    // Prepare data for bonus chart
-    this.bonusChartData.labels = this.bonusTypes.map(item => item.name);
-    this.bonusChartData.datasets[0].data = this.bonusTypes.map(item => item.value);
+  /**
+   * Load salary payments from API
+   */
+  loadSalaryPayments(): void {
+    if (!this.baseId) {
+      return;
+    }
+    
+    this.salaryService.getSalaryPayments(this.baseId).subscribe({
+      next: (data) => {
+        console.log('Salary payments response:', data);
+        
+        if (data && Array.isArray(data)) {
+          // Process payment data to ensure all required fields are available
+          this.salaryPayments = data.map(payment => {
+            // If the API doesn't provide these fields, calculate them based on available data
+            const baseSalary = payment.baseSalary || (this.salaryInfo?.salaryBase?.baseSalary || 0);
+            const bonusAmount = payment.bonusAmount || this.totalBonuses;
+            const deductionAmount = payment.deductionAmount || this.totalDeductions;
+            const adjustmentAmount = payment.adjustmentAmount || 0;
+            
+            return {
+              ...payment,
+              baseSalary,
+              bonusAmount,
+              deductionAmount,
+              adjustmentAmount
+            };
+          });
+          
+          this.updatePaymentsChart();
+          this.updateCharts();
+        } else {
+          console.warn('Unexpected salary payments format:', data);
+          this.salaryPayments = [];
+        }
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading salary payments:', error);
+        this.error = 'Không thể tải lịch sử thanh toán lương';
+        this.isLoading = false;
+      }
+    });
   }
 
-  calculateNetSalary() {
-    return this.salaryDetails.basicSalary + this.salaryDetails.allowances - this.salaryDetails.deductions;
-  }
-
-  calculateTotalBonus() {
-    return this.bonusTypes.reduce((sum, bonus) => sum + bonus.value, 0);
-  }
-
-  // Thêm phương thức khởi tạo khoảng thời gian
-  initializeDateRange(): void {
-    if (this.salaryHistory && this.salaryHistory.length > 0) {
-      // Sắp xếp lịch sử lương theo ngày
-      const sortedHistory = [...this.salaryHistory].sort((a, b) => {
-        return new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime();
+  /**
+   * Process salary adjustments into categories
+   */
+  processAdjustments(): void {
+    if (!this.salaryInfo) {
+      return;
+    }
+    
+    // Reset arrays
+    this.bonusAdjustments = [];
+    this.deductionAdjustments = [];
+    this.otherAdjustments = [];
+    
+    // Group adjustments by type if adjustments exist
+    if (this.salaryInfo.adjustments && Array.isArray(this.salaryInfo.adjustments)) {
+      console.log('Processing adjustments:', this.salaryInfo.adjustments);
+      
+      this.salaryInfo.adjustments.forEach(adjustment => {
+        if (!adjustment.adjustType) {
+          this.otherAdjustments.push(adjustment);
+          return;
+        }
+        
+        switch (adjustment.adjustType.toLowerCase()) {
+          case 'bonus':
+            this.bonusAdjustments.push(adjustment);
+            break;
+          case 'deduction':
+            this.deductionAdjustments.push(adjustment);
+            break;
+          default:
+            this.otherAdjustments.push(adjustment);
+            break;
+        }
       });
       
-      // Lấy tháng và năm đầu tiên có dữ liệu
-      const firstDate = new Date(sortedHistory[0].paymentDate);
-      this.startMonth = firstDate.getMonth();
-      this.startYear = firstDate.getFullYear();
+      console.log('Categorized adjustments:', {
+        bonuses: this.bonusAdjustments,
+        deductions: this.deductionAdjustments,
+        others: this.otherAdjustments
+      });
+    } else {
+      console.log('No adjustments found in salary info');
+    }
+    
+    // Calculate totals
+    this.calculateTotals();
+    
+    // Update charts
+    this.updateBonusChart();
+    this.updateDeductionChart();
+    this.updateOtherAdjustmentsChart();
+  }
+
+  /**
+   * Calculate total bonuses, deductions, and net salary
+   */
+  calculateTotals(): void {
+    // Get base salary
+    const baseSalary = this.salaryInfo?.salaryBase?.baseSalary || 0;
+    
+    // Calculate total bonuses
+    this.totalBonuses = Array.isArray(this.bonusAdjustments) ? 
+      this.bonusAdjustments.reduce((sum, item) => sum + (item.resultAmount || 0), 0) : 0;
+    
+    // Calculate total deductions
+    this.totalDeductions = Array.isArray(this.deductionAdjustments) ? 
+      this.deductionAdjustments.reduce((sum, item) => sum + (item.resultAmount || 0), 0) : 0;
       
-      // Mặc định kết thúc là tháng/năm hiện tại
-      this.endMonth = new Date().getMonth();
-      this.endYear = new Date().getFullYear();
+    // Calculate total other adjustments
+    this.totalOtherAdjustments = Array.isArray(this.otherAdjustments) ? 
+      this.otherAdjustments.reduce((sum, item) => sum + (item.resultAmount || 0), 0) : 0;
+    
+    // Calculate percentages (if base salary is not zero)
+    if (baseSalary > 0) {
+      this.bonusPercentage = (Number(this.totalBonuses) / Number(baseSalary)) * 100;
+      this.deductionPercentage = (Number(this.totalDeductions) / Number(baseSalary)) * 100;
+      this.otherAdjustmentsPercentage = (Number(this.totalOtherAdjustments) / Number(baseSalary)) * 100;
+    } else {
+      this.bonusPercentage = 0;
+      this.deductionPercentage = 0;
+      this.otherAdjustmentsPercentage = 0;
+    }
+    
+    // Calculate net salary
+    if (this.salaryInfo && this.salaryInfo.salaryBase) {
+      this.netSalary = baseSalary + this.totalBonuses - this.totalDeductions + this.totalOtherAdjustments;
+    } else {
+      this.netSalary = 0;
     }
   }
 
-  // Thêm phương thức lọc lịch sử lương
-  filterSalaryHistory(): void {
-    this.filteredSalaryHistory = this.salaryHistory.filter(salary => {
-      const salaryDate = new Date(salary.paymentDate);
-      const startDate = new Date(this.startYear, this.startMonth, 1);
-      const endDate = new Date(this.endYear, this.endMonth + 1, 0); // Ngày cuối cùng của tháng
-
-      return salaryDate >= startDate && salaryDate <= endDate;
+  /**
+   * Update bonus chart data
+   */
+  updateBonusChart(): void {
+    if (!Array.isArray(this.bonusAdjustments) || this.bonusAdjustments.length === 0) {
+      console.log('No bonus adjustments to display in chart');
+      return;
+    }
+    
+    console.log('Updating bonus chart with data:', this.bonusAdjustments);
+    
+    // Get unique bonus names
+    const bonusNames = [...new Set(this.bonusAdjustments.map(item => item.adjustmentName || 'Unknown'))];
+    
+    // Create data for fixed and percentage-based bonuses
+    const fixedBonuses = bonusNames.map(name => {
+      const bonus = this.bonusAdjustments.find(b => 
+        (b.adjustmentName || 'Unknown') === name && !b.percentage
+      );
+      return bonus ? bonus.resultAmount || 0 : 0;
     });
-
-    // Cập nhật dữ liệu cho biểu đồ
-    this.salaryChartData.labels = this.filteredSalaryHistory.map(item => item.month).reverse();
-    this.salaryChartData.datasets[0].data = this.filteredSalaryHistory.map(item => item.basicSalary).reverse();
-    this.salaryChartData.datasets[1].data = this.filteredSalaryHistory.map(item => item.netSalary).reverse();
+    
+    const percentageBonuses = bonusNames.map(name => {
+      const bonus = this.bonusAdjustments.find(b => 
+        (b.adjustmentName || 'Unknown') === name && !!b.percentage
+      );
+      return bonus ? bonus.resultAmount || 0 : 0;
+    });
+    
+    // Update chart data
+    this.bonusChartData.labels = bonusNames;
+    this.bonusChartData.datasets[0].data = fixedBonuses;
+    this.bonusChartData.datasets[1].data = percentageBonuses;
+    
+    console.log('Bonus chart data updated:', this.bonusChartData);
   }
 
-  // Thêm phương thức xử lý khi thay đổi bộ lọc
-  onFilterChange(): void {
-    this.filterSalaryHistory();
+  /**
+   * Update deduction chart data
+   */
+  updateDeductionChart(): void {
+    if (!Array.isArray(this.deductionAdjustments) || this.deductionAdjustments.length === 0) {
+      console.log('No deduction adjustments to display in chart');
+      return;
+    }
+    
+    console.log('Updating deduction chart with data:', this.deductionAdjustments);
+    
+    // Get unique deduction names
+    const deductionNames = [...new Set(this.deductionAdjustments.map(item => item.adjustmentName || 'Unknown'))];
+    
+    // Create data for fixed and percentage-based deductions
+    const fixedDeductions = deductionNames.map(name => {
+      const deduction = this.deductionAdjustments.find(d => 
+        (d.adjustmentName || 'Unknown') === name && !d.percentage
+      );
+      return deduction ? deduction.resultAmount || 0 : 0;
+    });
+    
+    const percentageDeductions = deductionNames.map(name => {
+      const deduction = this.deductionAdjustments.find(d => 
+        (d.adjustmentName || 'Unknown') === name && !!d.percentage
+      );
+      return deduction ? deduction.resultAmount || 0 : 0;
+    });
+    
+    // Update chart data
+    this.deductionChartData.labels = deductionNames;
+    this.deductionChartData.datasets[0].data = fixedDeductions;
+    this.deductionChartData.datasets[1].data = percentageDeductions;
+    
+    console.log('Deduction chart data updated:', this.deductionChartData);
+  }
+
+  /**
+   * Update salary history chart
+   */
+  updateSalaryHistoryChart(): void {
+    if (!Array.isArray(this.salaryHistory) || this.salaryHistory.length === 0) {
+      console.log('No salary history to display in chart');
+      return;
+    }
+    
+    console.log('Updating salary history chart with data:', this.salaryHistory);
+    
+    // Sort history by effective date
+    const sortedHistory = [...this.salaryHistory].sort((a, b) => {
+      const dateA = a.effectiveDate ? new Date(a.effectiveDate).getTime() : 0;
+      const dateB = b.effectiveDate ? new Date(b.effectiveDate).getTime() : 0;
+      return dateA - dateB;
+    });
+    
+    // Format dates for display
+    this.salaryHistoryChartData.labels = sortedHistory.map(item => 
+      this.formatDate(item.effectiveDate || '')
+    );
+    
+    // Create datasets for old and new salary
+    this.salaryHistoryChartData.datasets[0].data = sortedHistory.map(item => item.oldSalary || 0);
+    this.salaryHistoryChartData.datasets[1].data = sortedHistory.map(item => item.newSalary || 0);
+    
+    console.log('Salary history chart data updated:', this.salaryHistoryChartData);
+  }
+
+  /**
+   * Update payments chart
+   */
+  updatePaymentsChart(): void {
+    if (!Array.isArray(this.salaryPayments) || this.salaryPayments.length === 0) {
+      console.log('No salary payments to display in chart');
+      return;
+    }
+    
+    console.log('Updating payments chart with data:', this.salaryPayments);
+    
+    // Sort payments by date
+    const sortedPayments = [...this.salaryPayments].sort((a, b) => {
+      const dateA = a.paymentDate ? new Date(a.paymentDate).getTime() : 0;
+      const dateB = b.paymentDate ? new Date(b.paymentDate).getTime() : 0;
+      return dateA - dateB;
+    });
+    
+    // Format dates for display
+    this.salaryChartData.labels = sortedPayments.map(item => 
+      this.formatDate(item.paymentDate || '')
+    );
+    
+    // Create datasets for different salary components
+    this.salaryChartData.datasets[0].data = sortedPayments.map(item => item.baseSalary || 0);
+    this.salaryChartData.datasets[1].data = sortedPayments.map(item => item.bonusAmount || 0);
+    this.salaryChartData.datasets[2].data = sortedPayments.map(item => item.deductionAmount || 0);
+    this.salaryChartData.datasets[3].data = sortedPayments.map(item => item.netSalary || 0);
+    
+    console.log('Payments chart data updated:', this.salaryChartData);
+  }
+
+  /**
+   * Update other adjustments chart data
+   */
+  updateOtherAdjustmentsChart(): void {
+    if (!Array.isArray(this.otherAdjustments) || this.otherAdjustments.length === 0) {
+      console.log('No other adjustments to display in chart');
+      return;
+    }
+    
+    console.log('Updating other adjustments chart with data:', this.otherAdjustments);
+    
+    // Get unique adjustment names
+    const adjustmentNames = [...new Set(this.otherAdjustments.map(item => item.adjustmentName || 'Unknown'))];
+    
+    // Create data for fixed and percentage-based adjustments
+    const fixedAdjustments = adjustmentNames.map(name => {
+      const adjustment = this.otherAdjustments.find(adj => 
+        (adj.adjustmentName || 'Unknown') === name && !adj.percentage
+      );
+      return adjustment ? adjustment.resultAmount || 0 : 0;
+    });
+    
+    const percentageAdjustments = adjustmentNames.map(name => {
+      const adjustment = this.otherAdjustments.find(adj => 
+        (adj.adjustmentName || 'Unknown') === name && !!adj.percentage
+      );
+      return adjustment ? adjustment.resultAmount || 0 : 0;
+    });
+    
+    // Update chart data
+    this.otherAdjustmentsChartData.labels = adjustmentNames;
+    this.otherAdjustmentsChartData.datasets[0].data = fixedAdjustments;
+    this.otherAdjustmentsChartData.datasets[1].data = percentageAdjustments;
+    
+    console.log('Other adjustments chart data updated:', this.otherAdjustmentsChartData);
+  }
+
+  /**
+   * Update all charts
+   */
+  updateCharts(): void {
+    console.log('Updating all charts');
+    this.bonusChartData = { ...this.bonusChartData };
+    this.deductionChartData = { ...this.deductionChartData };
+    this.otherAdjustmentsChartData = { ...this.otherAdjustmentsChartData };
+    this.salaryChartData = { ...this.salaryChartData };
+    this.salaryHistoryChartData = { ...this.salaryHistoryChartData };
+    console.log('All charts updated');
+  }
+
+  /**
+   * Format date string
+   * @param dateString Date string
+   * @returns Formatted date
+   */
+  formatDate(dateString: string | null | undefined): string {
+    if (!dateString) return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'N/A';
+      }
+      
+      return date.toLocaleDateString('vi-VN', { 
+        day: 'numeric', 
+        month: 'numeric', 
+        year: 'numeric' 
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'N/A';
+    }
+  }
+
+  /**
+   * Get adjustment type badge class
+   * @param type Adjustment type
+   * @returns CSS class
+   */
+  getAdjustmentTypeClass(type: string | null | undefined): string {
+    if (!type) return 'bg-info';
+    
+    switch(type.toLowerCase()) {
+      case 'bonus':
+        return 'bg-success';
+      case 'deduction':
+        return 'bg-danger';
+      default:
+        return 'bg-info';
+    }
+  }
+
+  /**
+   * Get payment status badge class
+   * @param status Payment status
+   * @returns CSS class
+   */
+  getPaymentStatusClass(status: string | null | undefined): string {
+    if (!status) return 'bg-secondary';
+    
+    switch(status.toLowerCase()) {
+      case 'completed':
+        return 'bg-success';
+      case 'pending':
+        return 'bg-warning';
+      case 'failed':
+        return 'bg-danger';
+      default:
+        return 'bg-secondary';
+    }
+  }
+
+  /**
+   * Calculate amount from percentage of base salary
+   * @param percentage Percentage value
+   * @returns Calculated amount
+   */
+  calculateAmountFromPercentage(percentage: number | null | undefined): number {
+    if (!percentage || !this.salaryInfo || !this.salaryInfo.salaryBase) {
+      return 0;
+    }
+    
+    const baseSalary = this.salaryInfo.salaryBase.baseSalary || 0;
+    return (baseSalary * percentage) / 100;
   }
 } 

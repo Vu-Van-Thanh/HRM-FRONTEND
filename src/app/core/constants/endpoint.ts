@@ -27,5 +27,8 @@ export const API_ENDPOINT = {
    getAllRelative  : 'https://localhost:7214/Relative/{employeeId}',
    getContractByEmployeeId : 'https://localhost:7214/EmployeeContract/employee/{employeeId}',
    createContract : 'https://localhost:7214/EmployeeContract',
-   getAllProjectAndTask : 'https://localhost:7176/Project'
+   getAllProjectAndTask : 'https://localhost:7176/Project',
+   getSalaryInfo : 'https://localhost:7090/SalaryBase/payroll-info',
+   getSalaryChange : 'https://localhost:7090/SalaryHist/base/history-details',
+   getSalaryPayment : 'https://localhost:7090/SalaryPayment/payment-list'
 };

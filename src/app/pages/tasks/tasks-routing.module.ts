@@ -15,8 +15,13 @@ const routes: Routes = [
         component: KanbanboardComponent
     },
     {
-        path: 'create',
+        path: 'createtask',
         component: CreatetaskComponent
+    },
+    {
+        path: '',
+        redirectTo: 'list',
+        pathMatch: 'full'
     }
 ];
 

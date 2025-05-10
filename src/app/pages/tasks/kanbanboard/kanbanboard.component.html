@@ -1,68 +1,293 @@
 <div class="container-fluid">
   <!-- start page title -->
-  <app-page-title title="Kanban Board" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+  <app-page-title title="Project Tasks" [breadcrumbItems]="breadCrumbItems"></app-page-title>
   <!-- end page title -->
 
-  <div class="row">
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-2">Loading project tasks...</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Project Info -->
+  <div class="row" *ngIf="project && !isLoading">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-4">
+            <div class="flex-shrink-0 me-3">
+              <div class="avatar-md">
+                <span class="avatar-title rounded-circle bg-primary text-white font-size-18">
+                  {{ project.name?.charAt(0) || 'P' }}
+                </span>
+              </div>
+            </div>
+            <div class="flex-grow-1">
+              <h4>{{ project.name }}</h4>
+              <p class="text-muted mb-2">{{ project.description }}</p>
+              <div class="d-flex align-items-center">
+                <button class="btn btn-primary btn-sm me-2" (click)="backToProjects()">
+                  <i class="mdi mdi-arrow-left me-1"></i> Back to Projects
+                </button>
+                <span class="badge" [ngClass]="{'bg-success': project.status?.toLowerCase() === 'completed', 
+                                              'bg-warning': project.status?.toLowerCase() === 'in progress', 
+                                              'bg-info': project.status?.toLowerCase() === 'pending'}">
+                  {{ project.status }}
+                </span>
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              <div class="text-end">
+                <h5 class="font-size-15">Progress: {{ getCompletionPercentage() }}%</h5>
+                <div class="progress mt-2" style="height: 6px; width: 120px;">
+                  <div class="progress-bar" role="progressbar" [style.width.%]="getCompletionPercentage()"
+                      [ngClass]="{'bg-success': getCompletionPercentage() >= 75,
+                                'bg-warning': getCompletionPercentage() < 75 && getCompletionPercentage() >= 40,
+                                'bg-danger': getCompletionPercentage() < 40}"
+                      [attr.aria-valuenow]="getCompletionPercentage()" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row text-center">
+            <div class="col-lg-3 col-sm-6">
+              <div class="d-inline-flex align-items-center mt-2">
+                <div class="avatar-xs me-3">
+                  <span class="avatar-title rounded-circle bg-primary bg-soft text-primary font-size-18">
+                    <i class="mdi mdi-calendar-check"></i>
+                  </span>
+                </div>
+                <div class="flex-grow-1">
+                  <h5 class="font-size-14 mb-0">Due Date</h5>
+                  <p class="text-muted mb-0">{{ formatDate(project.endDate) }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+              <div class="d-inline-flex align-items-center mt-2">
+                <div class="avatar-xs me-3">
+                  <span class="avatar-title rounded-circle bg-primary bg-soft text-primary font-size-18">
+                    <i class="mdi mdi-clipboard-text"></i>
+                  </span>
+                </div>
+                <div class="flex-grow-1">
+                  <h5 class="font-size-14 mb-0">Total Tasks</h5>
+                  <p class="text-muted mb-0">{{ totalTasks }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+              <div class="d-inline-flex align-items-center mt-2">
+                <div class="avatar-xs me-3">
+                  <span class="avatar-title rounded-circle bg-success bg-soft text-success font-size-18">
+                    <i class="mdi mdi-check-all"></i>
+                  </span>
+                </div>
+                <div class="flex-grow-1">
+                  <h5 class="font-size-14 mb-0">Completed</h5>
+                  <p class="text-muted mb-0">{{ completedTasks.length }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+              <div class="d-inline-flex align-items-center mt-2">
+                <div class="avatar-xs me-3">
+                  <span class="avatar-title rounded-circle bg-danger bg-soft text-danger font-size-18">
+                    <i class="mdi mdi-alert"></i>
+                  </span>
+                </div>
+                <div class="flex-grow-1">
+                  <h5 class="font-size-14 mb-0">High Priority</h5>
+                  <p class="text-muted mb-0">{{ highPriorityTasks }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Row -->
+  <div class="row" *ngIf="project && !isLoading">
+    <div class="col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Task Status Distribution</h4>
+          <div>
+            <apx-chart dir="ltr" class="apex-charts" 
+                      [series]="taskStatusChart.series"
+                      [chart]="taskStatusChart.chart" 
+                      [labels]="taskStatusChart.labels"
+                      [colors]="taskStatusChart.colors" 
+                      [legend]="taskStatusChart.legend"
+                      [dataLabels]="taskStatusChart.dataLabels">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Task Priority Distribution</h4>
+          <div>
+            <apx-chart dir="ltr" class="apex-charts" 
+                      [series]="taskPriorityChart.series"
+                      [chart]="taskPriorityChart.chart" 
+                      [labels]="taskPriorityChart.labels"
+                      [colors]="taskPriorityChart.colors" 
+                      [legend]="taskPriorityChart.legend"
+                      [dataLabels]="taskPriorityChart.dataLabels">
+            </apx-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Task Statistics</h4>
+          
+          <div class="table-responsive mt-3">
+            <table class="table mb-0">
+              <tbody>
+                <tr>
+                  <td><span class="badge bg-success">Completed</span></td>
+                  <td>{{ completedTasks.length }}</td>
+                  <td>{{ totalTasks ? Math.round((completedTasks.length / totalTasks) * 100) : 0 }}%</td>
+                </tr>
+                <tr>
+                  <td><span class="badge bg-warning">In Progress</span></td>
+                  <td>{{ inprogressTasks.length }}</td>
+                  <td>{{ totalTasks ? Math.round((inprogressTasks.length / totalTasks) * 100) : 0 }}%</td>
+                </tr>
+                <tr>
+                  <td><span class="badge bg-info">Pending</span></td>
+                  <td>{{ upcomingTasks.length }}</td>
+                  <td>{{ totalTasks ? Math.round((upcomingTasks.length / totalTasks) * 100) : 0 }}%</td>
+                </tr>
+                <tr>
+                  <td><span class="badge bg-danger">High Priority</span></td>
+                  <td>{{ highPriorityTasks }}</td>
+                  <td>{{ totalTasks ? Math.round((highPriorityTasks / totalTasks) * 100) : 0 }}%</td>
+                </tr>
+                <tr>
+                  <td><span class="badge bg-warning">Medium Priority</span></td>
+                  <td>{{ mediumPriorityTasks }}</td>
+                  <td>{{ totalTasks ? Math.round((mediumPriorityTasks / totalTasks) * 100) : 0 }}%</td>
+                </tr>
+                <tr>
+                  <td><span class="badge bg-success">Low Priority</span></td>
+                  <td>{{ lowPriorityTasks }}</td>
+                  <td>{{ totalTasks ? Math.round((lowPriorityTasks / totalTasks) * 100) : 0 }}%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kanban Board -->
+  <div class="row" *ngIf="project && !isLoading">
     <div class="col-lg-4">
       <div class="card">
         <div class="card-body">
-          <div class="dropdown float-end" dropdown>
-            <a href="javascript: void(0);" class="dropdown-toggle arrow-none" dropdownToggle>
-              <i class="mdi mdi-dots-vertical m-0 text-muted h5"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end" *dropdownMenu>
-              <a class="dropdown-item" href="javascript: void(0);">Edit</a>
-              <a class="dropdown-item" href="javascript: void(0);">Delete</a>
-            </div>
-          </div> <!-- end dropdown -->
-
-          <h4 class="card-title mb-4">Upcoming</h4>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">Upcoming</h4>
+            <span class="badge bg-info">{{ upcomingTasks.length }}</span>
+          </div>
+          
           <div id="upcoming-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, upcomingTasks,'upcoming-task')">
             <div class="dndPlaceholder" dndPlaceholderRef></div>
 
             <ng-container *ngFor="let task of upcomingTasks; index as i">
               <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, upcomingTasks)">
-                <ng-template [ngTemplateOutlet]="TaskContent" [ngTemplateOutletContext]="{task:task, index: i}">
-                </ng-template>
+                <div class="card task-box mb-2">
+                  <div class="card-body">
+                    <div class="float-end">
+                      <span class="badge" [ngClass]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+                    </div>
+                    <h5 class="font-size-15 mb-1">{{ task.title }}</h5>
+                    <p class="text-muted mb-2">{{ task.description }}</p>
+                    <div class="d-flex align-items-center">
+                      <div class="flex-grow-1">
+                        <span class="text-muted font-size-12">
+                          <i class="mdi mdi-calendar me-1"></i> Due: {{ formatDate(task.deadline) }}
+                        </span>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <span class="text-muted font-size-12">
+                          {{ task.assignedToName || 'Unassigned' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </ng-container>
 
-            <div class="text-center d-grid">
-              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('upcoming')"><i class="mdi mdi-plus me-1"></i>
-                Add New</a>
+            <div class="text-center d-grid mt-2">
+              <a href="javascript: void(0);" class="btn btn-primary btn-sm" (click)="addnewTask('upcoming')">
+                <i class="mdi mdi-plus me-1"></i> Add New
+              </a>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- end col -->
 
     <div class="col-lg-4">
       <div class="card">
         <div class="card-body">
-          <div class="dropdown float-end" dropdown>
-            <a href="javascript: void(0);" class="dropdown-toggle arrow-none" dropdownToggle>
-              <i class="mdi mdi-dots-vertical m-0 text-muted h5"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end" *dropdownMenu>
-              <a class="dropdown-item" href="javascript: void(0);">Edit</a>
-              <a class="dropdown-item" href="javascript: void(0);">Delete</a>
-            </div>
-          </div> <!-- end dropdown -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">In Progress</h4>
+            <span class="badge bg-warning">{{ inprogressTasks.length }}</span>
+          </div>
 
-          <h4 class="card-title mb-4">In Progress</h4>
           <div id="Progress-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, inprogressTasks,'Progress-task')">
             <div class="dndPlaceholder" dndPlaceholderRef></div>
             <ng-container *ngFor="let task of inprogressTasks; index as i">
               <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, inprogressTasks)">
-                <ng-template [ngTemplateOutlet]="TaskContent" [ngTemplateOutletContext]="{task:task, index: i}">
-                </ng-template>
+                <div class="card task-box mb-2">
+                  <div class="card-body">
+                    <div class="float-end">
+                      <span class="badge" [ngClass]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+                    </div>
+                    <h5 class="font-size-15 mb-1">{{ task.title }}</h5>
+                    <p class="text-muted mb-2">{{ task.description }}</p>
+                    <div class="d-flex align-items-center">
+                      <div class="flex-grow-1">
+                        <span class="text-muted font-size-12">
+                          <i class="mdi mdi-calendar me-1"></i> Due: {{ formatDate(task.deadline) }}
+                        </span>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <span class="text-muted font-size-12">
+                          {{ task.assignedToName || 'Unassigned' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </ng-container>
-            <div class="text-center d-grid">
-              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('inprogress')"><i class="mdi mdi-plus me-1"></i>
-                Add New</a>
+            <div class="text-center d-grid mt-2">
+              <a href="javascript: void(0);" class="btn btn-primary btn-sm" (click)="addnewTask('inprogress')">
+                <i class="mdi mdi-plus me-1"></i> Add New
+              </a>
             </div>
           </div>
         </div>
@@ -72,30 +297,44 @@
     <div class="col-lg-4">
       <div class="card">
         <div class="card-body">
-          <div class="dropdown float-end" dropdown>
-            <a href="javascript: void(0);" class="dropdown-toggle arrow-none" dropdownToggle>
-              <i class="mdi mdi-dots-vertical m-0 text-muted h5"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end" *dropdownMenu>
-              <a class="dropdown-item" href="javascript: void(0);">Edit</a>
-              <a class="dropdown-item" href="javascript: void(0);">Delete</a>
-            </div>
-          </div> <!-- end dropdown -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">Completed</h4>
+            <span class="badge bg-success">{{ completedTasks.length }}</span>
+          </div>
 
-          <h4 class="card-title mb-4">Completed</h4>
           <div id="completed-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, completedTasks,'completed-task')">
             <div class="dndPlaceholder" dndPlaceholderRef></div>
 
             <ng-container *ngFor="let task of completedTasks; index as i">
               <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, completedTasks)">
-                <ng-template [ngTemplateOutlet]="TaskContent" [ngTemplateOutletContext]="{task:task, index: i}">
-                </ng-template>
+                <div class="card task-box mb-2">
+                  <div class="card-body">
+                    <div class="float-end">
+                      <span class="badge" [ngClass]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+                    </div>
+                    <h5 class="font-size-15 mb-1">{{ task.title }}</h5>
+                    <p class="text-muted mb-2">{{ task.description }}</p>
+                    <div class="d-flex align-items-center">
+                      <div class="flex-grow-1">
+                        <span class="text-muted font-size-12">
+                          <i class="mdi mdi-calendar-check me-1"></i> Completed: {{ formatDate(task.completedAt) }}
+                        </span>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <span class="text-muted font-size-12">
+                          {{ task.assignedToName || 'Unassigned' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </ng-container>
 
-            <div class="text-center d-grid">
-              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('completed')"><i class="mdi mdi-plus me-1"></i>
-                Add New</a>
+            <div class="text-center d-grid mt-2">
+              <a href="javascript: void(0);" class="btn btn-primary btn-sm" (click)="addnewTask('completed')">
+                <i class="mdi mdi-plus me-1"></i> Add New
+              </a>
             </div>
           </div>
         </div>
@@ -104,53 +343,7 @@
   </div>
 </div>
 
-<!-- Task  -->
-<ng-template #TaskContent let-task='task' let-i='index'>
-  <div class="card task-box">
-    <div class="card-body">
-      <div class="dropdown float-end" dropdown>
-        <a href="javascript:void(0);" class="dropdown-toggle arrow-none" data-bs-toggle="dropdown" aria-expanded="false" dropdownToggle>
-          <i class="mdi mdi-dots-vertical m-0 text-muted h5"></i>
-        </a>
-        <div class="dropdown-menu dropdown-menu-end" *dropdownMenu>
-          <a class="dropdown-item edittask-details" href="javascript:void(0);" id="taskedit" data-id="#uptask-2" (click)="updateTask(i)">Edit</a>
-          <a class="dropdown-item deletetask" href="javascript:void(0);" data-id="#uptask-2" (click)="delete($event)">Delete</a>
-        </div>
-      </div>
-      <div class="float-end ms-2">
-        <span class="badge rounded-pill badge-soft-secondary font-size-12" [ngClass]=" { 
-            'badge-soft-secondary': task.task === 'Waiting',
-            'badge-soft-success': task.task === 'Complete',
-            'badge-soft-primary': task.task === 'Approved',
-            'badge-soft-warning': task.task === 'Pending' }">{{task.task}}</span>
-      </div>
-      <div>
-        <h5 class="font-size-15"><a href="javascript: void(0);" class="text-dark">{{task.title}}</a>
-        </h5>
-        <p class="text-muted mb-4">{{task.date}}</p>
-      </div>
-
-      <div class="avatar-group float-start">
-        <div class="avatar-group-item">
-          <a href="javascript: void(0);" class="d-inline-block">
-            <img src="{{ task.user[0]}}" class="rounded-circle avatar-xs" alt="">
-          </a>
-        </div>
-        <div class="avatar-group-item" *ngIf="task.user[1]">
-          <a href="javascript: void(0);" class="d-inline-block">
-            <img src="{{ task.user[1]}}" class="rounded-circle avatar-xs" alt="">
-          </a>
-        </div>
-      </div>
-
-      <div class="text-end">
-        <h5 class="font-size-15 mb-1">$ {{task.budget}}</h5>
-        <p class="mb-0 text-muted">Budget</p>
-      </div>
-    </div>
-  </div>
-</ng-template>
-
+<!-- Task Form Modal -->
 <div bsModal #modalForm="bs-modal" id="modalForm" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -187,33 +380,40 @@
             </ul>
           </div>
 
-          <div class="form-group mb-4">
-            <label class="col-form-label">Status<span class="text-danger">*</span></label>
+          <div class="form-group mb-3">
+            <label class="col-form-label">Priority<span class="text-danger">*</span></label>
             <div class="col-lg-12">
-              <select class="form-select validate" id="TaskStatus" formControlName="taskstatus" required>
-                <option value="" selected>Choose..</option>
-                <option value="Waiting">Waiting</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Complete">Complete</option>
+              <select class="form-select validate" id="TaskPriority" formControlName="taskpriority" required>
+                <option value="" selected>Choose...</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
               </select>
             </div>
           </div>
 
           <div class="form-group mb-4">
-            <label for="taskbudget" class="col-form-label">Budget<span class="text-danger">*</span></label>
+            <label class="col-form-label">Status<span class="text-danger">*</span></label>
             <div class="col-lg-12">
-              <input id="taskbudget" name="taskbudget" type="number" placeholder="Enter Task Budget..." formControlName="taskbudget" class="form-control" required>
+              <select class="form-select validate" id="TaskStatus" formControlName="taskstatus" required>
+                <option value="" selected>Choose...</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
             </div>
           </div>
+
           <div class="row">
-            <div class="col-lg-10">
-              <button type="submit" class="btn btn-primary" id="addtask" >Create Task</button>
-              <!-- <button type="button" class="btn btn-primary d-none" id="updatetaskdetail">Update Task</button> -->
+            <div class="col-lg-12">
+              <div class="text-end">
+                <button type="button" class="btn btn-light me-1" (click)="modalForm.hide()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Task</button>
+              </div>
             </div>
           </div>
         </form>
       </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+    </div>
+  </div>
+</div>
