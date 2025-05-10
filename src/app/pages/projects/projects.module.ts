@@ -19,9 +19,10 @@ import { ProjectgridComponent } from './projectgrid/projectgrid.component';
 import { ProjectlistComponent } from './projectlist/projectlist.component';
 import { OverviewComponent } from './overview/overview.component';
 import { CreateComponent } from './create/create.component';
+import { CompletedPipe } from './completed.pipe';
 
 @NgModule({
-  declarations: [ProjectgridComponent, ProjectlistComponent, OverviewComponent, CreateComponent],
+  declarations: [ProjectgridComponent, ProjectlistComponent, OverviewComponent, CreateComponent, CompletedPipe],
   imports: [
     CommonModule,
     ProjectsRoutingModule,

@@ -16,6 +16,10 @@ const routes: Routes = [
         component: ProjectlistComponent
     },
     {
+        path: 'overview/:id',
+        component: OverviewComponent
+    },
+    {
         path: 'overview',
         component: OverviewComponent
     },

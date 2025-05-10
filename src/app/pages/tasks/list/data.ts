@@ -41,12 +41,15 @@ const taskChart: ChartType = {
         }
     },
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
-    markers: {
-        size: 0
+    xaxis: {
+        type: 'category'
     },
-    yaxis: {
-        min: 0
+    dataLabels: {
+        enabled: false
     },
+    legend: {
+        show: true
+    }
 };
 
 const tasks = [

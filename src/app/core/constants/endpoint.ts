@@ -26,5 +26,6 @@ export const API_ENDPOINT = {
    getAllActivityFld : 'https://localhost:7030/activities/fields',
    getAllRelative  : 'https://localhost:7214/Relative/{employeeId}',
    getContractByEmployeeId : 'https://localhost:7214/EmployeeContract/employee/{employeeId}',
-   createContract : 'https://localhost:7214/EmployeeContract'
+   createContract : 'https://localhost:7214/EmployeeContract',
+   getAllProjectAndTask : 'https://localhost:7176/Project'
 };

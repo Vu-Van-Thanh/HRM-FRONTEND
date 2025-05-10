@@ -5,14 +5,14 @@ import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
 // Date Format
 import {DatePipe} from '@angular/common';
 
-import {Project} from '../project.model';
+import {Project, LegacyProject} from '../project.model';
 import {projectData} from '../projectdata';
 import {DecimalPipe} from '@angular/common';
 import {debounceTime, delay, switchMap, tap} from 'rxjs/operators';
 import {SortColumn, SortDirection} from './projectgrid-sortable.directive';
 
 interface SearchResult {
-  countries: Project[];
+  countries: LegacyProject[];
   total: number;
 }
 
@@ -32,7 +32,7 @@ interface State {
 
 const compare = (v1: string | number, v2: string | number) => v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
 
-function sort(countries: Project[], column: SortColumn, direction: string): Project[] {
+function sort(countries: LegacyProject[], column: SortColumn, direction: string): LegacyProject[] {
   if (direction === '' || column === '') {
     return countries;
   } else {
@@ -43,16 +43,15 @@ function sort(countries: Project[], column: SortColumn, direction: string): Proj
   }
 }
 
-function matches(country: Project, term: string, pipe: PipeTransform) {
-  return country.text.toLowerCase().includes(term.toLowerCase())
-  ;
+function matches(country: LegacyProject, term: string, pipe: PipeTransform) {
+  return country.text.toLowerCase().includes(term.toLowerCase());
 }
 
 @Injectable({providedIn: 'root'})
 export class ProjectgridService {
   private _loading$ = new BehaviorSubject<boolean>(true);
   private _search$ = new Subject<void>();
-  private _countries$ = new BehaviorSubject<Project[]>([]);
+  private _countries$ = new BehaviorSubject<LegacyProject[]>([]);
   private _total$ = new BehaviorSubject<number>(0);
 
   content?: any;

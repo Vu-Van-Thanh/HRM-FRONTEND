@@ -3,45 +3,281 @@
   <app-page-title title="Projects Overview" [breadcrumbItems]="breadCrumbItems"></app-page-title>
   <!-- end page title -->
 
-  <div class="row">
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-2">Loading project details...</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div class="row" *ngIf="!isLoading && project">
     <div class="col-lg-8">
       <div class="card">
         <div class="card-body">
           <div class="d-flex">
             <div class="flex-shrink-0 me-4">
-              <img src="assets/images/companies/img-1.png" alt="" class="avatar-sm">
+              <div class="avatar-md">
+                <span class="avatar-title rounded-circle bg-primary text-white font-size-16">
+                  {{ project.name?.charAt(0) || 'P' }}
+                </span>
+              </div>
             </div>
 
             <div class="flex-grow-1 overflow-hidden">
-              <h5 class="text-truncate font-size-15">Skote Dashboard UI</h5>
-              <p class="text-muted">Separate existence is a myth. For science, music, sport, etc.</p>
+              <h5 class="text-truncate font-size-18">{{ project.name }}</h5>
+              <p class="text-muted">{{ project.description }}</p>
+              
+              <!-- Project Progress -->
+              <div class="mt-4">
+                <h5 class="font-size-15">Progress : {{ getCompletionPercentage() }}%</h5>
+                <div class="progress mt-3" style="height: 10px;">
+                  <div class="progress-bar" 
+                    [ngClass]="{
+                      'bg-success': getCompletionPercentage() >= 75,
+                      'bg-warning': getCompletionPercentage() < 75 && getCompletionPercentage() >= 40,
+                      'bg-danger': getCompletionPercentage() < 40
+                    }"
+                    role="progressbar" 
+                    [style.width.%]="getCompletionPercentage()" 
+                    [attr.aria-valuenow]="getCompletionPercentage()" 
+                    aria-valuemin="0" 
+                    aria-valuemax="100">
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <h5 class="font-size-15 mt-4">Project Details :</h5>
 
-          <p class="text-muted">To an English person, it will seem like simplified English, as a skeptical Cambridge
-            friend of mine told me what Occidental is. The European languages are members of the same family. Their
-            separate existence is a myth. For science, music, sport, etc,</p>
-
           <div class="text-muted mt-4">
-            <p><i class="mdi mdi-chevron-right text-primary me-1"></i> To achieve this, it would be necessary</p>
-            <p><i class="mdi mdi-chevron-right text-primary me-1"></i> Separate existence is a myth.</p>
-            <p><i class="mdi mdi-chevron-right text-primary me-1"></i> If several languages coalesce</p>
+            <p>
+              <i class="mdi mdi-chevron-right text-primary me-1"></i>
+              <strong>Department:</strong> {{ project.departmentName }}
+            </p>
+            <p>
+              <i class="mdi mdi-chevron-right text-primary me-1"></i>
+              <strong>Status:</strong> 
+              <span class="badge" [ngClass]="getStatusClass(project.status)">{{ project.status }}</span>
+            </p>
+            <p>
+              <i class="mdi mdi-chevron-right text-primary me-1"></i>
+              <strong>Tasks:</strong> {{ totalTasks }} Total ({{ completedTasks }} Completed)
+            </p>
           </div>
 
           <div class="row task-dates">
             <div class="col-sm-4 col-6">
               <div class="mt-4">
-                <h5 class="font-size-14"><i class="bx bx-calendar me-1 text-primary"></i> Start Date</h5>
-                <p class="text-muted mb-0">08 Sept, 2019</p>
+                <h5 class="font-size-14">
+                  <i class="bx bx-calendar me-1 text-primary"></i> Start Date
+                </h5>
+                <p class="text-muted mb-0">{{ formatDate(project.startDate) }}</p>
               </div>
             </div>
 
             <div class="col-sm-4 col-6">
               <div class="mt-4">
-                <h5 class="font-size-14"><i class="bx bx-calendar-check me-1 text-primary"></i> Due Date</h5>
-                <p class="text-muted mb-0">12 Oct, 2019</p>
+                <h5 class="font-size-14">
+                  <i class="bx bx-calendar-check me-1 text-primary"></i> Due Date
+                </h5>
+                <p class="text-muted mb-0">{{ formatDate(project.endDate) }}</p>
+              </div>
+            </div>
+            
+            <div class="col-sm-4 col-6">
+              <div class="mt-4">
+                <h5 class="font-size-14">
+                  <i class="bx bx-user-check me-1 text-primary"></i> Created By
+                </h5>
+                <p class="text-muted mb-0">{{ project.createdBy || 'N/A' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Task List -->
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Tasks</h4>
+          
+          <!-- Task tabs -->
+          <ul class="nav nav-tabs nav-tabs-custom mb-4">
+            <li class="nav-item">
+              <a class="nav-link active" data-bs-toggle="tab" href="#all-tasks">All ({{ totalTasks }})</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#completed">Completed ({{ completedTasks }})</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#in-progress">In Progress ({{ inProgressTasks }})</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#pending">Pending ({{ pendingTasks }})</a>
+            </li>
+          </ul>
+          
+          <div class="tab-content">
+            <!-- All tasks -->
+            <div class="tab-pane active" id="all-tasks">
+              <div class="table-responsive">
+                <table class="table table-nowrap align-middle table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Task</th>
+                      <th scope="col">Priority</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Deadline</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let task of project.tasks">
+                      <td>
+                        <h5 class="text-truncate font-size-14 mb-1">
+                          {{ task.title }}
+                        </h5>
+                        <p class="text-muted mb-0">{{ task.description }}</p>
+                      </td>
+                      <td>
+                        <span class="badge" [ngClass]="getPriorityClass(task.priority)">
+                          {{ task.priority }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge" [ngClass]="getStatusClass(task.status)">
+                          {{ task.status }}
+                        </span>
+                      </td>
+                      <td>{{ formatDate(task.deadline) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <!-- No tasks message -->
+                <div *ngIf="!project.tasks || project.tasks.length === 0" class="text-center py-4">
+                  <p class="text-muted">No tasks found for this project</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Completed tasks -->
+            <div class="tab-pane" id="completed">
+              <div class="table-responsive">
+                <table class="table table-nowrap align-middle table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Task</th>
+                      <th scope="col">Priority</th>
+                      <th scope="col">Completed At</th>
+                      <th scope="col">Assigned To</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let task of getTasksByPriority('completed')">
+                      <td>
+                        <h5 class="text-truncate font-size-14 mb-1">
+                          {{ task.title }}
+                        </h5>
+                        <p class="text-muted mb-0">{{ task.description }}</p>
+                      </td>
+                      <td>
+                        <span class="badge" [ngClass]="getPriorityClass(task.priority)">
+                          {{ task.priority }}
+                        </span>
+                      </td>
+                      <td>{{ formatDate(task.completedAt) || 'N/A' }}</td>
+                      <td>{{ task.assignedToName || 'Unassigned' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <!-- No completed tasks message -->
+                <div *ngIf="getTasksByPriority('completed').length === 0" class="text-center py-4">
+                  <p class="text-muted">No completed tasks found</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- In-progress tasks -->
+            <div class="tab-pane" id="in-progress">
+              <div class="table-responsive">
+                <table class="table table-nowrap align-middle table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Task</th>
+                      <th scope="col">Priority</th>
+                      <th scope="col">Start Date</th>
+                      <th scope="col">Deadline</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let task of getTasksByPriority('in progress')">
+                      <td>
+                        <h5 class="text-truncate font-size-14 mb-1">
+                          {{ task.title }}
+                        </h5>
+                        <p class="text-muted mb-0">{{ task.description }}</p>
+                      </td>
+                      <td>
+                        <span class="badge" [ngClass]="getPriorityClass(task.priority)">
+                          {{ task.priority }}
+                        </span>
+                      </td>
+                      <td>{{ formatDate(task.startDate) }}</td>
+                      <td>{{ formatDate(task.deadline) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <!-- No in-progress tasks message -->
+                <div *ngIf="getTasksByPriority('in progress').length === 0" class="text-center py-4">
+                  <p class="text-muted">No in-progress tasks found</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Pending tasks -->
+            <div class="tab-pane" id="pending">
+              <div class="table-responsive">
+                <table class="table table-nowrap align-middle table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Task</th>
+                      <th scope="col">Priority</th>
+                      <th scope="col">Start Date</th>
+                      <th scope="col">Deadline</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let task of getTasksByPriority('pending')">
+                      <td>
+                        <h5 class="text-truncate font-size-14 mb-1">
+                          {{ task.title }}
+                        </h5>
+                        <p class="text-muted mb-0">{{ task.description }}</p>
+                      </td>
+                      <td>
+                        <span class="badge" [ngClass]="getPriorityClass(task.priority)">
+                          {{ task.priority }}
+                        </span>
+                      </td>
+                      <td>{{ formatDate(task.startDate) }}</td>
+                      <td>{{ formatDate(task.deadline) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <!-- No pending tasks message -->
+                <div *ngIf="getTasksByPriority('pending').length === 0" class="text-center py-4">
+                  <p class="text-muted">No pending tasks found</p>
+                </div>
               </div>
             </div>
           </div>
@@ -51,271 +287,138 @@
     <!-- end col -->
 
     <div class="col-lg-4">
+      <!-- Team Members Card -->
       <div class="card">
         <div class="card-body">
           <h4 class="card-title mb-4">Team Members</h4>
+          
+          <!-- Loading indicator for team members -->
+          <div *ngIf="isLoadingTeam" class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-2">Loading team members...</p>
+          </div>
 
-          <div class="table-responsive">
+          <div class="table-responsive" *ngIf="!isLoadingTeam">
             <table class="table align-middle table-nowrap">
               <tbody>
-                <tr>
-                  <td style="width: 50px;"><img src="assets/images/users/avatar-2.jpg" class="rounded-circle avatar-xs"
-                      alt=""></td>
+                <tr *ngFor="let member of teamMembers">
+                  <td style="width: 50px;">
+                    <div *ngIf="member.avartar; else avatarInitial">
+                      <img [src]="member.avartar" class="rounded-circle avatar-xs" alt="{{ getEmployeeFullName(member) }}">
+                    </div>
+                    <ng-template #avatarInitial>
+                      <div class="avatar-xs">
+                        <span class="avatar-title rounded-circle bg-primary text-white font-size-16">
+                          {{ getEmployeeInitials(member) }}
+                        </span>
+                      </div>
+                    </ng-template>
+                  </td>
                   <td>
-                    <h5 class="font-size-14 m-0"><a href="" class="text-dark">Daniel Canales</a></h5>
+                    <h5 class="font-size-14 m-0">
+                      <a href="javascript: void(0);" class="text-dark">{{ getEmployeeFullName(member) }}</a>
+                    </h5>
+                    <small class="text-muted">Department: {{ member.departmentID }}</small>
                   </td>
                   <td>
                     <div>
-                      <a href="javascript: void(0);" class="badge bg-primary-subtle text-primary font-size-11">Frontend</a>
-                      <a href="javascript: void(0);" class="badge bg-primary-subtle text-primary font-size-11 ms-1">UI</a>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="assets/images/users/avatar-1.jpg" class="rounded-circle avatar-xs" alt=""></td>
-                  <td>
-                    <h5 class="font-size-14 m-0"><a href="" class="text-dark">Jennifer Walker</a></h5>
-                  </td>
-                  <td>
-                    <div>
-                      <a href="javascript: void(0);" class="badge bg-primary-subtle text-primary font-size-11">UI / UX</a>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="avatar-xs">
-                      <span class="avatar-title rounded-circle bg-primary text-white font-size-16">
-                        C
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <h5 class="font-size-14 m-0"><a href="" class="text-dark">Carl Mackay</a></h5>
-                  </td>
-                  <td>
-                    <div>
-                      <a href="javascript: void(0);" class="badge bg-primary-subtle text-primary font-size-11">Backend</a>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="assets/images/users/avatar-4.jpg" class="rounded-circle avatar-xs" alt=""></td>
-                  <td>
-                    <h5 class="font-size-14 m-0"><a href="" class="text-dark">Janice Cole</a></h5>
-                  </td>
-                  <td>
-                    <div>
-                      <a href="javascript: void(0);" class="badge bg-primary-subtle text-primary font-size-11">Frontend</a>
-                      <a href="javascript: void(0);" class="badge bg-primary-subtle text-primary font-size-11 ms-1">UI</a>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="avatar-xs">
-                      <span class="avatar-title rounded-circle bg-primary text-white font-size-16">
-                        T
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <h5 class="font-size-14 m-0"><a href="" class="text-dark">Tony Brafford</a></h5>
-                  </td>
-                  <td>
-                    <div>
-                      <a href="javascript: void(0);" class="badge bg-primary-subtle text-primary font-size-11">Backend</a>
+                      <span class="badge bg-primary-subtle text-primary font-size-11">{{ member.position }}</span>
+                      <a href="javascript: void(0);" 
+                         class="badge bg-success-subtle text-success font-size-11 ms-1" 
+                         tooltip="Tasks assigned">
+                        {{ getTasksByEmployee(member.employeeID).length }} Tasks
+                      </a>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
+            
+            <!-- No team members message -->
+            <div *ngIf="teamMembers.length === 0" class="text-center py-4">
+              <p class="text-muted">No team members assigned to this project</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- end col -->
-  </div>
-  <!-- end row -->
-
-  <div class="row">
-    <div class="col-lg-4">
-      <div class="card">
-        <div class="card-body pb-2">
-          <h4 class="card-title mb-4">Overview</h4>
-          <apx-chart dir="ltr" class="apex-charts" [series]="overviewBarChart.series"
-            [dataLabels]="overviewBarChart.dataLabels" [chart]="overviewBarChart.chart" [xaxis]="overviewBarChart.xaxis"
-            [colors]="overviewBarChart.colors" [yaxis]="overviewBarChart.yaxis" [xaxis]="overviewBarChart.xaxis"
-            [plotOptions]="overviewBarChart.plotOptions">
-          </apx-chart>
-        </div>
-      </div>
-    </div>
-    <!-- end col -->
-
-    <div class="col-lg-4">
+      
+      <!-- Project Stats Card -->
       <div class="card">
         <div class="card-body">
-          <h4 class="card-title mb-4">Attached Files</h4>
-          <div class="table-responsive">
-            <table class="table table-nowrap align-middle table-hover mb-0">
-              <tbody>
-                <tr>
-                  <td style="width: 45px;">
-                    <div class="avatar-sm">
-                      <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-24">
-                        <i class="bx bxs-file-doc"></i>
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <h5 class="font-size-14 mb-1"><a href="javascript: void(0);" class="text-dark">Skote Landing.Zip</a></h5>
-                    <small>Size : 3.25 MB</small>
-                  </td>
-                  <td>
-                    <div class="text-center">
-                      <a href="javascript: void(0);" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="avatar-sm">
-                      <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-24">
-                        <i class="bx bxs-file-doc"></i>
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <h5 class="font-size-14 mb-1"><a href="javascript: void(0);" class="text-dark">Skote Admin.Zip</a></h5>
-                    <small>Size : 3.15 MB</small>
-                  </td>
-                  <td>
-                    <div class="text-center">
-                      <a href="javascript: void(0);" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="avatar-sm">
-                      <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-24">
-                        <i class="bx bxs-file-doc"></i>
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <h5 class="font-size-14 mb-1"><a href="javascript: void(0);" class="text-dark">Skote Logo.Zip</a></h5>
-                    <small>Size : 2.02 MB</small>
-                  </td>
-                  <td>
-                    <div class="text-center">
-                      <a href="javascript: void(0);" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="avatar-sm">
-                      <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-24">
-                        <i class="bx bxs-file-doc"></i>
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <h5 class="font-size-14"><a href="javascript: void(0);" class="text-dark">Veltrix admin.Zip</a></h5>
-                    <small>Size : 2.25 MB</small>
-                  </td>
-                  <td>
-                    <div class="text-center">
-                      <a href="javascript: void(0);" class="text-dark"><i class="bx bx-download h3 m-0"></i></a>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <h4 class="card-title mb-4">Project Statistics</h4>
+          
+          <div class="mb-4">
+            <h5 class="font-size-15">Total Tasks</h5>
+            <div class="d-flex justify-content-between mt-2">
+              <div>
+                <span class="badge bg-primary">Total: {{ totalTasks }}</span>
+              </div>
+              <div>
+                <span class="badge bg-success me-1">Completed: {{ completedTasks }}</span>
+                <span class="badge bg-warning me-1">In Progress: {{ inProgressTasks }}</span>
+                <span class="badge bg-danger">Pending: {{ pendingTasks }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <apx-chart dir="ltr" class="apex-charts" 
+                      [series]="overviewBarChart.series"
+                      [dataLabels]="overviewBarChart.dataLabels" 
+                      [chart]="overviewBarChart.chart" 
+                      [xaxis]="overviewBarChart.xaxis"
+                      [colors]="overviewBarChart.colors" 
+                      [plotOptions]="overviewBarChart.plotOptions">
+            </apx-chart>
           </div>
         </div>
       </div>
-    </div>
-    <!-- end col -->
-
-    <div class="col-lg-4">
+      
+      <!-- Priority Distribution Card -->
       <div class="card">
         <div class="card-body">
-          <h4 class="card-title mb-4">Comments</h4>
-
-          <div class="d-flex mb-4">
-            <div class="flex-shrink-0 me-3">
-              <img class="d-flex-object rounded-circle avatar-xs" alt="" src="assets/images/users/avatar-2.jpg">
+          <h4 class="card-title mb-4">Task Priority Distribution</h4>
+          
+          <div class="row text-center mt-4">
+            <div class="col-4">
+              <h5 class="font-size-16">{{ getTasksByPriority('high').length }}</h5>
+              <p class="text-muted mb-0">High Priority</p>
             </div>
-            <div class="flex-grow-1">
-              <h5 class="font-size-13 mb-1">David Lambert</h5>
-              <p class="text-muted mb-1">
-                Separate existence is a myth.
-              </p>
+            <div class="col-4">
+              <h5 class="font-size-16">{{ getTasksByPriority('medium').length }}</h5>
+              <p class="text-muted mb-0">Medium Priority</p>
             </div>
-            <div class="ms-3">
-              <a href="javascript: void(0);" class="text-primary">Reply</a>
+            <div class="col-4">
+              <h5 class="font-size-16">{{ getTasksByPriority('low').length }}</h5>
+              <p class="text-muted mb-0">Low Priority</p>
             </div>
           </div>
-
-          <div class="d-flex mb-4">
-            <div class="flex-shrink-0 me-3">
-              <img class="d-flex-object rounded-circle avatar-xs" alt="" src="assets/images/users/avatar-3.jpg">
-            </div>
-            <div class="flex-grow-1">
-              <h5 class="font-size-13 mb-1">Steve Foster</h5>
-              <p class="text-muted mb-1">
-                <a href="javascript: void(0);" class="text-success">@Henry</a>
-                To an English person it will like simplified
-              </p>
-              <div class="d-flex mt-3">
-                <div class="flex-shrink-0 me-3">
-                <div class="avatar-xs">
-                  <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-16">
-                    J
-                  </span>
-                </div>
-                </div>
-                <div class="flex-grow-1">
-                  <h5 class="font-size-13 mb-1">Jeffrey Walker</h5>
-                  <p class="text-muted mb-1">
-                    as a skeptical Cambridge friend
-                  </p>
-                </div>
-                <div class="ms-3">
-                  <a href="javascript: void(0);" class="text-primary">Reply</a>
-                </div>
+          
+          <div class="mt-4">
+            <div class="progress mb-4" style="height: 14px;">
+              <div class="progress-bar bg-danger" role="progressbar" 
+                  [style.width.%]="getTasksByPriority('high').length / totalTasks * 100" 
+                  [attr.aria-valuenow]="getTasksByPriority('high').length / totalTasks * 100" 
+                  aria-valuemin="0" aria-valuemax="100">
+                High
+              </div>
+              <div class="progress-bar bg-warning" role="progressbar" 
+                  [style.width.%]="getTasksByPriority('medium').length / totalTasks * 100" 
+                  [attr.aria-valuenow]="getTasksByPriority('medium').length / totalTasks * 100" 
+                  aria-valuemin="0" aria-valuemax="100">
+                Medium
+              </div>
+              <div class="progress-bar bg-success" role="progressbar" 
+                  [style.width.%]="getTasksByPriority('low').length / totalTasks * 100" 
+                  [attr.aria-valuenow]="getTasksByPriority('low').length / totalTasks * 100" 
+                  aria-valuemin="0" aria-valuemax="100">
+                Low
               </div>
             </div>
-            <div class="ms-3">
-              <a href="javascript: void(0);" class="text-primary">Reply</a>
-            </div>
           </div>
-
-          <div class="d-flex mb-4">
-            <div class="flex-shrink-0 me-3">
-              <div class="avatar-xs">
-                <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-16">
-                  S
-                </span>
-              </div>
-            </div>
-            <div class="flex-grow-1">
-              <h5 class="font-size-13 mb-1">Steven Carlson</h5>
-              <p class="text-muted mb-1">
-                Separate existence is a myth.
-              </p>
-            </div>
-            <div class="ms-3">
-              <a href="javascript: void(0);" class="text-primary">Reply</a>
-            </div>
-          </div>
-
-          <div class="text-center mt-4 pt-2">
-            <a href="javascript: void(0);" class="btn btn-primary btn-sm">View more</a>
-          </div>
+          
         </div>
       </div>
     </div>

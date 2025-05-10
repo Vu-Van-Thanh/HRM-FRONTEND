@@ -1,11 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DndDropEvent } from 'ngx-drag-drop';
-
-import { tasks, memberList } from './data';
-
-import { Task } from './kanabn.model';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ModalDirective } from 'ngx-bootstrap/modal';
+import { ActivatedRoute } from '@angular/router';
+
+import { memberList } from './data';
+import { Task } from '../list/list.model';
+import { TaskService } from '../task.service';
 
 @Component({
   selector: 'app-kanbanboard',
@@ -17,12 +18,16 @@ import { ModalDirective } from 'ngx-bootstrap/modal';
  * Kanbanboard Component
  */
 export class KanbanboardComponent implements OnInit {
-
-  upcomingTasks: Task[];
-  inprogressTasks: Task[];
-  completedTasks: Task[];
+  upcomingTasks: Task[] = [];
+  inprogressTasks: Task[] = [];
+  completedTasks: Task[] = [];
   memberLists: any;
   status: any;
+  
+  // API data
+  tasks: Task[] = [];
+  isLoading = false;
+  projectId: string | null = null;
 
   // bread crumb items
   breadCrumbItems: Array<{}>;
@@ -30,9 +35,12 @@ export class KanbanboardComponent implements OnInit {
   submitted = false;
 
   @ViewChild('modalForm', { static: false }) modalForm?: ModalDirective;
-  alltask: ({ id: number; title: string; date: string; task: string; user: string[]; budget: number; status: string; groupId?: undefined; } | { id: number; title: string; date: string; task: string; user: string[]; budget: number; groupId: number; status: string; })[];
 
-  constructor(private formBuilder: UntypedFormBuilder) { }
+  constructor(
+    private formBuilder: UntypedFormBuilder,
+    private taskService: TaskService,
+    private route: ActivatedRoute
+  ) { }
 
   ngOnInit() {
     this.breadCrumbItems = [{ label: 'Tasks' }, { label: 'Kanban Board', active: true }];
@@ -44,9 +52,16 @@ export class KanbanboardComponent implements OnInit {
       taskstatus: ['', [Validators.required]],
       taskbudget: ['', [Validators.required]],
       taskassignee: ['']
-    })
+    });
 
-    this._fetchData();
+    // Check if we have a projectId in the URL query params
+    this.route.queryParams.subscribe(params => {
+      this.projectId = params['projectId'];
+      this.loadTasks();
+    });
+    
+    // Load member lists
+    this.memberLists = memberList;
   }
 
   /**
@@ -70,17 +85,88 @@ export class KanbanboardComponent implements OnInit {
         index = filteredList.length;
       }
 
+      // Update task status when moved between columns
+      if (targetStatus && event.data) {
+        event.data.status = targetStatus;
+        
+        // Here you would usually make an API call to update the task status
+        console.log('Task status updated:', event.data);
+      }
+
       filteredList.splice(index, 0, event.data);
     }
   }
 
-  private _fetchData() {
-    // all tasks
-    this.alltask = tasks
-    this.inprogressTasks = tasks.filter(t => t.status === 'inprogress');
-    this.upcomingTasks = tasks.filter(t => t.status === 'upcoming');
-    this.completedTasks = tasks.filter(t => t.status === 'completed');
-    this.memberLists = memberList
+  /**
+   * Load tasks from API based on project filter
+   */
+  loadTasks() {
+    this.isLoading = true;
+    
+    // If we have a projectId, load tasks for that project only
+    if (this.projectId) {
+      this.taskService.getTasksByProjectId(this.projectId).subscribe({
+        next: (tasks) => {
+          this.tasks = tasks;
+          this.filterTasksByStatus();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading tasks for project:', error);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Otherwise load all tasks from all projects
+      this.taskService.getAllTasks().subscribe({
+        next: (tasks) => {
+          this.tasks = tasks;
+          this.filterTasksByStatus();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading all tasks:', error);
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+  
+  /**
+   * Filter tasks by their status
+   */
+  filterTasksByStatus() {
+    // Filter tasks by status
+    this.inprogressTasks = this.tasks.filter(t => 
+      t.status?.toLowerCase() === 'in progress'
+    );
+    
+    this.upcomingTasks = this.tasks.filter(t => 
+      t.status?.toLowerCase() === 'pending' || 
+      t.status?.toLowerCase() === 'new'
+    );
+    
+    this.completedTasks = this.tasks.filter(t => 
+      t.status?.toLowerCase() === 'completed'
+    );
+  }
+
+  /**
+   * Get priority class for badge
+   * @param priority Task priority
+   * @returns CSS class
+   */
+  getPriorityClass(priority: string): string {
+    switch(priority?.toLowerCase()) {
+      case 'high':
+        return 'bg-danger';
+      case 'medium':
+        return 'bg-warning';
+      case 'low':
+        return 'bg-success';
+      default:
+        return 'bg-info';
+    }
   }
 
   // Delete Data
@@ -98,68 +184,32 @@ export class KanbanboardComponent implements OnInit {
 
   // add new tak  
   addnewTask(status: any) {
-    this.status = status
-    this.modalForm.show()
+    this.status = status;
+    this.modalForm.show();
   }
 
   // Save Form
   submitForm() {
     if (this.taskForm.valid) {
       if (this.taskForm.get('id')?.value) {
-        this.alltask = tasks.map((data: { id: any; }) => data.id === this.taskForm.get('id')?.value ? { ...data, ...this.taskForm.value } : data)
+        // Edit existing task - would make API call here
+        console.log('Update task:', this.taskForm.value);
       } else {
+        // Create new task - would make API call here
         const title = this.taskForm.get('taskname')?.value;
-        const desc = this.taskForm.get('taskdesc')?.value;
-        const task = this.taskForm.get('taskstatus')?.value;
-        const budget = this.taskForm.get('taskbudget')?.value;
-        const user = []
-        for (var i = 0; i < this.memberLists.length; i++) {
-          if (this.memberLists[i].checked == true) {
-            user.push(this.memberLists[i].profile)
-          }
-        }
-        tasks.push({
-          id: tasks.length + 1,
-          date: '14 Oct, 2019',
+        const description = this.taskForm.get('taskdesc')?.value;
+        const priority = this.taskForm.get('taskstatus')?.value;
+        
+        console.log('Create new task:', {
           title,
-          task,
-          user,
-          status: this.status,
-          budget
-        })
+          description,
+          priority,
+          status: this.status
+        });
+      }
+    }
     
-      }
-    }
-    this._fetchData();
     this.taskForm.reset();
-    this.modalForm.hide()
-  }
-
-  // Update Task
-  updateTask(id: any) {
-    this.submitted = false;
-    this.modalForm?.show()
-
-    var updatetitle = document.querySelector('.modal-title') as HTMLAreaElement
-    updatetitle.innerHTML = "Update Task";
-
-    var updatebtn = document.getElementById('addtask') as HTMLAreaElement
-    updatebtn.innerHTML = "Update Task";
-
-    var data = tasks[id]
-    this.taskForm.controls['id'].setValue(data.id);
-    this.taskForm.controls['taskname'].setValue(data.title);
-    this.taskForm.controls['taskstatus'].setValue(data.task);
-    this.taskForm.controls['taskbudget'].setValue(data.budget);
-    // Compare data.user profile and memberList profile if same the set checked property to true
-    for (var i = 0; i < this.memberLists.length; i++) {
-      for (var x = 0; x < data.user.length; x++) {
-        if (this.memberLists[i].profile == data.user[x]) {
-          this.memberLists[i].checked = true;
-          // this.taskForm.controls['taskassignee'].setValue( this.memberLists[i].id);
-        }
-      }
-    }
-
+    this.modalForm.hide();
   }
 }
