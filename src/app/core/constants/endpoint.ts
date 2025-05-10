@@ -24,4 +24,7 @@ export const API_ENDPOINT = {
    getAllAttendace : 'https://localhost:7030/Attendance/filter-attendance',
    createAttendance : 'https://localhost:7030/Attendance',
    getAllActivityFld : 'https://localhost:7030/activities/fields',
+   getAllRelative  : 'https://localhost:7214/Relative/{employeeId}',
+   getContractByEmployeeId : 'https://localhost:7214/EmployeeContract/employee/{employeeId}',
+   createContract : 'https://localhost:7214/EmployeeContract'
 };

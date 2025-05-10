@@ -1,4 +1,11 @@
 <div class="profile-container">
+  <!-- Loading indicator -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
   <!-- Header with tabs -->
   <div class="profile-header">
     <h2 class="profile-title">Hồ sơ nhân viên</h2>
@@ -21,7 +28,7 @@
         <div class="profile-header-card">
           <div class="profile-avatar">
             <div class="avatar-container">
-              <img src="assets/images/error-img.png" alt="avatar" />
+              <img [src]="employee.avartar || 'assets/images/error-img.png'" alt="avatar" />
               <div class="avatar-edit">
                 <i class="bi bi-camera"></i>
               </div>
@@ -29,7 +36,7 @@
             <div class="employee-status">
               <span class="status-badge active">Đang làm việc</span>
               <h4 class="employee-name">{{ employee.firstName }} {{ employee.lastName }}</h4>
-              <p class="employee-id">Mã nhân viên: NV{{ employee.employeeID }}</p>
+              <p class="employee-id">Mã nhân viên: {{ employee.employeeID }}</p>
             </div>
           </div>
           
@@ -38,28 +45,28 @@
               <i class="bi bi-building"></i>
               <div>
                 <span class="info-label">Phòng ban</span>
-                <span class="info-value">{{ employee.departmentID }}</span>
+                <span class="info-value">{{ employee.departmentID || 'Chưa có' }}</span>
               </div>
             </div>
             <div class="info-item">
               <i class="bi bi-person-badge"></i>
               <div>
                 <span class="info-label">Chức vụ</span>
-                <span class="info-value">{{ employee.position }}</span>
+                <span class="info-value">{{ employee.position || 'Chưa có' }}</span>
               </div>
             </div>
             <div class="info-item">
               <i class="bi bi-telephone"></i>
               <div>
                 <span class="info-label">Số điện thoại</span>
-                <span class="info-value">{{ employee.phone }}</span>
+                <span class="info-value">{{ employee.phone || 'Chưa có' }}</span>
               </div>
             </div>
             <div class="info-item">
               <i class="bi bi-envelope"></i>
               <div>
                 <span class="info-label">Email</span>
-                <span class="info-value">{{ employee.email }}</span>
+                <span class="info-value">{{ employee.email || 'Chưa có' }}</span>
               </div>
             </div>
           </div>
@@ -91,8 +98,9 @@
                 <div class="form-group">
                   <label>Giới tính</label>
                   <select class="form-control" [(ngModel)]="employee.gender" name="gender">
-                    <option value="male">Nam</option>
-                    <option value="female">Nữ</option>
+                    <option value="0">Nam</option>
+                    <option value="1">Nữ</option>
+                    <option value="2">Khác</option>
                   </select>
                 </div>
               </div>
@@ -167,8 +175,8 @@
                   <label>Ảnh CMND/CCCD</label>
                   <div class="file-upload">
                     <input type="file" class="form-control" (change)="onFileChange($event, 'cccd')" name="cccdImage">
-                    <div *ngIf="previewImages['cccd']" class="preview-image">
-                      <img [src]="previewImages['cccd']" alt="CMND preview" />
+                    <div *ngIf="previewImages['cccd'] || (employee.identity && employee.identity.length > 0)" class="preview-image">
+                      <img [src]="previewImages['cccd'] || employee.identity[0]" alt="CMND preview" />
                     </div>
                   </div>
                 </div>
@@ -176,8 +184,8 @@
                   <label>Ảnh BHXH</label>
                   <div class="file-upload">
                     <input type="file" class="form-control" (change)="onFileChange($event, 'bhxh')" name="bhxhImage">
-                    <div *ngIf="previewImages['bhxh']" class="preview-image">
-                      <img [src]="previewImages['bhxh']" alt="BHXH preview" />
+                    <div *ngIf="previewImages['bhxh'] || (employee.insurance && employee.insurance.length > 0)" class="preview-image">
+                      <img [src]="previewImages['bhxh'] || employee.insurance[0]" alt="BHXH preview" />
                     </div>
                   </div>
                 </div>
@@ -202,10 +210,13 @@
         </div>
         
         <div class="relatives-list">
+          <div *ngIf="relatives.length === 0" class="no-data-message">
+            <p>Chưa có thông tin người thân</p>
+          </div>
           <div class="relative-card" *ngFor="let relative of relatives; let i = index">
             <div class="relative-header">
-              <h4>{{ relative.name }}</h4>
-              <span class="relationship-badge">{{ relative.relationship }}</span>
+              <h4>{{ relative.firstName }} {{ relative.lastName }}</h4>
+              <span class="relationship-badge">{{ relative.relativeType }}</span>
               <button class="btn-icon" (click)="removeRelative(i)">
                 <i class="bi bi-trash"></i>
               </button>
@@ -213,15 +224,47 @@
             <div class="relative-info">
               <div class="info-item">
                 <i class="bi bi-calendar"></i>
-                <span>Ngày sinh: {{ relative.dateOfBirth | date:'dd/MM/yyyy' }}</span>
+                <span>Ngày sinh: {{ relative.dateOfBirth ? (relative.dateOfBirth | date:'dd/MM/yyyy') : 'Chưa có' }}</span>
               </div>
               <div class="info-item">
                 <i class="bi bi-telephone"></i>
-                <span>Số điện thoại: {{ relative.phone }}</span>
+                <span>Số điện thoại: {{ relative.phoneNumber || 'Chưa có' }}</span>
               </div>
               <div class="info-item">
                 <i class="bi bi-geo-alt"></i>
-                <span>Địa chỉ: {{ relative.address }}</span>
+                <span>Địa chỉ: {{ relative.address || 'Chưa có' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-card-text"></i>
+                <span>CMND/CCCD: {{ relative.indentityCard || 'Chưa có' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-globe"></i>
+                <span>Quốc tịch: {{ relative.nationality || 'Việt Nam' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-people"></i>
+                <span>Dân tộc: {{ relative.ethnic || 'Kinh' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-book"></i>
+                <span>Tôn giáo: {{ relative.religion || 'Không' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-pin-map"></i>
+                <span>Nơi sinh: {{ relative.placeOfBirth || 'Chưa có' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-geo"></i>
+                <span>Tỉnh/Thành phố: {{ relative.province || 'Chưa có' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-building"></i>
+                <span>Quận/Huyện: {{ relative.district || 'Chưa có' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-house"></i>
+                <span>Phường/Xã: {{ relative.commune || 'Chưa có' }}</span>
               </div>
             </div>
           </div>
@@ -229,33 +272,96 @@
         
         <div class="add-relative-form">
           <h4>Thêm người thân</h4>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Họ tên</label>
-              <input type="text" class="form-control" [(ngModel)]="newRelative.name" name="relativeName">
-            </div>
-            <div class="form-group">
-              <label>Mối quan hệ</label>
-              <select class="form-control" [(ngModel)]="newRelative.relationship" name="relationship">
-                <option value="">Chọn mối quan hệ</option>
-                <option *ngFor="let option of relationshipOptions" [value]="option">{{ option }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Ngày sinh</label>
-              <input type="date" class="form-control" [(ngModel)]="newRelative.dateOfBirth" name="relativeDob">
-            </div>
-            <div class="form-group">
-              <label>Số điện thoại</label>
-              <input type="text" class="form-control" [(ngModel)]="newRelative.phone" name="relativePhone">
-            </div>
-            <div class="form-group full-width">
-              <label>Địa chỉ</label>
-              <input type="text" class="form-control" [(ngModel)]="newRelative.address" name="relativeAddress">
+          
+          <!-- Basic Information -->
+          <div class="form-section">
+            <h5>Thông tin cơ bản</h5>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Họ</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.firstName" name="relativeFirstName">
+              </div>
+              <div class="form-group">
+                <label>Tên</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.lastName" name="relativeLastName">
+              </div>
+              <div class="form-group">
+                <label>Mối quan hệ</label>
+                <select class="form-control" [(ngModel)]="newRelative.relativeType" name="relativeType">
+                  <option value="">Chọn mối quan hệ</option>
+                  <option *ngFor="let option of relationshipOptions" [value]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Ngày sinh</label>
+                <input type="date" class="form-control" [(ngModel)]="newRelative.dateOfBirth" name="relativeDob">
+              </div>
             </div>
           </div>
+          
+          <!-- Contact Information -->
+          <div class="form-section">
+            <h5>Thông tin liên hệ</h5>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Số điện thoại</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.phoneNumber" name="relativePhone">
+              </div>
+              <div class="form-group full-width">
+                <label>Địa chỉ</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.address" name="relativeAddress">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Personal Information -->
+          <div class="form-section">
+            <h5>Thông tin cá nhân</h5>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Số CMND/CCCD</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.indentityCard" name="relativeIdCard">
+              </div>
+              <div class="form-group">
+                <label>Nơi sinh</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.placeOfBirth" name="relativePlaceOfBirth">
+              </div>
+              <div class="form-group">
+                <label>Quốc tịch</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.nationality" name="relativeNationality">
+              </div>
+              <div class="form-group">
+                <label>Dân tộc</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.ethnic" name="relativeEthnic">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Location Information -->
+          <div class="form-section">
+            <h5>Thông tin địa lý</h5>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tỉnh/Thành phố</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.province" name="relativeProvince">
+              </div>
+              <div class="form-group">
+                <label>Quận/Huyện</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.district" name="relativeDistrict">
+              </div>
+              <div class="form-group">
+                <label>Phường/Xã</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.commune" name="relativeCommune">
+              </div>
+              <div class="form-group">
+                <label>Tôn giáo</label>
+                <input type="text" class="form-control" [(ngModel)]="newRelative.religion" name="relativeReligion">
+              </div>
+            </div>
+          </div>
+          
           <div class="form-actions">
-            <button class="btn btn-primary" (click)="addRelative()">Thêm người thân</button>
+            <button type="button" class="btn btn-primary" (click)="addRelative()">Thêm người thân</button>
           </div>
         </div>
       </div>

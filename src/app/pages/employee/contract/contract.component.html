@@ -1,4 +1,15 @@
 <div class="container-fluid">
+  <!-- Loading indicator -->
+  <div class="loading-overlay" *ngIf="isLoading || isSubmitting">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="loading-text mt-2">
+      <span *ngIf="isLoading">Đang tải dữ liệu...</span>
+      <span *ngIf="isSubmitting">Đang lưu hợp đồng...</span>
+    </div>
+  </div>
+
   <!-- Add New Contract Card -->
   <div class="row">
     <div class="col-12">
@@ -6,21 +17,27 @@
         <div class="card-body">
           <h4 class="card-title mb-4">Thêm hợp đồng mới</h4>
           
-          <form (ngSubmit)="addContract()" #contractForm="ngForm">
+          <form [formGroup]="contractForm" (ngSubmit)="addContract()">
             <div class="row">
               <div class="col-md-6">
                 <div class="mb-3">
-                  <label class="form-label">Loại hợp đồng</label>
-                  <select class="form-select" [(ngModel)]="newContract.contractType" name="contractType" required>
-                    <option value="">Chọn loại hợp đồng</option>
-                    <option *ngFor="let type of contractTypes" [value]="type">{{type}}</option>
-                  </select>
+                  <label class="form-label">Số hợp đồng <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" formControlName="contractNumber" placeholder="Ví dụ: CT001">
+                  <div *ngIf="contractForm.get('contractNumber')?.invalid && contractForm.get('contractNumber')?.touched" class="text-danger form-text">
+                    Vui lòng nhập số hợp đồng
+                  </div>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="mb-3">
-                  <label class="form-label">Vị trí</label>
-                  <input type="text" class="form-control" [(ngModel)]="newContract.position" name="position" required>
+                  <label class="form-label">Loại hợp đồng <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="contractType">
+                    <option value="">Chọn loại hợp đồng</option>
+                    <option *ngFor="let type of contractTypes" [value]="type">{{type}}</option>
+                  </select>
+                  <div *ngIf="contractForm.get('contractType')?.invalid && contractForm.get('contractType')?.touched" class="text-danger form-text">
+                    Vui lòng chọn loại hợp đồng
+                  </div>
                 </div>
               </div>
             </div>
@@ -28,14 +45,41 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="mb-3">
-                  <label class="form-label">Ngày bắt đầu</label>
-                  <input type="date" class="form-control" [(ngModel)]="newContract.startDate" name="startDate" required>
+                  <label class="form-label">Vị trí <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" formControlName="position" placeholder="Ví dụ: Software Engineer">
+                  <div *ngIf="contractForm.get('position')?.invalid && contractForm.get('position')?.touched" class="text-danger form-text">
+                    Vui lòng nhập vị trí
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="status">
+                    <option value="">Chọn trạng thái</option>
+                    <option *ngFor="let status of statusOptions" [value]="status">{{status}}</option>
+                  </select>
+                  <div *ngIf="contractForm.get('status')?.invalid && contractForm.get('status')?.touched" class="text-danger form-text">
+                    Vui lòng chọn trạng thái
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" formControlName="startDate">
+                  <div *ngIf="contractForm.get('startDate')?.invalid && contractForm.get('startDate')?.touched" class="text-danger form-text">
+                    Vui lòng chọn ngày bắt đầu
+                  </div>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="mb-3">
                   <label class="form-label">Ngày kết thúc</label>
-                  <input type="date" class="form-control" [(ngModel)]="newContract.endDate" name="endDate">
+                  <input type="date" class="form-control" formControlName="endDate">
                 </div>
               </div>
             </div>
@@ -43,22 +87,43 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="mb-3">
-                  <label class="form-label">Lương cơ bản</label>
-                  <input type="number" class="form-control" [(ngModel)]="newContract.salary" name="salary" required>
+                  <label class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" formControlName="salaryBase">
+                  <div *ngIf="contractForm.get('salaryBase')?.invalid && contractForm.get('salaryBase')?.touched" class="text-danger form-text">
+                    Vui lòng nhập lương cơ bản hợp lệ
+                  </div>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="mb-3">
-                  <label class="form-label">Thời gian làm việc</label>
-                  <input type="text" class="form-control" [(ngModel)]="newContract.workingTime" name="workingTime" placeholder="Ví dụ: 8 giờ/ngày" required>
+                  <label class="form-label">Hệ số lương <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" formControlName="salaryIndex" step="0.1">
+                  <div *ngIf="contractForm.get('salaryIndex')?.invalid && contractForm.get('salaryIndex')?.touched" class="text-danger form-text">
+                    Vui lòng nhập hệ số lương hợp lệ
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="mb-3">
+                  <label class="form-label">File hợp đồng (Word/PDF) <span class="text-danger">*</span></label>
+                  <input type="file" class="form-control" (change)="onFileChange($event)" accept=".doc,.docx,.pdf">
+                  <div *ngIf="!contractFile && contractForm.get('contractFile')?.touched" class="text-danger form-text">
+                    Vui lòng chọn file hợp đồng
+                  </div>
+                  <div *ngIf="contractFile" class="form-text text-success">
+                    Đã chọn file: {{ contractFile.name }}
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="text-end mt-4">
               <button type="button" class="btn btn-light me-2" (click)="resetForm()">Làm mới</button>
-              <button type="submit" class="btn btn-primary" [disabled]="!contractForm.form.valid">
-                Thêm hợp đồng
+              <button type="submit" class="btn btn-primary" [disabled]="contractForm.invalid || !contractFile || isSubmitting">
+                <i class="bi bi-plus-circle me-1"></i> Thêm hợp đồng
               </button>
             </div>
           </form>
@@ -75,17 +140,21 @@
           <h5 class="card-title">Danh sách hợp đồng lao động</h5>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
+          <div *ngIf="contracts.length === 0" class="text-center py-4">
+            <p class="text-muted">Chưa có hợp đồng nào được tạo</p>
+          </div>
+          <div class="table-responsive" *ngIf="contracts.length > 0">
             <table class="table table-centered table-nowrap mb-0">
               <thead class="table-light">
                 <tr>
                   <th>Số hợp đồng</th>
                   <th>Loại hợp đồng</th>
                   <th>Vị trí</th>
-                  <th>Phòng ban</th>
                   <th>Ngày bắt đầu</th>
                   <th>Ngày kết thúc</th>
-                  <th>Mức lương</th>
+                  <th>Hệ số lương</th>
+                  <th>Lương cơ bản</th>
+                  <th>Tổng lương</th>
                   <th>Trạng thái</th>
                   <th>Thao tác</th>
                 </tr>
@@ -93,12 +162,13 @@
               <tbody>
                 <tr *ngFor="let contract of contracts">
                   <td>{{ contract.contractNumber }}</td>
-                  <td>{{ contract.type }}</td>
+                  <td>{{ contract.contractType }}</td>
                   <td>{{ contract.position }}</td>
-                  <td>{{ contract.department }}</td>
                   <td>{{ contract.startDate | date:'dd/MM/yyyy' }}</td>
                   <td>{{ contract.endDate | date:'dd/MM/yyyy' }}</td>
-                  <td>{{ contract.salary | number }} VNĐ</td>
+                  <td>{{ contract.salaryIndex || 1 }}</td>
+                  <td>{{ contract.salaryBase | number }} VNĐ</td>
+                  <td>{{ calculateTotalSalary(contract) | number }} VNĐ</td>
                   <td>
                     <span class="badge" [ngClass]="getStatusClass(contract.status)">
                       {{ contract.status }}
@@ -106,7 +176,7 @@
                   </td>
                   <td>
                     <button class="btn btn-sm btn-primary" (click)="viewContract(contract)">
-                      <i class="bx bx-file"></i> Xem
+                      <i class="bi bi-file-earmark-text"></i> Xem
                     </button>
                   </td>
                 </tr>
@@ -127,12 +197,42 @@
         <h5 class="modal-title">
           Xem hợp đồng: {{ selectedContract?.contractNumber }}
         </h5>
+        <div class="viewer-options" *ngIf="selectedContract?.contractUrl">
+          <button type="button" class="btn btn-sm btn-outline-primary me-2" 
+                  (click)="switchViewer('microsoft')" title="Microsoft Office Viewer">
+            <i class="bi bi-microsoft"></i> Microsoft
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-success me-2" 
+                  (click)="switchViewer('google')" title="Google Docs Viewer">
+            <i class="bi bi-google"></i> Google
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-info" 
+                  (click)="downloadFile()" title="Tải về">
+            <i class="bi bi-download"></i> Tải về
+          </button>
+        </div>
         <button type="button" class="btn-close" (click)="closePreview()"></button>
       </div>
       <div class="modal-body p-0">
-        <div class="ratio ratio-16x9">
-          <iframe *ngIf="previewUrl" [src]="previewUrl" frameborder="0" allowfullscreen></iframe>
+        <div class="iframe-container">
+          <div *ngIf="isLoadingPreview" class="iframe-loading">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="mt-2">Đang tải file hợp đồng...</p>
+          </div>
+          <iframe *ngIf="previewUrl" [src]="previewUrl" frameborder="0" allowfullscreen
+                  (load)="onIframeLoad()" (error)="onIframeError()"></iframe>
+          <div *ngIf="!previewUrl" class="d-flex justify-content-center align-items-center h-100 bg-light">
+            <p class="text-muted">Không thể tải tài liệu</p>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <div class="viewer-message" *ngIf="viewerMessage">
+          <p [class]="viewerMessageType">{{ viewerMessage }}</p>
+        </div>
+        <button type="button" class="btn btn-secondary" (click)="closePreview()">Đóng</button>
       </div>
     </div>
   </div>

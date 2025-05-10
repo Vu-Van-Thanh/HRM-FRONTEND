@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Relative } from '../employee.model';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import { EmployeeService } from '../employee.service';
 
 @Component({
   selector: 'app-personal-info',
@@ -12,11 +14,21 @@ export class PersonalInfoComponent implements OnInit {
   activeTab = 0; // 0: Thông tin cá nhân, 1: Thông tin người thân
   relatives: Relative[] = [];
   newRelative: Relative = {
-    name: '',
-    relationship: '',
+    firstName: '',
+    lastName: '',
+    relativeType: '',
     dateOfBirth: '',
-    phone: '',
-    address: ''
+    phoneNumber: '',
+    address: '',
+    nationality: 'Việt Nam',
+    ethnic: 'Kinh',
+    religion: 'Không',
+    placeOfBirth: '',
+    indentityCard: '',
+    country: 'Việt Nam',
+    province: '',
+    district: '',
+    commune: ''
   };
   
   employee: any = {
@@ -24,7 +36,7 @@ export class PersonalInfoComponent implements OnInit {
     position: '',
     accountID: null,
     departmentID: null,
-    firstName: 'thanhca',
+    firstName: '',
     lastName: '',
     dateOfBirth: null,
     gender: '',
@@ -49,55 +61,168 @@ export class PersonalInfoComponent implements OnInit {
     bankAccount: '',
     bank: '',
     salaryType: '',
-    employeeType: ''
+    employeeType: '',
+    phone: '',
+    email: ''
   };
   
-  relationshipOptions = ['Vợ/Chồng', 'Cha', 'Mẹ', 'Con', 'Anh/Chị', 'Em', 'Khác'];
+  relationshipOptions = ['Vợ/Chồng', 'Cha', 'Mẹ', 'Con', 'Anh/Chị/Em', 'Anh trai', 'Chị gái', 'Em trai', 'Em gái', 'Khác'];
+  isLoading = false;
   
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private employeeService: EmployeeService
+  ) { }
 
   ngOnInit(): void {
     this.getEmployeeData();
-    this.loadRelatives();
   }
 
   getEmployeeData() {
-    this.http.get('assets/data/employee.json').subscribe((data) => {
-      this.employee = data;
+    this.isLoading = true;
+    
+    // Get employeeID from localStorage
+    const userProfileString = localStorage.getItem('currentUserProfile');
+    if (userProfileString) {
+      const userProfile = JSON.parse(userProfileString);
+      const employeeId = userProfile.employeeID;
+      
+      if (employeeId) {
+        // Create filter with just employeeId
+        const filter = {
+          department: null,
+          jobTitle: null,
+          managerId: null,
+          employeeId: employeeId
+        };
+        
+        // Call the API with the filter
+        this.http.post<any>(API_ENDPOINT.getAllEmployee, filter).subscribe({
+          next: (response) => {
+            if (response && response.data && response.data.length > 0) {
+              const employeeData = response.data[0];
+              
+              // Format date for employee
+              if (employeeData.dateOfBirth) {
+                const date = new Date(employeeData.dateOfBirth);
+                employeeData.dateOfBirth = this.formatDateForInput(date);
+              }
+              
+              this.employee = employeeData;
+              console.log('Employee data loaded:', this.employee);
+              this.loadRelatives(employeeId);
+            } else {
+              console.error('No employee data returned');
+            }
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Error fetching employee data:', error);
+            this.isLoading = false;
+          }
+        });
+      } else {
+        console.error('No employee ID found in user profile');
+        this.isLoading = false;
+      }
+    } else {
+      console.error('No user profile found in localStorage');
+      this.isLoading = false;
+    }
+  }
+  
+  // Format date to YYYY-MM-DD for input fields
+  formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  
+  loadRelatives(employeeId: string) {
+    const url = API_ENDPOINT.getAllRelative.replace('{employeeId}', employeeId);
+    console.log("URL ", url);
+    this.http.get<any>(url).subscribe({
+      next: (response) => {
+        if (response) {
+          this.relatives = response.map((relative: any) => {
+            // Format date for relative
+            let formattedDate = '';
+            if (relative.dateOfBirth) {
+              const date = new Date(relative.dateOfBirth);
+              formattedDate = this.formatDateForInput(date);
+            }
+            
+            return {
+              name: `${relative.firstName || ''} ${relative.lastName || ''}`.trim(),
+              firstName: relative.firstName || '',
+              lastName: relative.lastName || '',
+              relationship: relative.relativeType || '',
+              relativeType: relative.relativeType || '',
+              dateOfBirth: formattedDate,
+              phone: relative.phoneNumber || '',
+              phoneNumber: relative.phoneNumber || '',
+              address: relative.address || '',
+              nationality: relative.nationality || 'Việt Nam',
+              ethnic: relative.ethnic || '',
+              religion: relative.religion || 'Không',
+              placeOfBirth: relative.placeOfBirth || '',
+              indentityCard: relative.indentityCard || '',
+              country: relative.country || 'Việt Nam',
+              province: relative.province || '',
+              district: relative.district || '',
+              commune: relative.commune || '',
+              employeeID: relative.employeeID || employeeId
+            };
+          });
+          console.log('Relatives loaded:', this.relatives);
+        } else {
+          console.log('No relatives data returned or empty data');
+          this.relatives = [];
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching relatives data:', error);
+        this.relatives = [];
+      }
     });
   }
   
-  loadRelatives() {
-    // Mock data for relatives
-    this.relatives = [
-      {
-        name: 'Nguyễn Văn A',
-        relationship: 'Cha',
-        dateOfBirth: '1960-01-01',
-        phone: '0123456789',
-        address: 'Số 123, Đường ABC, Quận 1, TP.HCM'
-      },
-      {
-        name: 'Trần Thị B',
-        relationship: 'Mẹ',
-        dateOfBirth: '1962-05-15',
-        phone: '0987654321',
-        address: 'Số 123, Đường ABC, Quận 1, TP.HCM'
-      }
-    ];
-  }
-  
   addRelative() {
-    if (this.newRelative.name && this.newRelative.relationship) {
-      this.relatives.push({...this.newRelative});
-      // Reset form
-      this.newRelative = {
-        name: '',
-        relationship: '',
-        dateOfBirth: '',
-        phone: '',
-        address: ''
-      };
+    if (this.newRelative.firstName && this.newRelative.lastName && this.newRelative.relativeType) {
+      // Get employeeID from localStorage
+      const userProfileString = localStorage.getItem('currentUserProfile');
+      if (userProfileString) {
+        const userProfile = JSON.parse(userProfileString);
+        const employeeId = userProfile.employeeID;
+        
+        const relativeToAdd: Relative = {
+          ...this.newRelative,
+          employeeID: employeeId,
+          name: `${this.newRelative.firstName} ${this.newRelative.lastName}`.trim()
+        };
+        
+        this.relatives.push(relativeToAdd);
+        
+        // Reset form
+        this.newRelative = {
+          firstName: '',
+          lastName: '',
+          relativeType: '',
+          dateOfBirth: '',
+          phoneNumber: '',
+          address: '',
+          nationality: 'Việt Nam',
+          ethnic: 'Kinh',
+          religion: 'Không',
+          placeOfBirth: '',
+          indentityCard: '',
+          country: 'Việt Nam',
+          province: '',
+          district: '',
+          commune: ''
+        };
+      }
     }
   }
   

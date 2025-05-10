@@ -7,11 +7,25 @@ export interface WorkHistory {
 }
 
 export interface Relative {
-  name: string;
-  relationship: string;
-  dateOfBirth: string;
-  phone: string;
-  address: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  relationship?: string;
+  relativeType?: string;
+  dateOfBirth?: string;
+  phone?: string;
+  phoneNumber?: string;
+  address?: string;
+  nationality?: string;
+  ethnic?: string;
+  religion?: string;
+  placeOfBirth?: string;
+  indentityCard?: string;
+  country?: string;
+  province?: string;
+  district?: string;
+  commune?: string;
+  employeeID?: string;
 }
 
 export interface Contract {
