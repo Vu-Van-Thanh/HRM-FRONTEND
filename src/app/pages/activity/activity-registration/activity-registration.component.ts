@@ -272,6 +272,13 @@ export class ActivityRegistrationComponent implements OnInit {
       fieldType: 'Number',
       value: estimatedHours
     };
+
+    // Thêm key "0000" vào requestFlds
+    requestFlds['0000'] = {
+      fieldName: 'Mô tả hoạt động',
+      fieldType: 'Text',
+      value: this.selectedActivity?.activityDescription 
+    };
     
     // Tạo bản sao của thời gian đã chọn để tránh ảnh hưởng đến UI
     const startDateToSend = new Date(startDate.getTime());

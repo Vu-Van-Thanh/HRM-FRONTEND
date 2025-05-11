@@ -139,60 +139,70 @@
     <div class="row mb-4">
         <!-- Personal Schedule Section -->
         <div class="col-xl-4">
-            <div class="card h-100">
-                <div class="card-body">
+            <div class="card equal-height-card">
+                <div class="card-body d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Lịch Cá Nhân</h4>
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-toggle text-muted" data-bs-toggle="dropdown">
-                                <i class="bx bx-dots-horizontal-rounded"></i>
-                            </a>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-light me-2" (click)="previousWeek()">
+                                <i class="bx bx-chevron-left"></i>
+                            </button>
+                            <span class="text-muted small">
+                                {{ formatDate(weekStartDate) }} - {{ formatDate(weekEndDate) }}
+                            </span>
+                            <button class="btn btn-sm btn-light ms-2" (click)="nextWeek()">
+                                <i class="bx bx-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
                     
                     <!-- Calendar Days -->
-                    <div class="d-flex gap-2 mb-4">
-                        <div class="text-center p-2 rounded bg-light">
-                            <div class="text-muted small">Th2</div>
-                            <div class="font-size-16 fw-bold">03</div>
-                        </div>
-                        <div class="text-center p-2 rounded bg-light">
-                            <div class="text-muted small">Th2</div>
-                            <div class="font-size-16 fw-bold">04</div>
-                        </div>
-                        <div class="text-center p-2 rounded bg-light">
-                            <div class="text-muted small">Th2</div>
-                            <div class="font-size-16 fw-bold">05</div>
-                        </div>
-                        <div class="text-center p-2 rounded bg-light">
-                            <div class="text-muted small">Th2</div>
-                            <div class="font-size-16 fw-bold">06</div>
-                        </div>
+                    <div class="d-flex gap-2 mb-4 justify-content-between">
+                        <ng-container *ngFor="let i of [0, 1, 2, 3, 4, 5, 6]">
+                            <div class="text-center p-2 rounded cursor-pointer" 
+                                 [ngClass]="getWeekdayStatusClass(i)"
+                                 (click)="selectWeekday(i)">
+                                <div class="text-muted small">{{ ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][i] }}</div>
+                                <div class="font-size-16 fw-bold">
+                                    {{ getWeekdayDate(i) }}
+                                </div>
+                            </div>
+                        </ng-container>
                     </div>
 
-                    <!-- Schedule Items -->
+                    <!-- Schedule Items with overflow scroll -->
                     <div class="schedule-items">
-                        <div class="card mb-3 bg-light">
-                            <div class="card-body py-2">
-                                <h6 class="card-title mb-1">Thiết kế giao diện Web Portal</h6>
-                                <p class="text-muted small mb-1">Người giao: Đặng Vũ</p>
-                                <span class="badge bg-warning text-dark">04 Th2</span>
+                        <ng-container *ngIf="filteredActivities && filteredActivities.length > 0; else noActivities">
+                            <div class="card mb-3 bg-light" *ngFor="let activity of filteredActivities">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="card-title mb-1">{{ getActivityInRequestFlds(activity.requestFlds) }}</h6>
+                                        <span class="badge" [ngClass]="{'bg-success': activity.status === 'APPROVED', 
+                                                                       'bg-warning': activity.status === 'PENDING', 
+                                                                       'bg-danger': activity.status === 'REJECTED'}">
+                                            {{ activity.status }}
+                                        </span>
+                                    </div>
+                                    <p class="text-muted small mb-1">ID: {{ activity.activityId }}</p>
+                                    <p class="text-muted small mb-0" *ngIf="activity.startTime">
+                                        {{ activity.startTime | date:'dd/MM/yyyy HH:mm' }}
+                                        <ng-container *ngIf="activity.endTime">
+                                            - {{ activity.endTime | date:'dd/MM/yyyy HH:mm' }}
+                                        </ng-container>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="card mb-3 bg-light">
-                            <div class="card-body py-2">
-                                <h6 class="card-title mb-1">Seminar</h6>
-                                <p class="text-muted small mb-1">Lầu G, chia sẻ về cuộc đời</p>
-                                <p class="text-muted small mb-0">10:00AM - 11:30AM</p>
+                        </ng-container>
+                        <ng-template #noActivities>
+                            <div class="alert alert-info">
+                                <ng-container *ngIf="selectedWeekday !== null; else allDaysMessage">
+                                    Không có hoạt động nào vào ngày này
+                                </ng-container>
+                                <ng-template #allDaysMessage>
+                                    Không có hoạt động nào trong tuần này
+                                </ng-template>
                             </div>
-                        </div>
-                        <div class="card mb-3 bg-light">
-                            <div class="card-body py-2">
-                                <h6 class="card-title mb-1">Phỏng vấn</h6>
-                                <p class="text-muted small mb-1">Lầu 4, ứng viên Front-End</p>
-                                <p class="text-muted small mb-0">08:00AM - 10:30AM</p>
-                            </div>
-                        </div>
+                        </ng-template>
                     </div>
                 </div>
             </div>
@@ -200,7 +210,7 @@
 
         <!-- Work Progress Section -->
         <div class="col-xl-4">
-            <div class="card h-100">
+            <div class="card equal-height-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Tiến Độ Công Việc</h4>
@@ -223,7 +233,7 @@
                     </div>
                     
                     <!-- Progress Chart -->
-                    <div class="chart-container" style="height: 150px;">
+                    <div class="chart-container">
                         <apx-chart 
                             dir="ltr" 
                             [series]="workProgressChart.series" 
@@ -241,7 +251,7 @@
 
         <!-- Attendance Hours Section -->
         <div class="col-xl-4">
-            <div class="card h-100">
+            <div class="card equal-height-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="card-title mb-0">Số Giờ Chấm Công</h4>

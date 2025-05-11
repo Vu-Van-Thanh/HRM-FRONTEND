@@ -3,6 +3,8 @@ import { emailSentBarChart, monthlyEarningChart } from './data';
 import { ChartType } from './dashboard.model';
 import { BsModalService, BsModalRef, ModalDirective } from 'ngx-bootstrap/modal';
 import { EventService } from '../../../core/services/event.service';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
 import { ConfigService } from '../../../core/services/config.service';
 
@@ -10,7 +12,30 @@ import { ConfigService } from '../../../core/services/config.service';
 interface CalendarDay {
   date: number | null;
   isCurrentMonth: boolean;
-  status?: string; // 'success', 'danger', 'warning', 'info', etc.
+  status?: string; 
+  activities?: ActivityRequestDTO[]; 
+
+}
+
+// Activity request interface
+interface ActivityRequestDTO {
+  requestId: string;
+  employeeId: string;
+  activityId: string;
+  createdAt: Date;
+  startTime?: Date;
+  endTime?: Date;
+  status: string;
+  requestFlds: string;
+}
+
+// Activity filter interface
+interface ActivityFilter {
+  activityId?: string;
+  status?: string;
+  employeeIdList?: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 @Component({
@@ -34,9 +59,15 @@ export class DefaultComponent implements OnInit {
   isActive: string;
 
   // Calendar properties
-  selectedMonth: number = new Date().getMonth() + 1; // Current month (1-12)
+  selectedMonth: number = new Date().getMonth(); // Current month (0-11)
   selectedYear: number = new Date().getFullYear(); // Current year
   calendarWeeks: CalendarDay[][] = [];
+  employeeId: string = '';
+  employeeActivities: ActivityRequestDTO[] = [];
+  weekStartDate: Date = new Date();
+  weekEndDate: Date = new Date();
+  selectedWeekday: number | null = null; // Selected weekday (0-6, null for all days)
+  filteredActivities: ActivityRequestDTO[] = []; // Filtered activities based on selected day
   
   // Chart properties
   workProgressChart: ChartType;
@@ -44,11 +75,19 @@ export class DefaultComponent implements OnInit {
   
   @ViewChild('content') content;
   @ViewChild('center', { static: false }) center?: ModalDirective;
-  constructor(private modalService: BsModalService, private configService: ConfigService, private eventService: EventService) {
+  constructor(
+    private modalService: BsModalService, 
+    private configService: ConfigService, 
+    private eventService: EventService,
+    private http: HttpClient
+  ) {
   }
 
   ngOnInit(): void {
     this.fetchData();
+    this.loadCurrentUserProfile();
+    this.setCurrentWeekDates();
+    this.fetchEmployeeActivities();
     this.updateCalendar();
     this.initWorkProgressChart();
     this.initAttendanceHoursChart();
@@ -68,10 +107,151 @@ export class DefaultComponent implements OnInit {
     this.monthlyEarningChart = monthlyEarningChart;
 
     this.isActive = 'year';
-    this.configService.getConfig().subscribe(data => {
-      this.transactions = data.transactions;
-      this.statData = data.statData;
+  }
+  
+  /**
+   * Load current user profile from localStorage
+   */
+  loadCurrentUserProfile() {
+    try {
+      const userProfileString = localStorage.getItem('currentUserProfile');
+      if (userProfileString) {
+        const userProfile = JSON.parse(userProfileString);
+        this.employeeId = userProfile.employeeID || '';
+        console.log('Loaded employee ID:', this.employeeId);
+      }
+    } catch (error) {
+      console.error('Error parsing user profile from localStorage:', error);
+    }
+  }
+
+  /**
+   * Set start and end dates for the current week
+   */
+  setCurrentWeekDates() {
+    // Create date with local timezone
+    const currentDate = new Date();
+    
+    // Get the first day of the week (Sunday)
+    const firstDay = new Date(currentDate);
+    const day = currentDate.getDay();
+    firstDay.setDate(currentDate.getDate() - day);
+    firstDay.setHours(0, 0, 0, 0); // Set to start of day
+    
+    // Get the last day of the week (Saturday)
+    const lastDay = new Date(firstDay);
+    lastDay.setDate(firstDay.getDate() + 6);
+    lastDay.setHours(23, 59, 59, 999); // Set to end of day
+    
+    this.weekStartDate = firstDay;
+    this.weekEndDate = lastDay;
+    
+    console.log('Week dates:', {
+      start: this.formatDate(this.weekStartDate),
+      end: this.formatDate(this.weekEndDate)
     });
+  }
+
+  /**
+   * Navigate to previous week
+   */
+  previousWeek() {
+    const newStartDate = new Date(this.weekStartDate);
+    newStartDate.setDate(this.weekStartDate.getDate() - 7);
+    
+    const newEndDate = new Date(this.weekEndDate);
+    newEndDate.setDate(this.weekEndDate.getDate() - 7);
+    
+    this.weekStartDate = newStartDate;
+    this.weekEndDate = newEndDate;
+    this.selectedMonth = this.weekStartDate.getMonth();
+    this.selectedYear = this.weekStartDate.getFullYear();
+    
+    this.fetchEmployeeActivities();
+    this.updateCalendar();
+    
+    // Reset selected weekday when changing weeks
+    this.selectedWeekday = null;
+    this.updateFilteredActivities();
+  }
+
+  /**
+   * Navigate to next week
+   */
+  nextWeek() {
+    const newStartDate = new Date(this.weekStartDate);
+    newStartDate.setDate(this.weekStartDate.getDate() + 7);
+    
+    const newEndDate = new Date(this.weekEndDate);
+    newEndDate.setDate(this.weekEndDate.getDate() + 7);
+    
+    this.weekStartDate = newStartDate;
+    this.weekEndDate = newEndDate;
+    this.selectedMonth = this.weekStartDate.getMonth();
+    this.selectedYear = this.weekStartDate.getFullYear();
+    
+    this.fetchEmployeeActivities();
+    this.updateCalendar();
+    
+    // Reset selected weekday when changing weeks
+    this.selectedWeekday = null;
+    this.updateFilteredActivities();
+  }
+
+  /**
+   * Fetch employee activities from API
+   */
+  fetchEmployeeActivities() {
+    if (!this.employeeId) {
+      console.error('No employee ID available');
+      return;
+    }
+
+    // Format dates for API request
+    const startYear = this.weekStartDate.getFullYear();
+    const startMonth = (this.weekStartDate.getMonth() + 1).toString().padStart(2, '0');
+    const startDay = this.weekStartDate.getDate().toString().padStart(2, '0');
+    const startDateStr = `${startYear}-${startMonth}-${startDay}T00:00:00`;
+
+    const endYear = this.weekEndDate.getFullYear();
+    const endMonth = (this.weekEndDate.getMonth() + 1).toString().padStart(2, '0');
+    const endDay = this.weekEndDate.getDate().toString().padStart(2, '0');
+    const endDateStr = `${endYear}-${endMonth}-${endDay}T23:59:59`;
+
+    const filter: ActivityFilter = {
+      employeeIdList: this.employeeId,
+      startDate: new Date(startDateStr),
+      endDate: new Date(endDateStr)
+    };
+
+    console.log('Fetching activities with filter:', {
+      employeeId: this.employeeId,
+      startDate: startDateStr,
+      endDate: endDateStr
+    });
+
+    const params = new HttpParams({
+      fromObject: {
+        ...(filter.activityId && { activityId: filter.activityId }),
+        ...(filter.status && { status: filter.status }),
+        ...(filter.employeeIdList && { employeeIdList: filter.employeeIdList }),
+        ...(filter.startDate && { startDate: startDateStr }),
+        ...(filter.endDate && { endDate: endDateStr })
+      }
+    });
+
+    this.http.get<ActivityRequestDTO[]>(`${API_ENDPOINT.getAllActivity}`, { params })
+      .subscribe({
+        next: (data) => {
+          console.log('Employee activities:', data);
+          this.employeeActivities = data;
+          this.updateFilteredActivities();
+          this.updateCalendar();
+        },
+        error: (error) => {
+          console.error('Error fetching employee activities:', error);
+        }
+      });
   }
   
   /**
@@ -80,20 +260,28 @@ export class DefaultComponent implements OnInit {
   updateCalendar() {
     this.calendarWeeks = [];
     
-    // Get first day of the month and last day of the month
-    const firstDayOfMonth = new Date(this.selectedYear, this.selectedMonth - 1, 1);
-    const lastDayOfMonth = new Date(this.selectedYear, this.selectedMonth, 0);
+    console.log('Updating calendar with month/year:', this.selectedMonth, this.selectedYear);
     
-    // Get day of week of first day (0 = Sunday, 1 = Monday, etc.)
+   // lấy ngày đầu tiên/ cuối cùng trong tháng
+    const firstDayOfMonth = new Date(this.selectedYear, this.selectedMonth, 1);
+    const lastDayOfMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0);
+    
+    console.log("firstDayOfMonth - ", firstDayOfMonth);
+    console.log("lastDayOfMonth - ", lastDayOfMonth);
+    
+    // lấy thứ đầu tiên trong tháng
     const firstDayWeekday = firstDayOfMonth.getDay();
+    console.log("firstDayWeekday - ", firstDayWeekday);
     
-    // Calculate days from previous month to show
+    // số ngày còn thiếu để thành 1 hàng 7 ngày
     const daysFromPrevMonth = firstDayWeekday;
+    console.log("daysFromPrevMonth - ", daysFromPrevMonth);
     
-    // Get last day of previous month
-    const lastDayOfPrevMonth = new Date(this.selectedYear, this.selectedMonth - 1, 0).getDate();
+    // lấy ngày cuối cùng trong tháng trước
+    const lastDayOfPrevMonth = new Date(this.selectedYear, this.selectedMonth, 0).getDate();
+    console.log("lastDayOfPrevMonth - ", lastDayOfPrevMonth);
     
-    // Current date counter
+    // ngày hiện tại
     let currentDate = 1;
     let nextMonthDate = 1;
     
@@ -108,31 +296,45 @@ export class DefaultComponent implements OnInit {
       
       // Generate days for current week
       for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        let calendarDay: CalendarDay;
+        let dayDate: Date;
+        
         if (weekIndex === 0 && dayIndex < firstDayWeekday) {
-          // Show days from previous month
+          // Days from previous month
           const prevMonthDate = lastDayOfPrevMonth - daysFromPrevMonth + dayIndex + 1;
-          week.push({
+          dayDate = new Date(this.selectedYear, this.selectedMonth - 1, prevMonthDate);
+          
+          calendarDay = {
             date: prevMonthDate,
             isCurrentMonth: false,
-            status: this.getRandomStatus() // In real app, this would come from your data
-          });
+            activities: this.getActivitiesForDate(dayDate)
+          };
         } else if (currentDate <= lastDayOfMonth.getDate()) {
-          // Show days from current month
-          week.push({
+          // Days from current month
+          dayDate = new Date(this.selectedYear, this.selectedMonth, currentDate);
+          
+          calendarDay = {
             date: currentDate,
             isCurrentMonth: true,
-            status: this.getRandomStatus() // In real app, this would come from your data
-          });
+            activities: this.getActivitiesForDate(dayDate)
+          };
           currentDate++;
         } else {
-          // Show days from next month
-          week.push({
+          // Days from next month
+          dayDate = new Date(this.selectedYear, this.selectedMonth + 1, nextMonthDate);
+          
+          calendarDay = {
             date: nextMonthDate,
             isCurrentMonth: false,
-            status: this.getRandomStatus() // In real app, this would come from your data
-          });
+            activities: this.getActivitiesForDate(dayDate)
+          };
           nextMonthDate++;
         }
+        
+        // Determine status based on activities
+        calendarDay.status = this.determineStatusFromActivities(calendarDay.activities);
+        
+        week.push(calendarDay);
       }
       
       this.calendarWeeks.push(week);
@@ -145,6 +347,72 @@ export class DefaultComponent implements OnInit {
   }
   
   /**
+   * Get activities for a specific date
+   * @param date The date to check
+   * @returns Activities for the date
+   */
+  getActivitiesForDate(date: Date): ActivityRequestDTO[] {
+    if (!this.employeeActivities || !Array.isArray(this.employeeActivities)) {
+      return [];
+    }
+    
+    // Format date as YYYY-MM-DD for comparison
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+    
+    return this.employeeActivities.filter(activity => {
+      if (!activity.startTime) return false;
+      
+      // Create date object from activity start time
+      const activityDate = new Date(activity.startTime);
+      
+      // Format activity date as YYYY-MM-DD
+      const activityYear = activityDate.getFullYear();
+      const activityMonth = (activityDate.getMonth() + 1).toString().padStart(2, '0');
+      const activityDay = activityDate.getDate().toString().padStart(2, '0');
+      const activityDateString = `${activityYear}-${activityMonth}-${activityDay}`;
+      
+      return activityDateString === dateString;
+    });
+  }
+  
+  /**
+   * Determine calendar day status based on activities
+   * @param activities Activities for the day
+   * @returns Status string
+   */
+  determineStatusFromActivities(activities?: ActivityRequestDTO[]): string {
+    if (!activities || activities.length === 0) {
+      return 'none';
+    }
+    
+    // Check if there's any activity with specific statuses
+    const hasApproved = activities.some(a => a.status === 'APPROVED');
+    const hasPending = activities.some(a => a.status === 'PENDING');
+    const hasRejected = activities.some(a => a.status === 'REJECTED');
+    
+    if (hasApproved) return 'present';
+    if (hasPending) return 'pending';
+    if (hasRejected) return 'absent';
+    
+    return 'none';
+  }
+  
+  getActivityInRequestFlds(requestFlds: string): string {
+    try {
+      const parsed = JSON.parse(requestFlds);
+      if (parsed["0000"] && parsed["0000"].value) {
+        return parsed["0000"].value;
+      }
+      return '';
+    } catch (e) {
+      console.error('Invalid JSON:', e);
+      return '';
+    }
+  }
+  /**
    * Returns the appropriate CSS class for a status
    * @param status The attendance status
    */
@@ -153,30 +421,38 @@ export class DefaultComponent implements OnInit {
       case 'present':
         return 'bg-success';
       case 'absent':
-        return 'bg-primary';
-      case 'overtime':
         return 'bg-danger';
-      case 'fullShift':
+      case 'pending':
         return 'bg-warning';
+      case 'overtime':
+        return 'bg-info';
+      case 'fullShift':
+        return 'bg-primary';
       case 'late':
         return 'bg-danger';
       case 'holiday':
         return 'bg-info';
+      case 'none':
       default:
-        return 'bg-secondary';
+        return 'bg-light';
     }
   }
   
   /**
-   * Helper method to generate random statuses for demo purposes
-   * In a real app, this would be replaced with actual attendance data
+   * Format date to display in the UI
+   * @param date Date object
+   * @returns Formatted date string
    */
-  private getRandomStatus(): string {
-    const statuses = ['present', 'absent', 'overtime', 'fullShift', 'late', 'holiday'];
-    const randomIndex = Math.floor(Math.random() * statuses.length);
-    return statuses[randomIndex];
+  formatDate(date: Date): string {
+    if (!date) return '';
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
   }
-  
+
   opencenterModal(template: TemplateRef<any>) {
     this.modalRef = this.modalService.show(template);
   }
@@ -231,11 +507,18 @@ export class DefaultComponent implements OnInit {
   private initWorkProgressChart() {
     this.workProgressChart = {
       chart: {
-        height: 280,
+        height: 200,
         type: 'area',
         toolbar: {
           show: false,
-        }
+        },
+        animations: {
+          enabled: true
+        },
+        sparkline: {
+          enabled: false
+        },
+        redrawOnParentResize: true
       },
       dataLabels: {
         enabled: false
@@ -261,7 +544,10 @@ export class DefaultComponent implements OnInit {
       },
       xaxis: {
         categories: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
-      },
+        labels: {
+          show: true
+        }
+      }
     };
   }
 
@@ -299,5 +585,89 @@ export class DefaultComponent implements OnInit {
    */
   changeLayout(layout: string) {
     this.eventService.broadcast('changeLayout', layout);
+  }
+
+  /**
+   * Get the date for a specific weekday in the current week
+   * @param dayIndex Day index (0=Sunday, 1=Monday, etc.)
+   * @returns Day of the month
+   */
+  getWeekdayDate(dayIndex: number): number {
+    const date = new Date(this.weekStartDate);
+    date.setDate(this.weekStartDate.getDate() + dayIndex);
+    return date.getDate();
+  }
+
+  /**
+   * Get the CSS class for a specific weekday in the current week
+   * @param dayIndex Day index (0=Sunday, 1=Monday, etc.)
+   * @returns CSS class string
+   */
+  getWeekdayStatusClass(dayIndex: number): string {
+    const date = new Date(this.weekStartDate);
+    date.setDate(date.getDate() + dayIndex);
+    
+    // Get activities for this date
+    const activities = this.getActivitiesForDate(date);
+    const status = this.determineStatusFromActivities(activities);
+    
+    // Add selected class if this is the selected weekday
+    let baseClass = '';
+    if (this.selectedWeekday === dayIndex) {
+      baseClass = 'bg-primary-subtle';
+    } else {
+      // Return appropriate CSS classes based on status
+      switch (status) {
+        case 'present':
+          baseClass = 'bg-success-subtle';
+          break;
+        case 'pending':
+          baseClass = 'bg-warning-subtle';
+          break;
+        case 'absent':
+          baseClass = 'bg-danger-subtle';
+          break;
+        default:
+          baseClass = 'bg-light';
+          break;
+      }
+    }
+    
+    return baseClass;
+  }
+  
+  /**
+   * Handle weekday selection
+   * @param dayIndex Day index to select (0=Sunday, 1=Monday, etc.)
+   */
+  selectWeekday(dayIndex: number): void {
+    // Toggle selection if clicking the same day again
+    if (this.selectedWeekday === dayIndex) {
+      this.selectedWeekday = null;
+    } else {
+      this.selectedWeekday = dayIndex;
+    }
+    
+    // Update filtered activities based on selection
+    this.updateFilteredActivities();
+  }
+  
+  /**
+   * Update filtered activities based on selected weekday
+   */
+  updateFilteredActivities(): void {
+    if (this.selectedWeekday === null) {
+      // If no weekday is selected, show all activities for the week
+      this.filteredActivities = [...this.employeeActivities];
+    } else {
+      // Filter activities for the selected weekday
+      const selectedDate = new Date(this.weekStartDate);
+      selectedDate.setDate(this.weekStartDate.getDate() + this.selectedWeekday);
+      
+      this.filteredActivities = this.getActivitiesForDate(selectedDate);
+    }
+    
+    // Log for debugging
+    console.log('Filtered activities:', this.filteredActivities.length, 'Selected weekday:', this.selectedWeekday);
   }
 }
