@@ -944,7 +944,7 @@ export class SalaryComponent implements OnInit, AfterViewInit {
       this.updatePaymentsChart();
       this.updateCharts();
       this.cdr.detectChanges();
-    }, 500); // Increase timeout to ensure data is loaded
+    }, 500); 
   }
 
   /**
@@ -1042,7 +1042,7 @@ export class SalaryComponent implements OnInit, AfterViewInit {
             // If the API doesn't provide these fields, calculate them based on available data
             const baseSalary = payment.baseSalary || (this.salaryInfo?.salaryBase?.baseSalary || 0);
             const bonusAmount = payment.bonusAmount || this.totalBonuses;
-            const deductionAmount = payment.deductionAmount || this.totalDeductions;
+            const deductionAmount = payment.deductionAmount ;//|| this.totalDeductions;
             const adjustmentAmount = payment.adjustmentAmount || 0;
             
             return {
@@ -1170,26 +1170,37 @@ export class SalaryComponent implements OnInit, AfterViewInit {
       console.log('No bonus adjustments to display in chart');
       return;
     }
+    const baseSalary = this.salaryInfo?.salaryBase?.baseSalary || 0;
+    console.log("Bonus data ZZZZZZZZZZZZ ", this.bonusAdjustments)  
     
-    console.log('Updating bonus chart with data:', this.bonusAdjustments);
+    // Group bonuses by their adjustment name
+    const bonusByName = this.bonusAdjustments.reduce((acc, bonus) => {
+      const name = bonus.adjustmentName || 'Unknown';
+      if (!acc[name]) {
+        acc[name] = {
+          fixed: 0,
+          percentage: 0
+        };
+      }
+      
+      // A bonus can have both percentage and fixed amount components
+      if (bonus.percentage) {
+        acc[name].percentage += (bonus.percentage * baseSalary / 100 || 0);
+      } 
+      
+      if (bonus.amount) {
+        acc[name].fixed += (bonus.amount || 0);
+      }
+      
+      return acc;
+    }, {});
     
-    // Get unique bonus names
-    const bonusNames = [...new Set(this.bonusAdjustments.map(item => item.adjustmentName || 'Unknown'))];
+    // Extract unique bonus names as labels
+    const bonusNames = Object.keys(bonusByName);
     
-    // Create data for fixed and percentage-based bonuses
-    const fixedBonuses = bonusNames.map(name => {
-      const bonus = this.bonusAdjustments.find(b => 
-        (b.adjustmentName || 'Unknown') === name && !b.percentage
-      );
-      return bonus ? bonus.resultAmount || 0 : 0;
-    });
-    
-    const percentageBonuses = bonusNames.map(name => {
-      const bonus = this.bonusAdjustments.find(b => 
-        (b.adjustmentName || 'Unknown') === name && !!b.percentage
-      );
-      return bonus ? bonus.resultAmount || 0 : 0;
-    });
+    // Extract fixed and percentage amounts
+    const fixedBonuses = bonusNames.map(name => bonusByName[name].fixed);
+    const percentageBonuses = bonusNames.map(name => bonusByName[name].percentage);
     
     // Update chart data
     this.bonusChartData.labels = bonusNames;
@@ -1208,25 +1219,37 @@ export class SalaryComponent implements OnInit, AfterViewInit {
       return;
     }
     
+    const baseSalary = this.salaryInfo?.salaryBase?.baseSalary || 0;
     console.log('Updating deduction chart with data:', this.deductionAdjustments);
     
-    // Get unique deduction names
-    const deductionNames = [...new Set(this.deductionAdjustments.map(item => item.adjustmentName || 'Unknown'))];
+    // Group deductions by their adjustment name
+    const deductionByName = this.deductionAdjustments.reduce((acc, deduction) => {
+      const name = deduction.adjustmentName || 'Unknown';
+      if (!acc[name]) {
+        acc[name] = {
+          fixed: 0,
+          percentage: 0
+        };
+      }
+      
+      // A deduction can have both percentage and fixed amount components
+      if (deduction.percentage) {
+        acc[name].percentage += (deduction.percentage * baseSalary / 100 || 0);
+      } 
+      
+      if (deduction.amount) {
+        acc[name].fixed += (deduction.amount || 0);
+      }
+      
+      return acc;
+    }, {});
     
-    // Create data for fixed and percentage-based deductions
-    const fixedDeductions = deductionNames.map(name => {
-      const deduction = this.deductionAdjustments.find(d => 
-        (d.adjustmentName || 'Unknown') === name && !d.percentage
-      );
-      return deduction ? deduction.resultAmount || 0 : 0;
-    });
+    // Extract unique deduction names as labels
+    const deductionNames = Object.keys(deductionByName);
     
-    const percentageDeductions = deductionNames.map(name => {
-      const deduction = this.deductionAdjustments.find(d => 
-        (d.adjustmentName || 'Unknown') === name && !!d.percentage
-      );
-      return deduction ? deduction.resultAmount || 0 : 0;
-    });
+    // Extract fixed and percentage amounts
+    const fixedDeductions = deductionNames.map(name => deductionByName[name].fixed);
+    const percentageDeductions = deductionNames.map(name => deductionByName[name].percentage);
     
     // Update chart data
     this.deductionChartData.labels = deductionNames;
@@ -1283,8 +1306,7 @@ export class SalaryComponent implements OnInit, AfterViewInit {
       const dateB = b.paymentDate ? new Date(b.paymentDate).getTime() : 0;
       return dateA - dateB;
     });
-    
-    // Format dates for display
+     // Format dates for display
     this.salaryChartData.labels = sortedPayments.map(item => 
       this.formatDate(item.paymentDate || '')
     );
@@ -1307,25 +1329,37 @@ export class SalaryComponent implements OnInit, AfterViewInit {
       return;
     }
     
+    const baseSalary = this.salaryInfo?.salaryBase?.baseSalary || 0;
     console.log('Updating other adjustments chart with data:', this.otherAdjustments);
     
-    // Get unique adjustment names
-    const adjustmentNames = [...new Set(this.otherAdjustments.map(item => item.adjustmentName || 'Unknown'))];
+    // Group other adjustments by their adjustment name
+    const adjustmentByName = this.otherAdjustments.reduce((acc, adjustment) => {
+      const name = adjustment.adjustmentName || 'Unknown';
+      if (!acc[name]) {
+        acc[name] = {
+          fixed: 0,
+          percentage: 0
+        };
+      }
+      
+      // An adjustment can have both percentage and fixed amount components
+      if (adjustment.percentage) {
+        acc[name].percentage += (adjustment.percentage * baseSalary / 100 || 0);
+      } 
+      
+      if (adjustment.amount) {
+        acc[name].fixed += (adjustment.amount || 0);
+      }
+      
+      return acc;
+    }, {});
     
-    // Create data for fixed and percentage-based adjustments
-    const fixedAdjustments = adjustmentNames.map(name => {
-      const adjustment = this.otherAdjustments.find(adj => 
-        (adj.adjustmentName || 'Unknown') === name && !adj.percentage
-      );
-      return adjustment ? adjustment.resultAmount || 0 : 0;
-    });
+    // Extract unique adjustment names as labels
+    const adjustmentNames = Object.keys(adjustmentByName);
     
-    const percentageAdjustments = adjustmentNames.map(name => {
-      const adjustment = this.otherAdjustments.find(adj => 
-        (adj.adjustmentName || 'Unknown') === name && !!adj.percentage
-      );
-      return adjustment ? adjustment.resultAmount || 0 : 0;
-    });
+    // Extract fixed and percentage amounts
+    const fixedAdjustments = adjustmentNames.map(name => adjustmentByName[name].fixed);
+    const percentageAdjustments = adjustmentNames.map(name => adjustmentByName[name].percentage);
     
     // Update chart data
     this.otherAdjustmentsChartData.labels = adjustmentNames;
