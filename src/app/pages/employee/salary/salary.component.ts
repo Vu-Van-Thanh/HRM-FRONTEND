@@ -212,12 +212,12 @@ export class SalaryComponent implements OnInit, AfterViewInit {
       {
         data: [],
         label: 'Lương cũ',
-        borderColor: 'rgba(75, 192, 192, 0.8)',
+        borderColor: 'rgba(230, 0, 0, 0.8)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         fill: true,
         tension: 0.4,
         borderWidth: 2,
-        pointBackgroundColor: 'rgba(75, 192, 192, 1)'
+        pointBackgroundColor: 'rgb(247, 0, 0)'
       },
       {
         data: [],
@@ -1130,24 +1130,43 @@ export class SalaryComponent implements OnInit, AfterViewInit {
   calculateTotals(): void {
     // Get base salary
     const baseSalary = this.salaryInfo?.salaryBase?.baseSalary || 0;
-    
     // Calculate total bonuses
     this.totalBonuses = Array.isArray(this.bonusAdjustments) ? 
-      this.bonusAdjustments.reduce((sum, item) => sum + (item.resultAmount || 0), 0) : 0;
+      this.bonusAdjustments.reduce((sum, item) => {
+        
+        return sum  + item.result;
+      }, 0) : 0;
     
     // Calculate total deductions
     this.totalDeductions = Array.isArray(this.deductionAdjustments) ? 
-      this.deductionAdjustments.reduce((sum, item) => sum + (item.resultAmount || 0), 0) : 0;
+      this.deductionAdjustments.reduce((sum, item) => {
+        return sum + item.result;
+      }, 0) : 0;
       
     // Calculate total other adjustments
     this.totalOtherAdjustments = Array.isArray(this.otherAdjustments) ? 
-      this.otherAdjustments.reduce((sum, item) => sum + (item.resultAmount || 0), 0) : 0;
+      this.otherAdjustments.reduce((sum, item) => {
+        return sum + item.result;
+        }
+        , 0) : 0;
     
     // Calculate percentages (if base salary is not zero)
     if (baseSalary > 0) {
-      this.bonusPercentage = (Number(this.totalBonuses) / Number(baseSalary)) * 100;
-      this.deductionPercentage = (Number(this.totalDeductions) / Number(baseSalary)) * 100;
-      this.otherAdjustmentsPercentage = (Number(this.totalOtherAdjustments) / Number(baseSalary)) * 100;
+      this.bonusPercentage = Array.isArray(this.bonusAdjustments) ? 
+      this.bonusAdjustments.reduce((sum, item) => {
+        
+        return sum  + item.percentage;
+      }, 0) : 0
+      this.deductionPercentage = Array.isArray(this.deductionAdjustments) ? 
+      this.deductionAdjustments.reduce((sum, item) => {
+        
+        return sum  + item.percentage;
+      }, 0) : 0
+      this.otherAdjustmentsPercentage = Array.isArray(this.otherAdjustments) ? 
+      this.otherAdjustments.reduce((sum, item) => {
+        
+        return sum  + item.percentage;
+      }, 0) : 0
     } else {
       this.bonusPercentage = 0;
       this.deductionPercentage = 0;
@@ -1258,7 +1277,7 @@ export class SalaryComponent implements OnInit, AfterViewInit {
     
     console.log('Deduction chart data updated:', this.deductionChartData);
   }
-
+  
   /**
    * Update salary history chart
    */

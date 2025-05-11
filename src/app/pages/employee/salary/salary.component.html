@@ -38,6 +38,10 @@
                     <td>{{totalDeductions | number}} VNĐ</td>
                   </tr>
                   <tr>
+                    <th>Điều chỉnh khác:</th>
+                    <td>{{totalOtherAdjustments | number}} VNĐ</td>
+                  </tr>
+                  <tr>
                     <th>Lương thực lãnh:</th>
                     <td>{{netSalary | number}} VNĐ</td>
                   </tr>
@@ -122,7 +126,7 @@
                   <tr>
                     <th colspan="2">Tổng thưởng & phụ cấp:</th>
                     <td><strong>{{totalBonuses | number}} VNĐ</strong></td>
-                    <td colspan="3"><strong>{{bonusPercentage | number:'1.1-2'}}% lương cơ bản</strong></td>
+                    <td colspan="3"><strong>{{bonusPercentage | number:'1.1-2'}}% </strong></td>
                   </tr>
                 </tbody>
               </table>
@@ -206,7 +210,7 @@
                   <tr>
                     <th colspan="2">Tổng khấu trừ:</th>
                     <td><strong>{{totalDeductions | number}} VNĐ</strong></td>
-                    <td colspan="3"><strong>{{deductionPercentage | number:'1.1-2'}}% lương cơ bản</strong></td>
+                    <td colspan="3"><strong>{{deductionPercentage | number:'1.1-2'}}%</strong></td>
                   </tr>
                 </tbody>
               </table>
@@ -290,7 +294,7 @@
                   <tr>
                     <th colspan="2">Tổng điều chỉnh khác:</th>
                     <td><strong>{{totalOtherAdjustments | number}} VNĐ</strong></td>
-                    <td colspan="3"><strong>{{otherAdjustmentsPercentage | number:'1.1-2'}}% lương cơ bản</strong></td>
+                    <td colspan="3"><strong>{{otherAdjustmentsPercentage | number:'1.1-2'}}%</strong></td>
                   </tr>
                 </tbody>
               </table>
