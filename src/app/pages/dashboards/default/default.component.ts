@@ -38,6 +38,13 @@ interface ActivityFilter {
   endDate?: Date;
 }
 
+// Activity hours interface
+interface ActivityHours {
+  type: string;
+  hours: number;
+  percentage: number;
+}
+
 @Component({
   selector: 'app-default',
   templateUrl: './default.component.html',
@@ -71,7 +78,11 @@ export class DefaultComponent implements OnInit {
   
   // Chart properties
   workProgressChart: ChartType;
-  attendanceHoursChart: ChartType;
+  activityHoursChart: ChartType;
+  
+  // Activity hours statistics
+  activityStats: ActivityHours[] = [];
+  totalActivityHours: string = '0';
   
   @ViewChild('content') content;
   @ViewChild('center', { static: false }) center?: ModalDirective;
@@ -90,7 +101,7 @@ export class DefaultComponent implements OnInit {
     this.fetchEmployeeActivities();
     this.updateCalendar();
     this.initWorkProgressChart();
-    this.initAttendanceHoursChart();
+    this.initActivityHoursChart();
   }
 
   ngAfterViewInit() {
@@ -199,6 +210,68 @@ export class DefaultComponent implements OnInit {
   }
 
   /**
+   * Calculate activity hours from activities
+   */
+  calculateActivityHours() {
+    // Default activity types and hours
+    const activityStats: { [key: string]: ActivityHours } = {
+      'leave': { type: 'Nghỉ phép', hours: 0, percentage: 0 },
+      'overtime': { type: 'Tăng ca', hours: 0, percentage: 0 },
+      'workfromhome': { type: 'Làm từ xa', hours: 0, percentage: 0 },
+      'other': { type: 'Khác', hours: 0, percentage: 0 }
+    };
+    
+    let totalHours = 0;
+    
+    // Calculate hours for each activity
+    this.employeeActivities.forEach(activity => {
+      if (activity.startTime && activity.endTime) {
+        const startTime = new Date(activity.startTime);
+        const endTime = new Date(activity.endTime);
+        const durationMs = endTime.getTime() - startTime.getTime();
+        const durationHours = durationMs / (1000 * 60 * 60);
+        
+        totalHours += durationHours;
+        
+        // Classify activity by type (based on activityId or name)
+        const activityName = this.getActivityInRequestFlds(activity.requestFlds).toLowerCase();
+        
+        if (activityName.includes('nghỉ') || activityName.includes('phép')) {
+          activityStats['leave'].hours += durationHours;
+        } else if (activityName.includes('tăng ca') || activityName.includes('overtime')) {
+          activityStats['overtime'].hours += durationHours;
+        } else if (activityName.includes('làm từ xa') || activityName.includes('remote')) {
+          activityStats['workfromhome'].hours += durationHours;
+        } else {
+          activityStats['other'].hours += durationHours;
+        }
+      }
+    });
+    
+    // Calculate percentages
+    if (totalHours > 0) {
+      Object.keys(activityStats).forEach(key => {
+        activityStats[key].percentage = (activityStats[key].hours / totalHours) * 100;
+      });
+    }
+    
+    // Convert to array and sort by hours (descending)
+    const result = Object.values(activityStats)
+      .filter(item => item.hours > 0)
+      .sort((a, b) => b.hours - a.hours);
+    
+    // Set total hours
+    this.totalActivityHours = totalHours.toFixed(1) + 'h';
+    
+    // If no activities with hours, add a default "No data" item
+    if (result.length === 0) {
+      result.push({ type: 'Không có dữ liệu', hours: 0, percentage: 100 });
+    }
+    
+    return result;
+  }
+
+  /**
    * Fetch employee activities from API
    */
   fetchEmployeeActivities() {
@@ -207,27 +280,12 @@ export class DefaultComponent implements OnInit {
       return;
     }
 
-    // Format dates for API request
-    const startYear = this.weekStartDate.getFullYear();
-    const startMonth = (this.weekStartDate.getMonth() + 1).toString().padStart(2, '0');
-    const startDay = this.weekStartDate.getDate().toString().padStart(2, '0');
-    const startDateStr = `${startYear}-${startMonth}-${startDay}T00:00:00`;
-
-    const endYear = this.weekEndDate.getFullYear();
-    const endMonth = (this.weekEndDate.getMonth() + 1).toString().padStart(2, '0');
-    const endDay = this.weekEndDate.getDate().toString().padStart(2, '0');
-    const endDateStr = `${endYear}-${endMonth}-${endDay}T23:59:59`;
-
     const filter: ActivityFilter = {
-      employeeIdList: this.employeeId,
-      startDate: new Date(startDateStr),
-      endDate: new Date(endDateStr)
+      employeeIdList: this.employeeId
     };
 
     console.log('Fetching activities with filter:', {
-      employeeId: this.employeeId,
-      startDate: startDateStr,
-      endDate: endDateStr
+      employeeId: this.employeeId
     });
 
     const params = new HttpParams({
@@ -235,8 +293,8 @@ export class DefaultComponent implements OnInit {
         ...(filter.activityId && { activityId: filter.activityId }),
         ...(filter.status && { status: filter.status }),
         ...(filter.employeeIdList && { employeeIdList: filter.employeeIdList }),
-        ...(filter.startDate && { startDate: startDateStr }),
-        ...(filter.endDate && { endDate: endDateStr })
+        ...(filter.startDate && { startDate: filter.startDate.toISOString() }),
+        ...(filter.endDate && { endDate: filter.endDate.toISOString() })
       }
     });
 
@@ -245,6 +303,11 @@ export class DefaultComponent implements OnInit {
         next: (data) => {
           console.log('Employee activities:', data);
           this.employeeActivities = data;
+          
+          // Calculate activity hours and update chart
+          this.activityStats = this.calculateActivityHours();
+          this.updateActivityHoursChart();
+          
           this.updateFilteredActivities();
           this.updateCalendar();
         },
@@ -252,6 +315,47 @@ export class DefaultComponent implements OnInit {
           console.error('Error fetching employee activities:', error);
         }
       });
+  }
+  
+  /**
+   * Updates the activity hours chart with calculated data
+   */
+  updateActivityHoursChart() {
+    // Extract series data and labels from activity stats
+    const series = this.activityStats.map(stat => Math.round(stat.hours * 10) / 10);
+    const labels = this.activityStats.map(stat => stat.type);
+    
+    // Update chart data
+    this.activityHoursChart.series = series;
+    this.activityHoursChart.labels = labels;
+  }
+  
+  /**
+   * Initialize activity hours chart
+   */
+  private initActivityHoursChart() {
+    this.activityHoursChart = {
+      chart: {
+        height: 150,
+        type: 'donut',
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '75%'
+          }
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      series: [0],
+      labels: ['Đang tải...'],
+      colors: ['#5b73e8', '#50a5f1', '#f46a6a', '#f1b44c'],
+      legend: {
+        show: false
+      }
+    };
   }
   
   /**
@@ -547,34 +651,6 @@ export class DefaultComponent implements OnInit {
         labels: {
           show: true
         }
-      }
-    };
-  }
-
-  /**
-   * Initialize attendance hours chart
-   */
-  private initAttendanceHoursChart() {
-    this.attendanceHoursChart = {
-      chart: {
-        height: 240,
-        type: 'donut',
-      }, 
-      plotOptions: {
-        pie: {
-          donut: {
-            size: '75%'
-          }
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      series: [210, 16, 24, 4],
-      labels: ['Làm việc', 'Ngày Nghỉ', 'Tăng ca', 'Đi trễ'],
-      colors: ['#5b73e8', '#50a5f1', '#f46a6a', '#f1b44c'],
-      legend: {
-        show: false
       }
     };
   }
