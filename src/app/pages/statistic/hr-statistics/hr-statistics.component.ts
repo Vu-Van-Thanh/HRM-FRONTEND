@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ChartType } from './hr-statistics.model';
+import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
 
 import {
@@ -57,7 +58,7 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
     { name: 'Đồng bằng sông Cửu Long', center: [9.7975, 105.6235], employees: 190, color: '#50a5f1' }
   ];
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this._fetchData();
@@ -139,4 +140,12 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
     // Vẫn focus vào Việt Nam lúc khởi tạo nhưng cho phép di chuyển ra xa
     this.map.fitBounds(this.vietnamBounds);
   }
+
+  updateworkforceGrowthChart() {
+    this.http.get('https://localhost:7176/Employee/workforce-growth').subscribe(data => {
+      console.log(data);
+      this.workforceGrowthChartOptions.series[0].data = data.totalEmployees;
+    });
+  }
+  
 } 
