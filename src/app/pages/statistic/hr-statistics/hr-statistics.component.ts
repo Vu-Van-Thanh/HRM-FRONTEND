@@ -144,8 +144,15 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
   updateworkforceGrowthChart() {
     this.http.get('https://localhost:7176/Employee/workforce-growth').subscribe(data => {
       console.log(data);
-      this.workforceGrowthChartOptions.series[0].data = data.totalEmployees;
-    });
+      const totalEmployeesSeries = this.workforceGrowthChartOptions.series.find(s => s.name === "Tổng nhân sự");
+    
+    // Nếu tìm thấy, cập nhật data
+    if (totalEmployeesSeries) {
+      totalEmployeesSeries.data = data.totalEmployees; // giả sử `data.totalEmployees` là một mảng dữ liệu
+    } else {
+      console.error("Không tìm thấy series 'Tổng nhân sự'");
+    }
+  });
   }
   
 } 
