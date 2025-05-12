@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { emailSentBarChart, monthlyEarningChart } from './data';
-import { ChartType } from './dashboard.model';
+import { ChartType, AttendaceFilterDTO,AttendaceResponseDTO } from './dashboard.model';
 import { BsModalService, BsModalRef, ModalDirective } from 'ngx-bootstrap/modal';
 import { EventService } from '../../../core/services/event.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -16,6 +16,7 @@ interface CalendarDay {
   activities?: ActivityRequestDTO[]; 
 
 }
+
 
 // Activity request interface
 interface ActivityRequestDTO {
@@ -203,8 +204,6 @@ export class DefaultComponent implements OnInit {
     
     this.fetchEmployeeActivities();
     this.updateCalendar();
-    
-    // Reset selected weekday when changing weeks
     this.selectedWeekday = null;
     this.updateFilteredActivities();
   }
@@ -213,29 +212,22 @@ export class DefaultComponent implements OnInit {
    * Calculate activity hours from activities
    */
   calculateActivityHours() {
-    // Default activity types and hours
     const activityStats: { [key: string]: ActivityHours } = {
       'leave': { type: 'Nghỉ phép', hours: 0, percentage: 0 },
       'overtime': { type: 'Tăng ca', hours: 0, percentage: 0 },
-      'workfromhome': { type: 'Làm từ xa', hours: 0, percentage: 0 },
-      'other': { type: 'Khác', hours: 0, percentage: 0 }
+      'workfromhome': { type: 'Làm từ xa', hours: 0, percentage: 0 }
     };
     
     let totalHours = 0;
     
-    // Calculate hours for each activity
     this.employeeActivities.forEach(activity => {
       if (activity.startTime && activity.endTime) {
         const startTime = new Date(activity.startTime);
         const endTime = new Date(activity.endTime);
         const durationMs = endTime.getTime() - startTime.getTime();
         const durationHours = durationMs / (1000 * 60 * 60);
-        
         totalHours += durationHours;
-        
-        // Classify activity by type (based on activityId or name)
         const activityName = this.getActivityInRequestFlds(activity.requestFlds).toLowerCase();
-        
         if (activityName.includes('nghỉ') || activityName.includes('phép')) {
           activityStats['leave'].hours += durationHours;
         } else if (activityName.includes('tăng ca') || activityName.includes('overtime')) {
@@ -243,27 +235,22 @@ export class DefaultComponent implements OnInit {
         } else if (activityName.includes('làm từ xa') || activityName.includes('remote')) {
           activityStats['workfromhome'].hours += durationHours;
         } else {
-          activityStats['other'].hours += durationHours;
+          activityStats[activityName.toString()].hours += durationHours;
         }
       }
     });
     
-    // Calculate percentages
     if (totalHours > 0) {
       Object.keys(activityStats).forEach(key => {
         activityStats[key].percentage = (activityStats[key].hours / totalHours) * 100;
       });
     }
-    
-    // Convert to array and sort by hours (descending)
     const result = Object.values(activityStats)
       .filter(item => item.hours > 0)
       .sort((a, b) => b.hours - a.hours);
     
-    // Set total hours
     this.totalActivityHours = totalHours.toFixed(1) + 'h';
     
-    // If no activities with hours, add a default "No data" item
     if (result.length === 0) {
       result.push({ type: 'Không có dữ liệu', hours: 0, percentage: 100 });
     }
@@ -321,7 +308,6 @@ export class DefaultComponent implements OnInit {
    * Updates the activity hours chart with calculated data
    */
   updateActivityHoursChart() {
-    // Extract series data and labels from activity stats
     const series = this.activityStats.map(stat => Math.round(stat.hours * 10) / 10);
     const labels = this.activityStats.map(stat => stat.type);
     
@@ -492,6 +478,21 @@ export class DefaultComponent implements OnInit {
       return 'none';
     }
     
+    let totalHours = 0;
+
+  activities.forEach(activity => {
+    if (activity.startTime && activity.endTime) {
+      const start = new Date(activity.startTime);
+      const end = new Date(activity.endTime);
+      const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      totalHours += duration;
+    }
+  });
+
+  // Nếu tổng thời gian = 8 tiếng => đủ công
+  if (totalHours == 8) {
+    return 'present';
+  }
     // Check if there's any activity with specific statuses
     const hasApproved = activities.some(a => a.status === 'APPROVED');
     const hasPending = activities.some(a => a.status === 'PENDING');

@@ -11,5 +11,29 @@ export interface ChartType {
     stroke?: any;
     labels?: any;
 }
+export interface AttendaceFilterDTO
+{
+    StartDate : Date;
+    EndDate : Date;
+    Starttime : Date;
+    Endtime : Date;
+    ProjectId : string;
+    Position : string;
+    EmployeeIDList : string;
+    Status : string;
+}
 
 
+export interface AttendaceResponseDTO
+{
+    AttendanceId : string;
+    EmployeeId : string;
+    AttendanceDate : Date;
+    Starttime: Date;
+    Endtime: Date;
+    Status : string;
+    Position : string;
+    Description : string;
+    ActivityId : string;
+    ProjectId : string;
+}
