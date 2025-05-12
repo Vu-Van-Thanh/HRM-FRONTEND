@@ -47,7 +47,7 @@
         <div class="card-body">
           <h4 class="card-title mb-4">Tin nổi bật</h4>
           <div class="row">
-            <div class="col-md-6" *ngFor="let news of getImportantNews() | slice:0:2">
+            <div class="col-md-6" *ngFor="let news of getImportantNews()">
               <div class="card news-card mb-4" (click)="viewNewsDetail(news)">
                 <img [src]="news.imageUrl" class="card-img-top" alt="news image">
                 <div class="card-body">
@@ -56,9 +56,9 @@
                     <small class="text-muted">{{ formatDate(news.publishDate) }}</small>
                   </div>
                   <h5 class="card-title">{{ news.title }}</h5>
-                  <p class="card-text">{{ news.summary }}</p>
+                  <p class="card-text">{{ news.summary || news.title }}</p>
                   <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Tác giả: {{ news.author }}</small>
+                    <small class="text-muted">{{ news.departmentName || news.departmentId }}</small>
                     <button class="btn btn-sm btn-outline-primary">Đọc thêm</button>
                   </div>
                 </div>
@@ -75,7 +75,7 @@
         <div class="card-body">
           <h4 class="card-title mb-4">Tin mới nhất</h4>
           <div class="news-list">
-            <div class="news-item d-flex mb-3" *ngFor="let news of getNonImportantNews() | slice:0:5" (click)="viewNewsDetail(news)">
+            <div class="news-item d-flex mb-3" *ngFor="let news of getLatestNews()" (click)="viewNewsDetail(news)">
               <div class="news-img me-3">
                 <img [src]="news.imageUrl" alt="news image" class="rounded" width="80">
               </div>
@@ -105,7 +105,7 @@
                 <tr>
                   <th>Tiêu đề</th>
                   <th>Danh mục</th>
-                  <th>Tác giả</th>
+                  <th>Phòng ban</th>
                   <th>Ngày đăng</th>
                   <th>Thao tác</th>
                 </tr>
@@ -123,7 +123,7 @@
                     </div>
                   </td>
                   <td><span class="badge bg-primary">{{ news.category }}</span></td>
-                  <td>{{ news.author }}</td>
+                  <td>{{ news.departmentName || news.departmentId }}</td>
                   <td>{{ formatDate(news.publishDate) }}</td>
                   <td>
                     <button class="btn btn-sm btn-primary" (click)="viewNewsDetail(news)">Xem chi tiết</button>
@@ -182,14 +182,14 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <span class="badge bg-primary me-2">{{ selectedNews.category }}</span>
-                <span class="text-muted">Tác giả: {{ selectedNews.author }}</span>
+                <span class="text-muted">Phòng ban: {{ selectedNews.departmentName || selectedNews.departmentId }}</span>
               </div>
               <div class="text-muted">
                 <i class="bx bx-calendar"></i> {{ formatDate(selectedNews.publishDate) }}
               </div>
             </div>
           </div>
-          <div class="news-detail-image mb-4">
+          <div class="news-detail-image mb-4" *ngIf="selectedNews.imageUrl">
             <img [src]="selectedNews.imageUrl" class="img-fluid rounded" alt="news image">
           </div>
           <div class="news-detail-content" [innerHTML]="safeContent">

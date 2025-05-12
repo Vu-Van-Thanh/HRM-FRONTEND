@@ -1,16 +1,32 @@
 import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { HttpClient } from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import { forkJoin } from 'rxjs';
+
+interface Department {
+  departmentId: string;
+  departmentName: string;
+  manager: string;
+  description: string;
+  location: string;
+  contact: string;
+}
 
 interface NewsItem {
   id: number;
   title: string;
-  summary: string;
+  summary?: string;
   content: string;
-  imageUrl: string;
+  imageUrl?: string;
   publishDate: Date;
-  author: string;
+  author?: string;
   category: string;
   isImportant: boolean;
+  departmentId: string;
+  departmentName?: string;
+  type: 'INTERNAL' | 'INFO' | 'EVENT' | 'OUTSTANDING' | 'POLICY';
+  dateCreated: Date;
 }
 
 @Component({
@@ -24,9 +40,10 @@ export class NewsComponent implements OnInit, AfterViewInit {
   selectedNews: NewsItem | null = null;
   showDetail = false;
   safeContent: SafeHtml | null = null;
-  categories: string[] = ['Tất cả', 'Thông báo', 'Sự kiện', 'Chính sách', 'Tin nội bộ'];
+  categories: string[] = ['Tất cả', 'Nội bộ', 'Thông tin', 'Sự kiện', 'Nổi bật', 'Chính sách'];
   selectedCategory = 'Tất cả';
   searchTerm = '';
+  departments: Department[] = [];
   
   // Phân trang
   currentPage = 1;
@@ -40,11 +57,12 @@ export class NewsComponent implements OnInit, AfterViewInit {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
-    this.loadNews();
+    this.loadData();
   }
 
   ngAfterViewInit(): void {
@@ -54,16 +72,131 @@ export class NewsComponent implements OnInit, AfterViewInit {
     }, 100);
   }
 
-  loadNews(): void {
-    // Mock data - replace with actual API call
-    this.newsItems = [
+  loadData(): void {
+    // Use forkJoin to fetch both departments and news in parallel
+    forkJoin({
+      departments: this.http.get<Department[]>(API_ENDPOINT.getAllDepartment),
+      news: this.http.get<any[]>(API_ENDPOINT.getAllNews)
+    }).subscribe({
+      next: (result) => {
+        this.departments = result.departments;
+        this.processNewsData(result.news);
+      },
+      error: (error) => {
+        console.error('❌ Error loading data:', error);
+        // Load mock data if API fails
+        this.loadMockData();
+      }
+    });
+  }
+
+/*  extractImageFromContent(content: string): string | null {
+    // Look for image tags in the HTML content
+    const imgRegex = /<img[^>]+src="([^">]+)"/i;
+    const match = content.match(imgRegex);
+    return match ? match[2] : null;
+  }*/
+    extractImageFromContent(content: string): string | null {
+      const imgRegex = /<img[^>]+src="([^">]+)"/gi;
+      const matches = [...content.matchAll(imgRegex)];
+      return matches.length >= 2 ? matches[1][1] : null;
+    }
+    
+
+  processNewsData(newsData: any[]): void {
+    this.newsItems = newsData.map(item => {
+      // Map the news type to a category name in Vietnamese
+      let category = 'Thông tin';
+      let isImportant = false;
+      
+      switch(item.type) {
+        case 'INTERNAL':
+          category = 'Nội bộ';
+          break;
+        case 'INFO':
+          category = 'Thông tin';
+          break;
+        case 'EVENT':
+          category = 'Sự kiện';
+          break;
+        case 'OUTSTANDING':
+          category = 'Nổi bật';
+          isImportant = true;
+          break;
+        case 'POLICY':
+          category = 'Chính sách';
+          break;
+      }
+      
+      // Extract image from content if available
+      const extractedImage = this.extractImageFromContent(item.content || '');
+      
+      // Find department name
+      const department = this.departments.find(d => d.departmentId === item.departmentId);
+      const departmentName = department ? department.departmentName : item.departmentId;
+      
+      return {
+        id: item.id || 0,
+        title: item.title || '',
+        content: item.content || '',
+        summary: item.title, // Using title as summary if no summary provided
+        imageUrl: extractedImage || 'assets/images/news/news_default.jpg', // Use extracted image or default
+        publishDate: new Date(item.dateCreated),
+        dateCreated: new Date(item.dateCreated),
+        author: departmentName || 'Không xác định',
+        category: category,
+        isImportant: isImportant,
+        departmentId: item.departmentId || '',
+        departmentName: departmentName,
+        type: item.type
+      };
+    });
+    
+    // Sort by date descending (newest first)
+    this.newsItems.sort((a, b) => b.dateCreated.getTime() - a.dateCreated.getTime());
+    
+    console.log('✅ Loaded news items:', this.newsItems);
+    this.updateFilteredNews();
+  }
+
+  loadMockData(): void {
+    // Mock departments
+    this.departments = [
+      {
+        departmentId: "FN",
+        departmentName: "Finance",
+        manager: "Robert Brown",
+        description: "Manages company finances and budget planning.",
+        location: "Chicago",
+        contact: "+1-555-9876"
+      },
+      {
+        departmentId: "HR",
+        departmentName: "Human Resources",
+        manager: "John Doe",
+        description: "Responsible for employee relations and HR policies.",
+        location: "New York",
+        contact: "+1-555-1234"
+      },
+      {
+        departmentId: "IT",
+        departmentName: "Information Technology",
+        manager: "Jane Smith",
+        description: "Manages technology infrastructure and software development.",
+        location: "San Francisco",
+        contact: "+1-555-5678"
+      }
+    ];
+    
+    // Mock news data - then call processNewsData
+    const mockNewsData = [
       {
         id: 1,
         title: 'Thông báo về việc tổ chức họp nhân viên tháng 6/2023',
-        summary: 'Công ty sẽ tổ chức cuộc họp nhân viên định kỳ vào ngày 15/06/2023 tại hội trường chính.',
         content: `
           <h2>Thông báo về việc tổ chức họp nhân viên tháng 6/2023</h2>
           <p>Kính gửi toàn thể nhân viên,</p>
+          <img src="assets/images/news/meeting.jpg" alt="Meeting image" />
           <p>Công ty sẽ tổ chức cuộc họp nhân viên định kỳ vào ngày 15/06/2023 tại hội trường chính. Cuộc họp này sẽ tập trung vào các vấn đề sau:</p>
           <ul>
             <li>Báo cáo kết quả kinh doanh quý 2/2023</li>
@@ -76,16 +209,13 @@ export class NewsComponent implements OnInit, AfterViewInit {
           <p>Trân trọng,</p>
           <p>Ban Giám đốc</p>
         `,
-        imageUrl: 'assets/images/news/meeting.jpg',
-        publishDate: new Date('2023-06-10'),
-        author: 'Ban Giám đốc',
-        category: 'Thông báo',
-        isImportant: true
+        dateCreated: '2023-06-10T10:00:00',
+        departmentId: 'HR',
+        type: 'INTERNAL'
       },
       {
         id: 2,
         title: 'Chính sách mới về làm việc từ xa',
-        summary: 'Công ty triển khai chính sách mới về làm việc từ xa, cho phép nhân viên làm việc tại nhà tối đa 3 ngày/tuần.',
         content: `
           <h2>Chính sách mới về làm việc từ xa</h2>
           <p>Kính gửi toàn thể nhân viên,</p>
@@ -106,19 +236,17 @@ export class NewsComponent implements OnInit, AfterViewInit {
           <p>Trân trọng,</p>
           <p>Phòng Nhân sự</p>
         `,
-        imageUrl: 'assets/images/news/remote-work.jpg',
-        publishDate: new Date('2023-06-05'),
-        author: 'Phòng Nhân sự',
-        category: 'Chính sách',
-        isImportant: true
+        dateCreated: '2023-06-05T14:30:00',
+        departmentId: 'HR',
+        type: 'POLICY'
       },
       {
         id: 3,
         title: 'Sự kiện teambuilding tháng 7/2023',
-        summary: 'Công ty sẽ tổ chức sự kiện teambuilding vào cuối tháng 7/2023 tại resort ven biển.',
         content: `
           <h2>Sự kiện teambuilding tháng 7/2023</h2>
           <p>Kính gửi toàn thể nhân viên,</p>
+          <img src="assets/images/news/teambuilding.jpg" alt="Teambuilding event" />
           <p>Công ty sẽ tổ chức sự kiện teambuilding vào cuối tháng 7/2023 tại resort ven biển. Đây là dịp để nhân viên giao lưu, thư giãn và tăng cường tinh thần đoàn kết.</p>
           <h3>Thông tin chi tiết:</h3>
           <p>- Thời gian: 28/07/2023 - 30/07/2023</p>
@@ -132,19 +260,17 @@ export class NewsComponent implements OnInit, AfterViewInit {
           <p>Trân trọng,</p>
           <p>Phòng Nhân sự</p>
         `,
-        imageUrl: 'assets/images/news/teambuilding.jpg',
-        publishDate: new Date('2023-06-15'),
-        author: 'Phòng Nhân sự',
-        category: 'Sự kiện',
-        isImportant: false
+        dateCreated: '2023-06-15T09:15:00',
+        departmentId: 'HR',
+        type: 'EVENT'
       },
       {
         id: 4,
         title: 'Tin tức về dự án mới của công ty',
-        summary: 'Công ty đã ký kết hợp đồng với đối tác lớn về dự án phát triển phần mềm quản lý doanh nghiệp.',
         content: `
           <h2>Tin tức về dự án mới của công ty</h2>
           <p>Chúng tôi rất vui mừng thông báo rằng công ty đã ký kết hợp đồng với đối tác lớn về dự án phát triển phần mềm quản lý doanh nghiệp. Dự án này sẽ kéo dài trong 12 tháng và huy động sự tham gia của nhiều nhân viên từ các phòng ban khác nhau.</p>
+          <img src="assets/images/news/project.jpg" alt="Project announcement" />
           <h3>Thông tin về dự án:</h3>
           <p>- Tên dự án: Hệ thống quản lý doanh nghiệp toàn diện</p>
           <p>- Đối tác: Công ty ABC</p>
@@ -159,73 +285,13 @@ export class NewsComponent implements OnInit, AfterViewInit {
           <p>Trân trọng,</p>
           <p>Ban Giám đốc</p>
         `,
-        imageUrl: 'assets/images/news/project.jpg',
-        publishDate: new Date('2023-06-20'),
-        author: 'Ban Giám đốc',
-        category: 'Tin nội bộ',
-        isImportant: false
-      },
-      {
-        id: 5,
-        title: 'Thông báo về việc nâng cấp hệ thống máy chủ',
-        summary: 'Công ty sẽ tiến hành nâng cấp hệ thống máy chủ vào cuối tuần này, có thể gây gián đoạn dịch vụ.',
-        content: `
-          <h2>Thông báo về việc nâng cấp hệ thống máy chủ</h2>
-          <p>Kính gửi toàn thể nhân viên,</p>
-          <p>Phòng CNTT sẽ tiến hành nâng cấp hệ thống máy chủ vào cuối tuần này. Việc nâng cấp này nhằm cải thiện hiệu suất và bảo mật của hệ thống.</p>
-          <h3>Thời gian thực hiện:</h3>
-          <p>- Bắt đầu: 20:00, thứ Bảy, ngày 17/06/2023</p>
-          <p>- Kết thúc dự kiến: 08:00, Chủ nhật, ngày 18/06/2023</p>
-          <h3>Ảnh hưởng:</h3>
-          <p>- Hệ thống email nội bộ có thể gián đoạn</p>
-          <p>- Một số ứng dụng nội bộ có thể không hoạt động</p>
-          <p>- Dữ liệu sẽ được sao lưu trước khi nâng cấp</p>
-          <h3>Lưu ý:</h3>
-          <p>- Nhân viên nên lưu công việc và đóng tất cả các ứng dụng trước khi rời văn phòng vào thứ Sáu</p>
-          <p>- Nếu có vấn đề khẩn cấp, vui lòng liên hệ số điện thoại hỗ trợ: 0123.456.789</p>
-          <p>Trân trọng,</p>
-          <p>Phòng CNTT</p>
-        `,
-        imageUrl: 'assets/images/news/server.jpg',
-        publishDate: new Date('2023-06-12'),
-        author: 'Phòng CNTT',
-        category: 'Thông báo',
-        isImportant: false
-      },
-      {
-        id: 6,
-        title: 'Chính sách mới về đào tạo nhân viên',
-        summary: 'Công ty triển khai chính sách mới về đào tạo nhân viên, tăng ngân sách đào tạo lên 50% so với năm trước.',
-        content: `
-          <h2>Chính sách mới về đào tạo nhân viên</h2>
-          <p>Kính gửi toàn thể nhân viên,</p>
-          <p>Nhằm nâng cao chất lượng nguồn nhân lực, công ty triển khai chính sách mới về đào tạo nhân viên, cụ thể như sau:</p>
-          <h3>1. Tăng ngân sách đào tạo</h3>
-          <p>- Ngân sách đào tạo tăng 50% so với năm trước</p>
-          <p>- Mỗi nhân viên được cấp ngân sách đào tạo riêng</p>
-          <p>- Hỗ trợ chi phí tham gia các khóa học bên ngoài</p>
-          <h3>2. Chương trình đào tạo nội bộ</h3>
-          <p>- Tổ chức các buổi workshop hàng tháng</p>
-          <p>- Mời chuyên gia bên ngoài về đào tạo</p>
-          <p>- Xây dựng thư viện học liệu trực tuyến</p>
-          <h3>3. Chính sách khuyến khích</h3>
-          <p>- Tặng thưởng cho nhân viên hoàn thành khóa học</p>
-          <p>- Ưu tiên thăng tiến cho nhân viên tích cực học tập</p>
-          <p>- Cấp chứng chỉ nội bộ cho các khóa đào tạo</p>
-          <p>Chính sách này sẽ có hiệu lực từ ngày 01/07/2023.</p>
-          <p>Trân trọng,</p>
-          <p>Phòng Nhân sự</p>
-        `,
-        imageUrl: 'assets/images/news/training.jpg',
-        publishDate: new Date('2023-06-18'),
-        author: 'Phòng Nhân sự',
-        category: 'Chính sách',
-        isImportant: false
+        dateCreated: '2023-06-20T11:45:00',
+        departmentId: 'IT',
+        type: 'INFO'
       }
     ];
     
-    // Initialize filtered news items
-    this.updateFilteredNews();
+    this.processNewsData(mockNewsData);
   }
 
   updateFilteredNews(): void {
@@ -241,19 +307,14 @@ export class NewsComponent implements OnInit, AfterViewInit {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(news => 
         news.title.toLowerCase().includes(term) || 
-        news.summary.toLowerCase().includes(term) ||
-        news.author.toLowerCase().includes(term)
+        (news.summary && news.summary.toLowerCase().includes(term)) ||
+        (news.departmentName && news.departmentName.toLowerCase().includes(term))
       );
     }
     
     this.filteredNewsItems = filtered;
     this.totalItems = filtered.length;
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-    
-    // Reset to first page when filtering
-    this.currentPage = 1;
-    
-    // Update paginated news
     this.updatePaginatedNews();
   }
 
@@ -264,7 +325,12 @@ export class NewsComponent implements OnInit, AfterViewInit {
   }
 
   getImportantNews(): NewsItem[] {
-    return this.filteredNewsItems.filter(news => news.isImportant);
+    return this.filteredNewsItems.filter(news => news.isImportant).slice(0, 2);
+  }
+
+  getLatestNews(): NewsItem[] {
+    // Return the most recent news items (already sorted by date in processNewsData)
+    return this.filteredNewsItems.slice(0, 3);
   }
 
   getNonImportantNews(): NewsItem[] {
@@ -292,12 +358,14 @@ export class NewsComponent implements OnInit, AfterViewInit {
     this.updateFilteredNews();
   }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  formatDate(date: Date | string | undefined): string {
+    if (!date) return '';
+    
+    const d = date instanceof Date ? date : new Date(date);
+    
+    if (isNaN(d.getTime())) return ''; // Invalid date
+    
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
   }
 
   // Phân trang

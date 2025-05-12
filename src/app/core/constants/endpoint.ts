@@ -32,5 +32,6 @@ export const API_ENDPOINT = {
    getSalaryChange : 'https://localhost:7090/SalaryHist/base/history-details',
    getSalaryPayment : 'https://localhost:7090/SalaryPayment/payment-list',
    BASE_URL: 'https://localhost:7176',
-   getTasksByAssignedTo: 'https://localhost:7176/Task/assigned'
+   getTasksByAssignedTo: 'https://localhost:7176/Task/assigned',
+   getAllNews : 'https://localhost:7176/Article'
 };
