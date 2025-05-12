@@ -37,3 +37,22 @@ export interface AttendaceResponseDTO
     ActivityId : string;
     ProjectId : string;
 }
+
+export interface ProjectTaskInfo {
+    taskId: string;
+    title: string;
+    description: string;
+    startDate: Date;
+    deadline: Date;
+    completedAt: Date | null;
+    status: string;
+    priority: string;
+    projectId: string;
+    projectName: string;
+    assignedTo: string;
+    assignedToName: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    createdBy: string;
+    updatedBy: string;
+}

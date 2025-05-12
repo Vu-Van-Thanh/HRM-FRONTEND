@@ -138,10 +138,10 @@
     <!-- Main Content Sections -->
     <div class="row mb-4">
         <!-- Personal Schedule Section -->
-        <div class="col-xl-4">
-            <div class="card equal-height-card">
+        <div class="col-xl-4 mb-4">
+            <div class="card" style="height: 450px;">
                 <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0">Lịch Cá Nhân</h4>
                         <div class="d-flex align-items-center">
                             <button class="btn btn-sm btn-light me-2" (click)="previousWeek()">
@@ -157,7 +157,7 @@
                     </div>
                     
                     <!-- Calendar Days -->
-                    <div class="d-flex gap-2 mb-4 justify-content-between">
+                    <div class="d-flex gap-2 mb-3 justify-content-between">
                         <ng-container *ngFor="let i of [0, 1, 2, 3, 4, 5, 6]">
                             <div class="text-center p-2 rounded cursor-pointer" 
                                  [ngClass]="getWeekdayStatusClass(i)"
@@ -170,16 +170,16 @@
                         </ng-container>
                     </div>
 
-                    <!-- Schedule Items with overflow scroll -->
+                    <!-- Schedule Items -->
                     <div class="schedule-items">
                         <ng-container *ngIf="filteredActivities && filteredActivities.length > 0; else noActivities">
-                            <div class="card mb-3 bg-light" *ngFor="let activity of filteredActivities">
-                                <div class="card-body py-2">
+                            <div class="card mb-2 bg-light" *ngFor="let activity of filteredActivities">
+                                <div class="card-body py-2 px-3">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="card-title mb-1">{{ getActivityInRequestFlds(activity.requestFlds) }}</h6>
+                                        <h6 class="card-title mb-1 fs-6">{{ getActivityInRequestFlds(activity.requestFlds) }}</h6>
                                         <span class="badge" [ngClass]="{'bg-success': activity.status === 'APPROVED', 
-                                                                       'bg-warning': activity.status === 'PENDING', 
-                                                                       'bg-danger': activity.status === 'REJECTED'}">
+                                                               'bg-warning': activity.status === 'PENDING', 
+                                                               'bg-danger': activity.status === 'REJECTED'}">
                                             {{ activity.status }}
                                         </span>
                                     </div>
@@ -194,7 +194,7 @@
                             </div>
                         </ng-container>
                         <ng-template #noActivities>
-                            <div class="alert alert-info">
+                            <div class="alert alert-info py-2">
                                 <ng-container *ngIf="selectedWeekday !== null; else allDaysMessage">
                                     Không có hoạt động nào vào ngày này
                                 </ng-container>
@@ -209,10 +209,11 @@
         </div>
 
         <!-- Work Progress Section -->
-        <div class="col-xl-4">
-            <div class="card equal-height-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="col-xl-4 mb-4">
+            <div class="card" style="height: 450px;">
+                <div class="card-body d-flex flex-column">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0">Tiến Độ Công Việc</h4>
                         <div class="dropdown">
                             <a href="#" class="dropdown-toggle text-muted" data-bs-toggle="dropdown">
@@ -221,39 +222,84 @@
                         </div>
                     </div>
                     
+                    <!-- Task Counters -->
                     <div class="d-flex justify-content-between mb-3">
                         <div>
-                            <h1 class="display-4 mb-0 fw-bold">50</h1>
-                            <p class="text-muted">Tổng công việc</p>
+                            <h1 class="display-5 mb-0 fw-bold">{{totalTasks}}</h1>
+                            <p class="text-muted mb-0">Tổng công việc</p>
                         </div>
                         <div>
-                            <h1 class="display-4 mb-0 fw-bold text-primary">42</h1>
-                            <p class="text-muted">Hoàn thành</p>
+                            <h1 class="display-5 mb-0 fw-bold text-primary">{{completedTasks}}</h1>
+                            <p class="text-muted mb-0">Hoàn thành</p>
                         </div>
                     </div>
                     
-                    <!-- Progress Chart -->
-                    <div class="chart-container">
-                        <apx-chart 
-                            dir="ltr" 
-                            [series]="workProgressChart.series" 
-                            [chart]="workProgressChart.chart"
-                            [colors]="workProgressChart.colors"
-                            [stroke]="workProgressChart.stroke"
-                            [fill]="workProgressChart.fill"
-                            [xaxis]="workProgressChart.xaxis"
-                            [dataLabels]="workProgressChart.dataLabels">
-                        </apx-chart>
+                    <!-- Progress Chart Section - Fixed Layout -->
+                    <div class="mb-4">
+                        <div style="height: 150px; position: relative;">
+                            <apx-chart 
+                                dir="ltr" 
+                                [series]="workProgressChart.series" 
+                                [chart]="workProgressChart.chart"
+                                [colors]="workProgressChart.colors"
+                                [stroke]="workProgressChart.stroke"
+                                [fill]="workProgressChart.fill"
+                                [xaxis]="workProgressChart.xaxis"
+                                [dataLabels]="workProgressChart.dataLabels">
+                            </apx-chart>
+                        </div>
                     </div>
+                    
+                <!-- 
+                    <h5 class="mb-3 mt-4">Công việc hiện tại</h5>-->
+                    
+                    <!-- 
+                    <div>
+                        <ng-container *ngIf="employeeTasks && employeeTasks.length > 0; else noTasks">
+                            <div class="card mb-2 border" *ngFor="let task of employeeTasks | slice:0:6">
+                                <div class="card-body p-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0 fs-6">{{task.title}}</h6>
+                                        <span class="badge" 
+                                              [ngClass]="{'bg-success': task.status === 'Completed' || task.status === 'Done', 
+                                                         'bg-warning': task.status === 'In Progress', 
+                                                         'bg-danger': task.status === 'Overdue', 
+                                                         'bg-info': task.status === 'To Do'}">
+                                            {{task.status}}
+                                        </span>
+                                    </div>
+                                    <p class="text-muted small mb-1">{{task.projectName}}</p>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted small">
+                                            <i class="bx bx-calendar me-1"></i>{{task.deadline | date:'dd/MM/yyyy'}}
+                                        </span>
+                                        <span class="text-muted small">
+                                            <i class="bx bx-flag me-1"></i>{{task.priority}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-2 mb-2" *ngIf="employeeTasks.length > 6">
+                                <a href="javascript:void(0);" class="btn btn-sm btn-link">Xem tất cả công việc</a>
+                            </div>
+                        </ng-container>
+                        <ng-template #noTasks>
+                            <div class="alert alert-info py-2">
+                                Không có công việc nào được giao
+                            </div>
+                        </ng-template>
+                    </div>
+                    Task List -->
                 </div>
             </div>
         </div>
 
         <!-- My Activities Section with Chart -->
-        <div class="col-xl-4">
-            <div class="card equal-height-card">
+        <div class="col-xl-4 mb-4">
+            <div class="card" style="height: 450px;">
                 <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0">Hoạt động của tôi</h4>
                         <div class="dropdown">
                             <a href="#" class="dropdown-toggle text-muted" data-bs-toggle="dropdown">
@@ -262,9 +308,9 @@
                         </div>
                     </div>
                     
-                    <!-- Activity Hours Chart -->
-                    <div class="text-center position-relative mb-3">
-                        <div class="chart-container" style="height: 150px; position: relative;">
+                    <!-- Activity Hours Chart Section - Restructured -->
+                    <div class="mb-4">
+                        <div style="height: 150px; position: relative;">
                             <apx-chart 
                                 dir="ltr" 
                                 [series]="activityHoursChart.series" 
@@ -275,32 +321,35 @@
                                 [plotOptions]="activityHoursChart.plotOptions"
                                 [dataLabels]="activityHoursChart.dataLabels">
                             </apx-chart>
-                            <div class="position-absolute top-50 start-50 translate-middle">
-                                <h4 class="mb-0 text-center">{{ totalActivityHours }}</h4>
+
+                            <!-- Center text positioned absolutely -->
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 10;">
+                                <h4 class="mb-0">{{ totalActivityHours }}</h4>
                                 <p class="text-muted small mb-0">Tổng giờ</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Legend -->
-                        <div class="mt-2">
-                            <div class="d-flex align-items-center mb-1" *ngFor="let stat of activityStats; let i = index">
-                                <span class="badge rounded-circle me-2" [ngStyle]="{'background-color': activityHoursChart.colors[i % activityHoursChart.colors.length]}">&nbsp;</span>
-                                <span class="small">{{ stat.type }}</span>
-                                <span class="ms-auto small">{{ stat.hours.toFixed(1) }}h ({{ stat.percentage.toFixed(1) }}%)</span>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Activities List -->
-                    <div class="activities-container">
+                    <!-- Legend Section -->
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center mb-1" *ngFor="let stat of activityStats; let i = index">
+                            <span class="badge rounded-circle me-2" [ngStyle]="{'background-color': activityHoursChart.colors[i % activityHoursChart.colors.length]}">&nbsp;</span>
+                            <span class="small">{{ stat.type }}</span>
+                            <span class="ms-auto small">{{ stat.hours.toFixed(1) }}h ({{ stat.percentage.toFixed(1) }}%)</span>
+                        </div>
+                    </div>
+                    
+                    <!--
+                    <h5 class="mb-2">Danh sách hoạt động</h5>
+                    <div>
                         <ng-container *ngIf="employeeActivities && employeeActivities.length > 0; else noEmployeeActivities">
-                            <div class="card mb-3 bg-light" *ngFor="let activity of employeeActivities | slice:0:3">
-                                <div class="card-body py-2">
+                            <div class="card mb-2 bg-light" *ngFor="let activity of employeeActivities | slice:0:6">
+                                <div class="card-body py-1 px-2">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="card-title mb-1">{{ getActivityInRequestFlds(activity.requestFlds) }}</h6>
+                                        <h6 class="card-title mb-1 fs-6">{{ getActivityInRequestFlds(activity.requestFlds) }}</h6>
                                         <span class="badge" [ngClass]="{'bg-success': activity.status === 'APPROVED', 
-                                                                       'bg-warning': activity.status === 'PENDING', 
-                                                                       'bg-danger': activity.status === 'REJECTED'}">
+                                                               'bg-warning': activity.status === 'PENDING', 
+                                                               'bg-danger': activity.status === 'REJECTED'}">
                                             {{ activity.status }}
                                         </span>
                                     </div>
@@ -312,16 +361,17 @@
                                     </p>
                                 </div>
                             </div>
-                            <div class="text-center mt-2" *ngIf="employeeActivities.length > 3">
+                            <div class="text-center mt-2 mb-2" *ngIf="employeeActivities.length > 6">
                                 <a href="javascript:void(0);" class="btn btn-sm btn-link">Xem tất cả hoạt động</a>
                             </div>
                         </ng-container>
                         <ng-template #noEmployeeActivities>
-                            <div class="alert alert-info">
+                            <div class="alert alert-info py-2">
                                 Không có hoạt động nào
                             </div>
                         </ng-template>
                     </div>
+                     Activities List Section -->
                 </div>
             </div>
         </div>
@@ -338,18 +388,18 @@
                             <h4 class="card-title mb-0 me-3">LỊCH CHẤM CÔNG - KỲ CÔNG THÁNG</h4>
                             <div class="d-flex align-items-center ms-3">
                                 <select class="form-select form-select-sm me-2" style="width: auto;" [(ngModel)]="selectedMonth" (change)="updateCalendar()">
-                                    <option [value]="1" [selected]="selectedMonth === 1">Tháng 1</option>
-                                    <option [value]="2" [selected]="selectedMonth === 2">Tháng 2</option>
-                                    <option [value]="3" [selected]="selectedMonth === 3">Tháng 3</option>
-                                    <option [value]="4" [selected]="selectedMonth === 4">Tháng 4</option>
-                                    <option [value]="5" [selected]="selectedMonth === 5">Tháng 5</option>
-                                    <option [value]="6" [selected]="selectedMonth === 6">Tháng 6</option>
-                                    <option [value]="7" [selected]="selectedMonth === 7">Tháng 7</option>
-                                    <option [value]="8" [selected]="selectedMonth === 8">Tháng 8</option>
-                                    <option [value]="9" [selected]="selectedMonth === 9">Tháng 9</option>
-                                    <option [value]="10" [selected]="selectedMonth === 10">Tháng 10</option>
-                                    <option [value]="11" [selected]="selectedMonth === 11">Tháng 11</option>
-                                    <option [value]="12" [selected]="selectedMonth === 12">Tháng 12</option>
+                                    <option [value]="0" [selected]="selectedMonth === 0">Tháng 1</option>
+                                    <option [value]="1" [selected]="selectedMonth === 1">Tháng 2</option>
+                                    <option [value]="2" [selected]="selectedMonth === 2">Tháng 3</option>
+                                    <option [value]="3" [selected]="selectedMonth === 3">Tháng 4</option>
+                                    <option [value]="4" [selected]="selectedMonth === 4">Tháng 5</option>
+                                    <option [value]="5" [selected]="selectedMonth === 5">Tháng 6</option>
+                                    <option [value]="6" [selected]="selectedMonth === 6">Tháng 7</option>
+                                    <option [value]="7" [selected]="selectedMonth === 7">Tháng 8</option>
+                                    <option [value]="8" [selected]="selectedMonth === 8">Tháng 9</option>
+                                    <option [value]="9" [selected]="selectedMonth === 9">Tháng 10</option>
+                                    <option [value]="10" [selected]="selectedMonth === 10">Tháng 11</option>
+                                    <option [value]="11" [selected]="selectedMonth === 11">Tháng 12</option>
                                 </select>
                                 <select class="form-select form-select-sm" style="width: auto;" [(ngModel)]="selectedYear" (change)="updateCalendar()">
                                     <option [value]="selectedYear - 2" [selected]="selectedYear === selectedYear - 2">{{selectedYear - 2}}</option>
@@ -377,15 +427,19 @@
                         </div>
                         <div class="d-flex align-items-center me-3 mb-2">
                             <span class="badge rounded-circle bg-success me-2">&nbsp;</span>
-                            <small>Công tác</small>
+                            <small>Khai công đủ (8h)</small>
                         </div>
                         <div class="d-flex align-items-center me-3 mb-2">
                             <span class="badge rounded-circle bg-warning me-2">&nbsp;</span>
-                            <small>Ca đủ công</small>
+                            <small>Chờ phê duyệt</small>
                         </div>
                         <div class="d-flex align-items-center me-3 mb-2">
                             <span class="badge rounded-circle bg-danger me-2">&nbsp;</span>
-                            <small>Trễ/sớm</small>
+                            <small>Khai công thiếu</small>
+                        </div>
+                        <div class="d-flex align-items-center me-3 mb-2">
+                            <span class="badge rounded-circle bg-secondary me-2">&nbsp;</span>
+                            <small>Chưa khai</small>
                         </div>
                         <div class="d-flex align-items-center me-3 mb-2">
                             <span class="badge rounded-circle bg-info me-2">&nbsp;</span>

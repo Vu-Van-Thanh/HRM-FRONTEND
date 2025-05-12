@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { emailSentBarChart, monthlyEarningChart } from './data';
-import { ChartType, AttendaceFilterDTO,AttendaceResponseDTO } from './dashboard.model';
+import { ChartType, AttendaceFilterDTO,AttendaceResponseDTO, ProjectTaskInfo } from './dashboard.model';
 import { BsModalService, BsModalRef, ModalDirective } from 'ngx-bootstrap/modal';
 import { EventService } from '../../../core/services/event.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -85,6 +85,13 @@ export class DefaultComponent implements OnInit {
   activityStats: ActivityHours[] = [];
   totalActivityHours: string = '0';
   
+  // Task properties
+  employeeTasks: ProjectTaskInfo[] = [];
+  completedTasks: number = 0;
+  totalTasks: number = 0;
+  tasksByStatus: { [status: string]: number } = {};
+  tasksByPriority: { [priority: string]: number } = {};
+  
   @ViewChild('content') content;
   @ViewChild('center', { static: false }) center?: ModalDirective;
   constructor(
@@ -103,6 +110,8 @@ export class DefaultComponent implements OnInit {
     this.updateCalendar();
     this.initWorkProgressChart();
     this.initActivityHoursChart();
+    this.fetchAttendanceRecords();
+    this.fetchEmployeeTasks();
   }
 
   ngAfterViewInit() {
@@ -235,7 +244,11 @@ export class DefaultComponent implements OnInit {
         } else if (activityName.includes('làm từ xa') || activityName.includes('remote')) {
           activityStats['workfromhome'].hours += durationHours;
         } else {
-          activityStats[activityName.toString()].hours += durationHours;
+          // Check if the activity name exists in activityStats, if not create it
+          if (!activityStats[activityName]) {
+            activityStats[activityName] = { type: activityName, hours: 0, percentage: 0 };
+          }
+          activityStats[activityName].hours += durationHours;
         }
       }
     });
@@ -434,6 +447,9 @@ export class DefaultComponent implements OnInit {
         break;
       }
     }
+    
+    // Fetch attendance records to update the calendar
+    this.fetchAttendanceRecords();
   }
   
   /**
@@ -469,30 +485,63 @@ export class DefaultComponent implements OnInit {
   }
   
   /**
+   * Determine status from attendance records
+   */
+  determineStatusFromAttendance(attendanceRecords: AttendaceResponseDTO[]): string {
+    let totalHours = 0;
+
+    // Calculate total hours worked
+    attendanceRecords.forEach(record => {
+      if (record.Starttime && record.Endtime) {
+        const start = new Date(record.Starttime);
+        const end = new Date(record.Endtime);
+        const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        totalHours += duration;
+      }
+    });
+
+    // If total hours = 8, mark as fullDay (Khai công đủ)
+    if (totalHours >= 8) {
+      return 'fullDay';
+    } 
+    // If less than 8 hours but greater than 0, mark as insufficient (Khai công thiếu)
+    else if (totalHours > 0) {
+      return 'insufficient';
+    }
+    // Default case - chưa khai
+    return 'notSubmitted';
+  }
+
+  /**
    * Determine calendar day status based on activities
    * @param activities Activities for the day
    * @returns Status string
    */
   determineStatusFromActivities(activities?: ActivityRequestDTO[]): string {
     if (!activities || activities.length === 0) {
-      return 'none';
+      return 'notSubmitted'; // Changed from 'none' to 'notSubmitted'
     }
     
     let totalHours = 0;
 
-  activities.forEach(activity => {
-    if (activity.startTime && activity.endTime) {
-      const start = new Date(activity.startTime);
-      const end = new Date(activity.endTime);
-      const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-      totalHours += duration;
-    }
-  });
+    activities.forEach(activity => {
+      if (activity.startTime && activity.endTime) {
+        const start = new Date(activity.startTime);
+        const end = new Date(activity.endTime);
+        const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        totalHours += duration;
+      }
+    });
 
-  // Nếu tổng thời gian = 8 tiếng => đủ công
-  if (totalHours == 8) {
-    return 'present';
-  }
+    // If total time = 8 hours => Khai công đủ
+    if (totalHours >= 8) {
+      return 'fullDay';
+    }
+    // If has hours but less than 8 => Khai công thiếu
+    else if (totalHours > 0) {
+      return 'insufficient';
+    }
+      
     // Check if there's any activity with specific statuses
     const hasApproved = activities.some(a => a.status === 'APPROVED');
     const hasPending = activities.some(a => a.status === 'PENDING');
@@ -502,21 +551,9 @@ export class DefaultComponent implements OnInit {
     if (hasPending) return 'pending';
     if (hasRejected) return 'absent';
     
-    return 'none';
+    return 'notSubmitted';
   }
-  
-  getActivityInRequestFlds(requestFlds: string): string {
-    try {
-      const parsed = JSON.parse(requestFlds);
-      if (parsed["0000"] && parsed["0000"].value) {
-        return parsed["0000"].value;
-      }
-      return '';
-    } catch (e) {
-      console.error('Invalid JSON:', e);
-      return '';
-    }
-  }
+
   /**
    * Returns the appropriate CSS class for a status
    * @param status The attendance status
@@ -531,12 +568,16 @@ export class DefaultComponent implements OnInit {
         return 'bg-warning';
       case 'overtime':
         return 'bg-info';
-      case 'fullShift':
-        return 'bg-primary';
+      case 'fullDay':
+        return 'bg-success';
+      case 'insufficient':
+        return 'bg-danger';
       case 'late':
         return 'bg-danger';
       case 'holiday':
         return 'bg-info';
+      case 'notSubmitted':
+        return 'bg-secondary';
       case 'none':
       default:
         return 'bg-light';
@@ -634,8 +675,8 @@ export class DefaultComponent implements OnInit {
       },
       colors: ['#5b73e8'],
       series: [{
-        name: 'Completed Tasks',
-        data: [22, 23, 30, 28, 32, 27, 24]
+        name: 'Công việc',
+        data: [0, 0, 0, 0, 0, 0, 0]
       }],
       fill: {
         type: 'gradient',
@@ -746,5 +787,196 @@ export class DefaultComponent implements OnInit {
     
     // Log for debugging
     console.log('Filtered activities:', this.filteredActivities.length, 'Selected weekday:', this.selectedWeekday);
+  }
+
+  /**
+   * Fetch attendance records for the current employee
+   */
+  fetchAttendanceRecords() {
+    if (!this.employeeId) {
+      console.error('No employee ID available');
+      return;
+    }
+
+    // Create first and last day of current month
+    const firstDayOfMonth = new Date(this.selectedYear, this.selectedMonth, 1);
+    const lastDayOfMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0);
+
+    const filter: AttendaceFilterDTO = {
+      StartDate: firstDayOfMonth,
+      EndDate: lastDayOfMonth,
+      EmployeeIDList: this.employeeId,
+      Starttime: new Date(),
+      Endtime: new Date(),
+      ProjectId: '',
+      Position: '',
+      Status: ''
+    };
+
+    console.log('Fetching attendance with filter:', filter);
+
+    const params = new HttpParams({
+      fromObject: {
+        ...(filter.StartDate && { StartDate: filter.StartDate.toISOString() }),
+        ...(filter.EndDate && { EndDate: filter.EndDate.toISOString() }),
+        ...(filter.EmployeeIDList && { EmployeeIDList: filter.EmployeeIDList }),
+        ...(filter.Status && { Status: filter.Status })
+      }
+    });
+
+    this.http.get<AttendaceResponseDTO[]>(`${API_ENDPOINT.getAllAttendace}`, { params })
+      .subscribe({
+        next: (data) => {
+          console.log('Attendance records:', data);
+          
+          // Update calendar with attendance data
+          this.updateCalendarWithAttendance(data);
+        },
+        error: (error) => {
+          console.error('Error fetching attendance records:', error);
+        }
+      });
+  }
+
+  /**
+   * Update calendar with attendance data
+   */
+  updateCalendarWithAttendance(attendanceRecords: AttendaceResponseDTO[]) {
+    // Process each calendar day and match with attendance
+    for (const week of this.calendarWeeks) {
+      for (const day of week) {
+        if (!day.date) continue;
+        
+        // Create date object for the current calendar day
+        const dayDate = new Date(this.selectedYear, this.selectedMonth, day.date);
+        
+        // Find attendance records for this day
+        const dayAttendance = attendanceRecords.filter(record => {
+          const recordDate = new Date(record.AttendanceDate);
+          return recordDate.getDate() === dayDate.getDate() && 
+                 recordDate.getMonth() === dayDate.getMonth() && 
+                 recordDate.getFullYear() === dayDate.getFullYear();
+        });
+        
+        // Set status based on attendance
+        if (dayAttendance.length > 0) {
+          day.status = this.determineStatusFromAttendance(dayAttendance);
+        }
+      }
+    }
+  }
+
+  getActivityInRequestFlds(requestFlds: string): string {
+    try {
+      const parsed = JSON.parse(requestFlds);
+      if (parsed["0000"] && parsed["0000"].value) {
+        return parsed["0000"].value;
+      }
+      return '';
+    } catch (e) {
+      console.error('Invalid JSON:', e);
+      return '';
+    }
+  }
+
+  /**
+   * Fetch tasks assigned to the employee
+   */
+  fetchEmployeeTasks() {
+    if (!this.employeeId) {
+      console.error('No employee ID available');
+      return;
+    }
+
+    console.log('Fetching tasks for employee:', this.employeeId);
+
+    this.http.get<ProjectTaskInfo[]>(`${API_ENDPOINT.getTasksByAssignedTo}/${this.employeeId}`)
+      .subscribe({
+        next: (tasks) => {
+          console.log('Employee tasks:', tasks);
+          this.employeeTasks = tasks;
+          
+          // Calculate task statistics
+          this.calculateTaskStatistics();
+          
+          // Update work progress chart
+          this.updateWorkProgressChart();
+        },
+        error: (error) => {
+          console.error('Error fetching employee tasks:', error);
+        }
+      });
+  }
+
+  /**
+   * Calculate task statistics
+   */
+  calculateTaskStatistics() {
+    // Reset counters
+    this.totalTasks = this.employeeTasks.length;
+    this.completedTasks = 0;
+    this.tasksByStatus = {};
+    this.tasksByPriority = {};
+    
+    // Calculate statistics
+    this.employeeTasks.forEach(task => {
+      // Count by status
+      if (!this.tasksByStatus[task.status]) {
+        this.tasksByStatus[task.status] = 0;
+      }
+      this.tasksByStatus[task.status]++;
+      
+      // Count completed tasks
+      if (task.status === 'Completed' || task.status === 'Done') {
+        this.completedTasks++;
+      }
+      
+      // Count by priority
+      if (!this.tasksByPriority[task.priority]) {
+        this.tasksByPriority[task.priority] = 0;
+      }
+      this.tasksByPriority[task.priority]++;
+    });
+    
+    console.log('Task statistics:', {
+      total: this.totalTasks,
+      completed: this.completedTasks,
+      byStatus: this.tasksByStatus,
+      byPriority: this.tasksByPriority
+    });
+  }
+
+  /**
+   * Update work progress chart with task data
+   */
+  updateWorkProgressChart() {
+    // Create data for chart
+    const weekdays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
+    const tasksByDay = Array(7).fill(0);
+    
+    // Count tasks by due date weekday
+    this.employeeTasks.forEach(task => {
+      if (task.deadline) {
+        const deadline = new Date(task.deadline);
+        const weekdayIndex = deadline.getDay();
+        // Convert Sunday (0) to be the last day (6)
+        const adjustedIndex = weekdayIndex === 0 ? 6 : weekdayIndex - 1;
+        tasksByDay[adjustedIndex]++;
+      }
+    });
+    
+    // Update chart data
+    this.workProgressChart.series = [{
+      name: 'Công việc',
+      data: tasksByDay
+    }];
+    
+    // Update chart categories
+    this.workProgressChart.xaxis = {
+      categories: weekdays,
+      labels: {
+        show: true
+      }
+    };
   }
 }
