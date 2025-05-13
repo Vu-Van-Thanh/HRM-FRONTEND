@@ -179,8 +179,8 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
 
         // xử lý dữ liệu nhân viên theo giới tính mỗi phòng ban
         let departmentGenderLabels = employeeByDepartmentGender.map(d => d.departmentName);
-        let departmentGenderMale = employeeByDepartmentGender.map(d => d.Male);
-        let departmentGenderFemale = employeeByDepartmentGender.map(d => d.Female);
+        let departmentGenderMale = employeeByDepartmentGender.map(d => d.male);
+        let departmentGenderFemale = employeeByDepartmentGender.map(d => d.female);
         this.departmentGenderChartOptions.xaxis.categories = departmentGenderLabels;
         (this.departmentGenderChartOptions.series as ApexAxisChartSeries)[0].data = departmentGenderMale;
         (this.departmentGenderChartOptions.series as ApexAxisChartSeries)[1].data = departmentGenderFemale;

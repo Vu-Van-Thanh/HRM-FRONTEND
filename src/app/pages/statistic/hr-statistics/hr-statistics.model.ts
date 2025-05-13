@@ -36,8 +36,8 @@ export interface EmployeeByDepartment {
 }
 export interface EmployeeByDepartmentAndGender {
     departmentName : string;
-    Male : number;
-    Female : number;
+    male : number;
+    female : number;
 }
 
 export interface EmployeeByDegree {
