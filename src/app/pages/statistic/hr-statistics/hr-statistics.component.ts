@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { ChartType } from './hr-statistics.model';
+import { ChartType, GrowthWorkforce,EmployeeCounter } from './hr-statistics.model';
 import { HttpClient } from '@angular/common/http';
+import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexFill, ApexGrid, ApexLegend, ApexMarkers, ApexNonAxisChartSeries, ApexPlotOptions, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis, ApexResponsive } from "ng-apexcharts";
 import * as L from 'leaflet';
 
 import {
@@ -15,6 +16,7 @@ import {
   regionDistributionChartOptions,
   seniorityChartOptions
 } from './data';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
 interface RegionData {
   name: string;
@@ -132,27 +134,79 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
       circle.bindTooltip(`${region.name}: ${region.employees} nhân viên`);
     });
 
-    // Thêm control zoom ở góc phải dưới
     L.control.zoom({
       position: 'bottomright'
     }).addTo(this.map);
     
-    // Vẫn focus vào Việt Nam lúc khởi tạo nhưng cho phép di chuyển ra xa
     this.map.fitBounds(this.vietnamBounds);
   }
 
   updateworkforceGrowthChart() {
-    this.http.get('https://localhost:7176/Employee/workforce-growth').subscribe(data => {
+    this.http.get<GrowthWorkforce>(API_ENDPOINT.getGrowthWorkforce).subscribe(data => {
       console.log(data);
-      const totalEmployeesSeries = this.workforceGrowthChartOptions.series.find(s => s.name === "Tổng nhân sự");
-    
-    // Nếu tìm thấy, cập nhật data
-    if (totalEmployeesSeries) {
-      totalEmployeesSeries.data = data.totalEmployees; // giả sử `data.totalEmployees` là một mảng dữ liệu
-    } else {
-      console.error("Không tìm thấy series 'Tổng nhân sự'");
-    }
-  });
+      
+      if (data) {
+        (this.workforceGrowthChartOptions.series as ApexAxisChartSeries).find(s => s.name === "Tổng nhân sự").data = data.employeeGrowthByMonth;
+        (this.workforceGrowthChartOptions.series as ApexAxisChartSeries).find(s => s.name === "Nhân viên mới").data = data.newEmployeesByMonth;
+        (this.workforceGrowthChartOptions.series as ApexAxisChartSeries).find(s => s.name === "Nhân viên nghỉ việc").data = data.leaveEmployeesByMonth;
+        (this.workforceGrowthChartOptions.series as ApexAxisChartSeries).find(s => s.name === "Tỷ lệ giữ chân").data = data.retentionRate;
+        (this.workforceGrowthChartOptions.series as ApexAxisChartSeries).find(s => s.name === "Tỷ lệ tăng trưởng").data = data.GrowthRate;
+      } else {
+        console.error("Không tìm thấy series 'Tổng nhân sự'");
+      }
+    });
+  }
+  
+  updateEmployeeCountChart(){
+    this.http.get<EmployeeCounter>(API_ENDPOINT.getEmployeeCount).subscribe(data => {
+        let employeeByGender = data.employeeGender;
+        let employeeByDepartment = data.employeeDepartment;
+        let employeeByDepartmentGender = data.employeeByDepartmentAndGender;
+        let employeeByDegree = data.employeeByDegree;
+        let employeeByRegion = data.employeeByRegion;
+        // xử lý gender chart 
+        this.genderRatioChartOptions.series = [employeeByGender.male, employeeByGender.female];
+
+        // xử lý department chart
+        let total = employeeByDepartment.reduce((sum, d) => sum + d.employeeCount, 0);
+        let colors = employeeByDepartment.map(() => this.generateRandomColor());
+        let departmentLabels = data.employeeDepartment.map(d => d.departmentName);
+        let departmentSeries = data.employeeDepartment.map(d => (d.employeeCount/total) * 100);
+        this.departmentChartOptions.labels = departmentLabels;  
+        this.departmentChartOptions.series = departmentSeries;
+        this.departmentChartOptions.colors = colors;
+
+
+        // xử lý dữ liệu nhân viên theo giới tính mỗi phòng ban
+        let departmentGenderLabels = employeeByDepartmentGender.map(d => d.departmentName);
+        let departmentGenderMale = employeeByDepartmentGender.map(d => d.Male);
+        let departmentGenderFemale = employeeByDepartmentGender.map(d => d.Female);
+        this.departmentGenderChartOptions.xaxis.categories = departmentGenderLabels;
+        (this.departmentGenderChartOptions.series as ApexAxisChartSeries)[0].data = departmentGenderMale;
+        (this.departmentGenderChartOptions.series as ApexAxisChartSeries)[1].data = departmentGenderFemale;
+        // xử lý dữ liệu nhân viên theo trình độ học vấn
+        let employeeByDegreeLabels = employeeByDegree.map(d => d.degreeName);
+        let employeeByDegreeCount = employeeByDegree.map(d => d.employeeCount);
+        let colorsDegree = employeeByDegree.map(() => this.generateRandomColor());
+        this.educationChartOptions.labels = employeeByDegreeLabels;
+        this.educationChartOptions.series = employeeByDegreeCount;
+        this.educationChartOptions.colors = colorsDegree;
+        // xử lý dữ liệu nhân viên theo khu vực
+        this.regionDistributionChartOptions.series = [
+          {
+            data: employeeByRegion.map(region => ({
+              x: region.regionName,
+              y: region.employeeCount
+            }))
+          }
+        ];
+    });
+  }
+
+  
+
+  generateRandomColor(): string {
+    return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
   }
   
 } 

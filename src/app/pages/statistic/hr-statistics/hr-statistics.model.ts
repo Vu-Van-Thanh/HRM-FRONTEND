@@ -17,3 +17,41 @@ export interface ChartType {
     labels?: string[];
     responsive?: ApexResponsive[];
 } 
+
+// data growthworkforce
+export interface GrowthWorkforce {
+    employeeGrowthByMonth : number[];
+    newEmployeesByMonth : number[];
+    leaveEmployeesByMonth : number[];
+    retentionRate : number[];
+    GrowthRate : number[];
+}
+export interface EmployeeByGender {
+    male : number;
+    female : number
+}
+export interface EmployeeByDepartment {
+    departmentName : string;
+    employeeCount : number;
+}
+export interface EmployeeByDepartmentAndGender {
+    departmentName : string;
+    Male : number;
+    Female : number;
+}
+
+export interface EmployeeByDegree {
+    degreeName : string;    
+    employeeCount : number;
+}
+export interface EmployeeByRegion{
+    regionName : string;
+    employeeCount : number;
+}
+export interface EmployeeCounter {
+    employeeDepartment : EmployeeByDepartment[];
+    employeeGender : EmployeeByGender;
+    employeeByDepartmentAndGender : EmployeeByDepartmentAndGender[];
+    employeeByDegree : EmployeeByDegree[];
+    employeeByRegion : EmployeeByRegion[];
+}
