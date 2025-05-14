@@ -48,10 +48,15 @@ export interface EmployeeByRegion{
     regionName : string;
     employeeCount : number;
 }
+export interface SeniorityEmployee{
+    type : string;
+    count : number;
+}
 export interface EmployeeCounter {
     employeeDepartment : EmployeeByDepartment[];
     employeeGender : EmployeeByGender;
     employeeByDepartmentAndGender : EmployeeByDepartmentAndGender[];
     employeeByDegree : EmployeeByDegree[];
     employeeByRegion : EmployeeByRegion[];
+    seniorityEmployees : SeniorityEmployee[];
 }

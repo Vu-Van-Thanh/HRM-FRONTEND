@@ -158,12 +158,13 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
   }
   
   updateEmployeeCountChart(){
-    this.http.get<EmployeeCounter>(API_ENDPOINT.getEmployeeCount).subscribe(data => {
+    this.http.get<EmployeeCounter>(API_ENDPOINT.getEmployeeTotal).subscribe(data => {
         let employeeByGender = data.employeeGender;
         let employeeByDepartment = data.employeeDepartment;
         let employeeByDepartmentGender = data.employeeByDepartmentAndGender;
         let employeeByDegree = data.employeeByDegree;
         let employeeByRegion = data.employeeByRegion;
+        let seniorityEmployees = data.seniorityEmployees;
         // xử lý gender chart 
         this.genderRatioChartOptions.series = [employeeByGender.male, employeeByGender.female];
 
@@ -200,6 +201,11 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
             }))
           }
         ];
+        // xử xử lý dữ liệu thâm niêm làm việc
+        let seniorityLabels = seniorityEmployees.map(s => s.type);
+        let seniorityCount = seniorityEmployees.map(s => s.count);
+        this.seniorityChartOptions.xaxis.categories = seniorityLabels;
+        (this.seniorityChartOptions.series as ApexAxisChartSeries)[0].data = seniorityCount;
     });
   }
 

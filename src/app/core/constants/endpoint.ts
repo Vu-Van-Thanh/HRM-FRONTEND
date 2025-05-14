@@ -35,5 +35,6 @@ export const API_ENDPOINT = {
    getTasksByAssignedTo: 'https://localhost:7176/Task/assigned',
    getAllNews : 'https://localhost:7176/Article',
    getEmployeeCount : 'https://localhost:7214/Employee',
-   getGrowthWorkforce : 'https://localhost:7214/Employee/workforce-growth',
+   getEmployeeTotal : 'https://localhost:7214/Employee/statistic',
+   getGrowthWorkforce : 'https://localhost:7214/Employee/total-employee',
 };
