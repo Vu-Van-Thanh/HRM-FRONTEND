@@ -211,10 +211,14 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  getEmployeeInDepartment(departmentName: string) : Observable<DepartmentPerformance[]> {
+  getEmployeeInDepartment() : Observable<DepartmentPerformance[]> {
     return this.http.get<DepartmentPerformance[]>(API_ENDPOINT.getDepartmentPerfomance);
   }
 
+  UpdatePerformanceChart(){
+    let performanceData = this.getEmployeeInDepartment();
+    
+  }
  
 
 
