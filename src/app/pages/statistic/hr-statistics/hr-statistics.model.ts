@@ -52,6 +52,15 @@ export interface SeniorityEmployee{
     type : string;
     count : number;
 }
+export interface EmployeeInDepartment
+{
+    departmentName : string;
+    employeeIDList : string;
+}
+export interface DepartmentPerformance {
+    departmentName : string;
+    performanceScore : number[];
+}
 export interface EmployeeCounter {
     employeeDepartment : EmployeeByDepartment[];
     employeeGender : EmployeeByGender;
