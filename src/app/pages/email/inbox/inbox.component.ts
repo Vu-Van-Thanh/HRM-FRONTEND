@@ -4,6 +4,7 @@ import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Email } from './inbox.model';
 import { emailData } from './data';
 import Swal from 'sweetalert2';
+import { EmailService, EmailDTO, MailStatus } from 'src/app/core/services/email.service';
 
 @Component({
   selector: 'app-inbox',
@@ -24,8 +25,8 @@ export class InboxComponent implements OnInit {
 
   // paginated email data
   emailData: Array<Email>;
-  emailIds: number[] = [];
-  emailDatas:any;
+  emailIds: string[] = [];
+  emailDatas: any;
   // page number
   page: number = 1;
   // default page size
@@ -36,15 +37,76 @@ export class InboxComponent implements OnInit {
   // start and end index
   startIndex: number = 1;
   endIndex: number = 15;
+  
+  // API emails
+  apiEmails: EmailDTO[] = [];
+  isLoading: boolean = false;
+  error: string | null = null;
 
-  constructor(private modalService: BsModalService) {
-  }
+  constructor(
+    private modalService: BsModalService,
+    private emailService: EmailService
+  ) {}
 
   ngOnInit() {
     this.breadCrumbItems = [{ label: 'Email' }, { label: 'Inbox', active: true }];
-    this.emailData = emailData;
-    this.emailDatas = Object.assign([], this.emailData); 
-    this.totalRecords = emailData.length;
+    this.loadEmails();
+  }
+  
+  /**
+   * Map email status to category
+   */
+  mapStatusToCategory(status: MailStatus): string {
+    switch (status) {
+      case MailStatus.Received:
+        return 'all';
+      case MailStatus.Sent:
+        return 'sent-mail';
+      case MailStatus.Draft:
+        return 'draft';
+      case MailStatus.Deleted:
+        return 'trash';
+      default:
+        return 'all';
+    }
+  }
+  
+  /**
+   * Load emails from API
+   */
+  loadEmails() {
+    this.isLoading = true;
+    this.emailService.getAllEmailsByEmployee().subscribe({
+      next: (emails) => {
+        this.apiEmails = emails;
+        this.totalRecords = emails.length;
+        
+        // Convert API emails to the format expected by the component
+        this.emailData = this.apiEmails.map(email => ({
+          id: email.emailId,
+          subject: email.subject,
+          title: email.sender,
+          date: new Date(email.receivedAt).toLocaleString(),
+          unread: !email.isRead,
+          text: email.body,
+          isStarred: email.isStarred,
+          category: this.mapStatusToCategory(email.status)
+        }));
+        
+        this.emailDatas = Object.assign([], this.emailData);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching emails:', error);
+        this.error = 'Failed to load emails';
+        this.isLoading = false;
+        
+        // Fallback to demo data if API fails
+        this.emailData = emailData;
+        this.emailDatas = Object.assign([], this.emailData);
+        this.totalRecords = emailData.length;
+      }
+    });
   }
 
   open(content) {
@@ -107,13 +169,13 @@ export class InboxComponent implements OnInit {
     if (this.endIndex > this.totalRecords) {
       this.endIndex = this.totalRecords;
     }
-    this.emailData = emailData.slice(this.startIndex - 1, this.endIndex - 1);
+    this.emailData = this.emailDatas.slice(this.startIndex - 1, this.endIndex - 1);
   }
 
   /**
    * Category Filtering  
    */
-   categoryFilter(e:any,name: any) {  
+  categoryFilter(e:any, name: any) {  
     var removeClass = document.querySelectorAll('.mail-list a');
     removeClass.forEach((element: any) => {      
         element.classList.remove('active');
