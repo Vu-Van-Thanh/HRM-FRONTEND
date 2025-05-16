@@ -1,8 +1,10 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { ChartType, GrowthWorkforce,EmployeeCounter } from './hr-statistics.model';
+import { ChartType, GrowthWorkforce,EmployeeCounter, EmployeeInDepartment, DepartmentPerformance } from './hr-statistics.model';
 import { HttpClient } from '@angular/common/http';
 import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexFill, ApexGrid, ApexLegend, ApexMarkers, ApexNonAxisChartSeries, ApexPlotOptions, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis, ApexResponsive } from "ng-apexcharts";
 import * as L from 'leaflet';
+import { Observable } from 'rxjs';
+
 
 import {
   educationChartOptions,
@@ -208,6 +210,18 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
         (this.seniorityChartOptions.series as ApexAxisChartSeries)[0].data = seniorityCount;
     });
   }
+
+  getEmployeeInDepartment() : Observable<DepartmentPerformance[]> {
+    return this.http.get<DepartmentPerformance[]>(API_ENDPOINT.getDepartmentPerfomance);
+  }
+
+  UpdatePerformanceChart(){
+    let performanceData = this.getEmployeeInDepartment();
+    
+  }
+ 
+
+
 
   
 
