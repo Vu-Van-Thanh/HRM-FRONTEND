@@ -78,6 +78,7 @@ export class InboxComponent implements OnInit {
     this.isLoading = true;
     this.emailService.getAllEmailsByEmployee().subscribe({
       next: (emails) => {
+        console.log("emails nhận duọcw"  ,emails);  
         this.apiEmails = emails;
         this.totalRecords = emails.length;
         
@@ -190,5 +191,4 @@ export class InboxComponent implements OnInit {
       });
     } 
   }
-
 }

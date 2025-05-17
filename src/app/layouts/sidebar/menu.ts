@@ -326,7 +326,7 @@ export const MENU: MenuItem[] = [
             {
                 id: 50,
                 label: 'MENUITEMS.TASKS.LIST.CREATETASK',
-                link: '/tasks/create',
+                link: '/tasks/createtask',
                 parentId: 47
             }
         ]

@@ -101,7 +101,7 @@ export class EmployeeService {
       district: employee.district,
       commune: employee.commune,
       insuranceNumber: employee.insuranceNumber,
-      avatar: employee.avartar, // Note 'avartar' spelling from backend
+      avartar: employee.avartar, // Note 'avartar' spelling from backend
       photo: employee.avartar, // Also map to photo for UI compatibility
       identity: employee.identity || [],
       insurance: employee.insurance || [],
@@ -168,7 +168,7 @@ export class EmployeeService {
       district: employee.district,
       commune: employee.commune,
       insuranceNumber: employee.insuranceNumber,
-      avartar: employee.avatar, // Note: backend uses 'avartar' spelling
+      avartar: employee.avartar, // Note: backend uses 'avartar' spelling
       identity: employee.identity || [],
       insurance: employee.insurance || []
     };

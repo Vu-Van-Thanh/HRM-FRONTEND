@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ModalModule } from 'ngx-bootstrap/modal';
@@ -35,6 +35,7 @@ import { GenerateComponent } from './generate/generate.component';
     PaginationModule.forRoot(),
     CKEditorModule,
     FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class EmailModule { }

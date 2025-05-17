@@ -60,7 +60,7 @@ export interface Employee {
   district?: string;
   commune?: string;
   insuranceNumber?: string;
-  avatar?: string;
+  avartar?: string;
   identity?: string[];
   insurance?: string[];
   

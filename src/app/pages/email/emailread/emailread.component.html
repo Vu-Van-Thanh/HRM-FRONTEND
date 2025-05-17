@@ -158,41 +158,81 @@
                 <img class="rounded-circle avatar-sm" src="assets/images/users/avatar-2.jpg" alt="Generic placeholder image">
               </div>
               <div class="flex-grow-1">
-                <h5 class="font-size-14 mt-1">Humberto D. Champion</h5>
-                <small class="text-muted">support@domain.com</small>
+                <h5 class="font-size-14 mt-1">{{currentEmail ? currentEmail.sender : (emailRead?.[0]?.title || 'Unknown')}}</h5>
+                <small class="text-muted">{{currentEmail ? currentEmail.sender : 'support@domain.com'}}</small>
               </div>
             </div>
 
-            <h4 class="mt-0 font-size-16">{{emailRead[0].title}}</h4>
+            <!-- Email Subject (Tiêu đề) -->
+            <h4 class="mt-0 font-size-16">{{currentEmail ? currentEmail.subject : (emailRead?.[0]?.subject || 'No subject')}}</h4>
 
-            <p>Dear Lorem Ipsum,</p>
-            <p>
-              {{emailRead[0].subject}}
-            </p>
-            <p>Sed elementum turpis eu lorem interdum, sed porttitor eros commodo. Nam eu venenatis tortor, id lacinia
-              diam. Sed aliquam in dui et porta. Sed bibendum orci non tincidunt ultrices. Vivamus fringilla, mi lacinia
-              dapibus condimentum, ipsum urna lacinia lacus, vel tincidunt mi nibh sit amet lorem.</p>
-            <p>Sincerly,</p>
+            <!-- Email Status Indicators -->
+            <div class="email-status-indicators mb-3">
+              <span *ngIf="currentEmail?.isStarred" class="badge bg-warning me-1">
+                <i class="mdi mdi-star"></i> Starred
+              </span>
+              <span *ngIf="currentEmail?.isRead" class="badge bg-info me-1">
+                <i class="mdi mdi-eye"></i> Read
+              </span>
+              <span *ngIf="currentEmail?.isDeleted" class="badge bg-danger me-1">
+                <i class="mdi mdi-delete"></i> Deleted
+              </span>
+              <span *ngIf="currentEmail?.status !== undefined" class="badge bg-primary">
+                {{currentEmail.status === mailStatus.Sent ? 'Sent' : 
+                  currentEmail.status === mailStatus.Draft ? 'Draft' : 
+                  currentEmail.status === mailStatus.Deleted ? 'Deleted' : 'Received'}}
+              </span>
+            </div>
+
+            <!-- Email content - display using [innerHTML] to render HTML properly -->
+            <div *ngIf="isLoading" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            
+            <div *ngIf="error" class="alert alert-danger">
+              {{error}}
+            </div>
+            
+            <div *ngIf="!isLoading && !error" class="email-content-container">
+              <!-- For current email from API, use innerHTML to render HTML body -->
+              <div *ngIf="currentEmail" [innerHTML]="safeHtmlBody" class="email-html-content"></div>
+              
+              <!-- Fallback to static data if API email not available -->
+              <div *ngIf="!currentEmail">
+                <p>Dear Lorem Ipsum,</p>
+                <p *ngIf="emailRead?.[0]?.subject">
+                  {{emailRead[0].subject}}
+                </p>
+                <p>Sed elementum turpis eu lorem interdum, sed porttitor eros commodo. Nam eu venenatis tortor, id lacinia
+                  diam. Sed aliquam in dui et porta. Sed bibendum orci non tincidunt ultrices. Vivamus fringilla, mi lacinia
+                  dapibus condimentum, ipsum urna lacinia lacus, vel tincidunt mi nibh sit amet lorem.</p>
+                <p>Sincerly,</p>
+                <div class="row">
+                  <div class="col-xl-2 col-6">
+                    <div class="card">
+                      <img class="card-img-top img-fluid" src="assets/images/small/img-3.jpg" alt="Card image cap">
+                      <div class="py-2 text-center">
+                        <a href="javascript: void(0);" class="fw-medium" download>Download</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-xl-2 col-6">
+                    <div class="card">
+                      <img class="card-img-top img-fluid" src="assets/images/small/img-4.jpg" alt="Card image cap">
+                      <div class="py-2 text-center">
+                        <a href="javascript: void(0);" class="fw-medium" download>Download</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <hr />
 
-            <div class="row">
-              <div class="col-xl-2 col-6">
-                <div class="card">
-                  <img class="card-img-top img-fluid" src="assets/images/small/img-3.jpg" alt="Card image cap">
-                  <div class="py-2 text-center">
-                    <a href="javascript: void(0);" class="fw-medium" download>Download</a>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xl-2 col-6">
-                <div class="card">
-                  <img class="card-img-top img-fluid" src="assets/images/small/img-4.jpg" alt="Card image cap">
-                  <div class="py-2 text-center">
-                    <a href="javascript: void(0);" class="fw-medium" download>Download</a>
-                  </div>
-                </div>
-              </div>
-            </div>
+            
 
             <a href="javascript: void(0);" class="btn btn-secondary mt-4"><i class="mdi mdi-reply"></i>
               Reply</a>
@@ -204,3 +244,4 @@
     </div>
   </div>
 </div>
+

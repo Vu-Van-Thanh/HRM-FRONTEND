@@ -30,7 +30,7 @@
               <h3>Thông tin cơ bản</h3>
               <div class="employee-avatar mb-4">
                 <div class="avatar-container">
-                  <img [src]="employee?.photo || 'assets/images/default-avatar.png'" alt="Ảnh nhân viên" class="employee-image">
+                  <img [src]="employee?.avartar || 'assets/images/default-avatar.png'" alt="Ảnh nhân viên" class="employee-image">
                   <div class="avatar-upload" *ngIf="isEditMode">
                     <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none">
                     <button mat-raised-button color="primary" (click)="fileInput.click()">

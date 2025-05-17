@@ -1,0 +1,54 @@
+.email-content-container {
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.email-html-content {
+  // Đảm bảo nội dung HTML hiển thị đúng
+  max-width: 100%;
+  overflow: auto;
+
+  // Đảm bảo hình ảnh không vượt quá container
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  // Cải thiện định dạng văn bản
+  p, div, span {
+    line-height: 1.6;
+  }
+
+  // Cải thiện bảng
+  table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    
+    td, th {
+      padding: 0.5rem;
+      border: 1px solid #dee2e6;
+    }
+  }
+
+  // Cải thiện liên kết
+  a {
+    color: #007bff;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.email-status-indicators {
+  .badge {
+    padding: 5px 8px;
+    margin-right: 5px;
+    font-weight: normal;
+  }
+}

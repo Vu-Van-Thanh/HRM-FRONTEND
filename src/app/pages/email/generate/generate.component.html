@@ -2,80 +2,130 @@
     <app-page-title title="Tạo email" [breadcrumbItems]="breadCrumbItems"></app-page-title>
 
     <div class="row">
-        <div class="col-12">
+        <div class="col-md-9">
             <div class="card">
                 <div class="card-body">
-                    <!-- Filters -->
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Chọn phòng ban</label>
-                                <select class="form-select" [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()">
-                                    <option value="">Tất cả phòng ban</option>
-                                    <option *ngFor="let dept of departments" [value]="dept.id">{{dept.name}}</option>
+                    <h4 class="card-title mb-4">Tạo email</h4>
+                    
+                    <form [formGroup]="composeForm">
+                        <!-- Template and Department Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="emailTemplate" class="form-label">Mẫu email</label>
+                                <select class="form-select" id="emailTemplate" (change)="onTemplateChange($event)" [disabled]="isLoadingTemplates">
+                                    <option value="">-- Chọn mẫu email --</option>
+                                    <option *ngFor="let template of emailTemplates" [value]="template.templateId">
+                                        {{template.templateName}}
+                                    </option>
                                 </select>
+                                <div *ngIf="isLoadingTemplates" class="mt-1 text-muted">
+                                    <small><i class="fa fa-spinner fa-spin me-1"></i> Đang tải mẫu email...</small>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Chọn mẫu email</label>
-                                <select class="form-select" [(ngModel)]="selectedTemplate">
-                                    <option value="">Chọn mẫu email</option>
-                                    <option *ngFor="let template of emailTemplates" [value]="template.id">{{template.name}}</option>
+                            <div class="col-md-6">
+                                <label for="department" class="form-label">Phòng ban</label>
+                                <select class="form-select" id="department" [(ngModel)]="selectedDepartmentId" 
+                                        [ngModelOptions]="{standalone: true}"
+                                        (ngModelChange)="loadEmployeesByDepartment($event)" 
+                                        [disabled]="isLoadingDepartments">
+                                    <option [ngValue]="">-- Chọn phòng ban --</option>
+                                    <option *ngFor="let dept of departments" [ngValue]="dept.departmentId">
+                                        {{dept.departmentName}}
+                                    </option>
                                 </select>
+                                <div *ngIf="isLoadingDepartments" class="mt-1 text-muted">
+                                    <small><i class="fa fa-spinner fa-spin me-1"></i> Đang tải phòng ban...</small>
+                                </div>
+                                <div *ngIf="selectedDepartmentId" class="mt-1 text-success">
+                                    <small><i class="mdi mdi-check-circle me-1"></i> Đã chọn phòng ban với ID: {{selectedDepartmentId}}</small>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Selected Employees -->
-                    <div class="mb-4" *ngIf="selectedEmployees.length > 0">
-                        <h5>Người nhận đã chọn:</h5>
-                        <div class="d-flex flex-wrap gap-2">
-                            <div *ngFor="let employee of selectedEmployees" class="badge bg-primary d-flex align-items-center">
-                                {{employee.name}}
-                                <i class="fas fa-times ms-2" (click)="removeEmployee(employee)"></i>
+                        
+                        <!-- To Field -->
+                        <div class="mb-3">
+                            <label for="emailTo" class="form-label">Người nhận</label>
+                            <input type="text" class="form-control" id="emailTo" formControlName="to" placeholder="Người nhận" readonly>
+                            
+                            <!-- Selected Recipients Tags -->
+                            <div *ngIf="selectedRecipients.length > 0" class="mt-2">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span *ngFor="let recipient of selectedRecipients" class="badge bg-primary d-flex align-items-center">
+                                        {{recipient.employeeName}}
+                                        <i class="mdi mdi-close-circle ms-1" style="cursor: pointer;" (click)="removeEmployee(recipient)"></i>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Employee List -->
-                    <div class="table-responsive">
-                        <table class="table table-centered table-nowrap mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Tên nhân viên</th>
-                                    <th scope="col">Email</th>
-                                    <th scope="col">Phòng ban</th>
-                                    <th scope="col">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let employee of employees">
-                                    <td>{{employee.id}}</td>
-                                    <td>{{employee.name}}</td>
-                                    <td>{{employee.email}}</td>
-                                    <td>{{employee.department?.name}}</td>
-                                    <td>
-                                        <button class="btn btn-sm" 
-                                                [class.btn-primary]="!isSelected(employee)"
-                                                [class.btn-danger]="isSelected(employee)"
-                                                (click)="onEmployeeSelect(employee)">
-                                            {{isSelected(employee) ? 'Xóa' : 'Chọn'}}
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <!-- Subject Field -->
+                        <div class="mb-3">
+                            <label for="emailSubject" class="form-label">Tiêu đề</label>
+                            <input type="text" class="form-control" id="emailSubject" formControlName="subject" placeholder="Tiêu đề email">
+                        </div>
+                        
+                        <!-- Email Content -->
+                        <div class="mb-3">
+                            <label class="form-label">Nội dung</label>
+                            <ckeditor [editor]="Editor" [data]="templateContent" formControlName="content"></ckeditor>
+                        </div>
+                        
+                        <!-- Send Button -->
+                        <div class="text-end">
+                            <button type="button" class="btn btn-primary" 
+                                    [disabled]="selectedRecipients.length === 0 || !selectedTemplateId || !composeForm.valid || isSending"
+                                    (click)="sendEmail()">
+                                <span *ngIf="!isSending">
+                                    <i class="mdi mdi-send me-1"></i> Gửi email
+                                </span>
+                                <span *ngIf="isSending">
+                                    <i class="mdi mdi-loading mdi-spin me-1"></i> Đang gửi...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <!-- Employee List -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title d-flex justify-content-between align-items-center">
+                        <span>Danh sách nhân viên</span>
+                        <span *ngIf="departmentEmployees.length > 0" class="badge bg-info">{{departmentEmployees.length}}</span>
+                    </h4>
+                    
+                    <div *ngIf="isLoadingEmployees">
+                        <div class="d-flex justify-content-center my-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Đang tải...</span>
+                            </div>
+                        </div>
+                        <p class="text-center text-muted">Đang tải danh sách nhân viên...</p>
                     </div>
-
-                    <!-- Send Button -->
-                    <div class="text-end mt-4">
-                        <button class="btn btn-primary" 
-                                [disabled]="selectedEmployees.length === 0 || !selectedTemplate"
-                                (click)="sendEmail()">
-                            <i class="fas fa-paper-plane me-1"></i> Gửi email
-                        </button>
+                    
+                    <div *ngIf="!isLoadingEmployees && departmentEmployees.length === 0 && selectedDepartmentId">
+                        <p class="text-center text-muted mt-4">Không có nhân viên nào trong phòng ban này</p>
+                    </div>
+                    
+                    <div *ngIf="!isLoadingEmployees && !selectedDepartmentId">
+                        <p class="text-center text-muted mt-4">Vui lòng chọn phòng ban</p>
+                    </div>
+                    
+                    <div *ngIf="!isLoadingEmployees && departmentEmployees.length > 0" 
+                         style="max-height: 400px; overflow-y: auto;">
+                        <div class="list-group">
+                            <div *ngFor="let employee of departmentEmployees" 
+                                 class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                 [class.active]="isSelected(employee)"
+                                 (click)="onEmployeeSelect(employee)"
+                                 style="cursor: pointer;">
+                                <span>{{employee.employeeName}}</span>
+                                <i *ngIf="isSelected(employee)" class="mdi mdi-check"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
