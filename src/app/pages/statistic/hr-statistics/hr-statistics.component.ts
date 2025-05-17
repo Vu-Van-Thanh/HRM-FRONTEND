@@ -1,10 +1,10 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { ChartType, GrowthWorkforce,EmployeeCounter, EmployeeInDepartment, DepartmentPerformance } from './hr-statistics.model';
 import { HttpClient } from '@angular/common/http';
 import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexFill, ApexGrid, ApexLegend, ApexMarkers, ApexNonAxisChartSeries, ApexPlotOptions, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis, ApexResponsive } from "ng-apexcharts";
 import * as L from 'leaflet';
 import { Observable } from 'rxjs';
-
+import { ChartComponent } from "ng-apexcharts";
 
 import {
   educationChartOptions,
@@ -33,6 +33,8 @@ interface RegionData {
   styleUrls: ['./hr-statistics.component.scss']
 })
 export class HrStatisticsComponent implements OnInit, AfterViewInit {
+
+  @ViewChild("departmentGenderChart") departmentGenderChart: ChartComponent;
 
   // Chart variables
   educationChartOptions: ChartType;
@@ -161,6 +163,7 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
   
   updateEmployeeCountChart(){
     this.http.get<EmployeeCounter>(API_ENDPOINT.getEmployeeTotal).subscribe(data => {
+      console.log(data);
         let employeeByGender = data.employeeGender;
         let employeeByDepartment = data.employeeDepartment;
         let employeeByDepartmentGender = data.employeeByDepartmentAndGender;
@@ -182,11 +185,26 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
 
         // xử lý dữ liệu nhân viên theo giới tính mỗi phòng ban
         let departmentGenderLabels = employeeByDepartmentGender.map(d => d.departmentName);
+       
         let departmentGenderMale = employeeByDepartmentGender.map(d => d.male);
         let departmentGenderFemale = employeeByDepartmentGender.map(d => d.female);
-        this.departmentGenderChartOptions.xaxis.categories = departmentGenderLabels;
-        (this.departmentGenderChartOptions.series as ApexAxisChartSeries)[0].data = departmentGenderMale;
-        (this.departmentGenderChartOptions.series as ApexAxisChartSeries)[1].data = departmentGenderFemale;
+        
+        // Cập nhật categories cho biểu đồ
+        if (this.departmentGenderChartOptions && this.departmentGenderChartOptions.xaxis) {
+          this.departmentGenderChartOptions.xaxis.categories = departmentGenderLabels;
+          
+        } else {
+          console.error("departmentGenderChartOptions.xaxis is undefined");
+        }
+        
+        // Cập nhật dữ liệu series
+        if (this.departmentGenderChartOptions && this.departmentGenderChartOptions.series) {
+          (this.departmentGenderChartOptions.series as ApexAxisChartSeries)[0].data = departmentGenderMale;
+          (this.departmentGenderChartOptions.series as ApexAxisChartSeries)[1].data = departmentGenderFemale;
+        }
+        
+        this.updateDepartmentGenderChart();
+        
         // xử lý dữ liệu nhân viên theo trình độ học vấn
         let employeeByDegreeLabels = employeeByDegree.map(d => d.degreeName);
         let employeeByDegreeCount = employeeByDegree.map(d => d.employeeCount);
@@ -195,19 +213,44 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
         this.educationChartOptions.series = employeeByDegreeCount;
         this.educationChartOptions.colors = colorsDegree;
         // xử lý dữ liệu nhân viên theo khu vực
-        this.regionDistributionChartOptions.series = [
-          {
-            data: employeeByRegion.map(region => ({
-              x: region.regionName,
-              y: region.employeeCount
-            }))
-          }
-        ];
+        if (employeeByRegion && employeeByRegion.length > 0) {
+          console.log("Updating region distribution chart with:", employeeByRegion);
+          // Format data for treemap chart
+          this.regionDistributionChartOptions.series = [
+            {
+              data: employeeByRegion.map(region => ({
+                x: region.regionName,
+                y: region.employeeCount
+              }))
+            }
+          ];
+          console.log("Updated regionDistributionChartOptions.series:", this.regionDistributionChartOptions.series);
+        }
         // xử xử lý dữ liệu thâm niêm làm việc
         let seniorityLabels = seniorityEmployees.map(s => s.type);
         let seniorityCount = seniorityEmployees.map(s => s.count);
         this.seniorityChartOptions.xaxis.categories = seniorityLabels;
         (this.seniorityChartOptions.series as ApexAxisChartSeries)[0].data = seniorityCount;
+    });
+  }
+
+  /**
+   * Cập nhật lại biểu đồ departmentGenderChart
+   */
+  updateDepartmentGenderChart() {
+    
+    setTimeout(() => {
+      if (this.departmentGenderChart && this.departmentGenderChart.updateOptions) {
+       
+        this.departmentGenderChart.updateOptions({
+          xaxis: {
+            categories: this.departmentGenderChartOptions.xaxis.categories
+          },
+          series: this.departmentGenderChartOptions.series
+        }, true, true);
+      } else {
+        console.log("Không thể cập nhật biểu đồ - departmentGenderChart chưa được khởi tạo");
+      }
     });
   }
 

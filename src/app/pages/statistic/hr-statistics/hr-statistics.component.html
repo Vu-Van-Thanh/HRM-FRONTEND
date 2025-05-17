@@ -10,6 +10,7 @@
             <li class="breadcrumb-item active">Thống kê nhân sự</li>
           </ol>
         </div>
+        <button class="btn btn-primary" (click)="updateEmployeeCountChart()">Làm mới</button>
       </div>
     </div>
   </div>
@@ -142,6 +143,7 @@
               <h4 class="card-title mb-4">Nhân sự phòng ban theo giới tính</h4>
               <div id="department-gender-chart">
                 <apx-chart
+                  #departmentGenderChart
                   [series]="departmentGenderChartOptions.series"
                   [chart]="departmentGenderChartOptions.chart"
                   [dataLabels]="departmentGenderChartOptions.dataLabels"
