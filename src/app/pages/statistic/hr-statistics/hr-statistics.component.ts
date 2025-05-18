@@ -284,6 +284,7 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
       }
       
       console.log(params);
+      
       // Call the performance API with the department data as query params
       this.http.get<DepartmentPerformance[]>(
         API_ENDPOINT.getDepartmentPerfomance, 
@@ -292,11 +293,8 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
         console.log('Department performance data:', performanceData);
         
         if (performanceData && performanceData.length > 0) {
-          // Process performance data
           const departmentNames = performanceData.map(item => item.departmentName);
           
-          // Handle the performanceScore as an array
-          // Approach 1: Use all data points in a multi-series chart - each department gets its own series
           const seriesData = performanceData.map(item => ({
             name: item.departmentName,
             data: item.performanceScore
@@ -306,6 +304,44 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
           this.departmentPerformanceChartOptions.xaxis.categories = 
             Array.from({ length: Math.max(...performanceData.map(d => d.performanceScore.length)) }, (_, i) => `Q${i+1}`);
           this.departmentPerformanceChartOptions.series = seriesData;
+        }
+      });
+      
+      // Call the payroll statistics API with the same parameters
+      this.http.get<any[]>(
+        API_ENDPOINT.getPayrollStatistic, 
+        { params: params }
+      ).subscribe(salaryData => {
+        console.log('Salary statistics data:', salaryData);
+        
+        if (salaryData && salaryData.length > 0) {
+          // Get department names for the categories
+          const departmentNames = salaryData.map(item => item.departmentId);
+          
+          // Extract average, min, and max salary data
+          const avgSalaries = salaryData.map(item => Number(item.averageSalary));
+          const minSalaries = salaryData.map(item => Number(item.minSalary));
+          const maxSalaries = salaryData.map(item => Number(item.maxSalary));
+          
+          // Update the average salary chart
+          this.averageSalaryChartOptions.xaxis.categories = departmentNames;
+          
+          // Assuming averageSalaryChartOptions.series is structured as an array of series objects
+          // with name and data properties
+          (this.averageSalaryChartOptions.series as ApexAxisChartSeries) = [
+            {
+              name: 'Lương trung bình',
+              data: avgSalaries
+            },
+            {
+              name: 'Lương thấp nhất',
+              data: minSalaries
+            },
+            {
+              name: 'Lương cao nhất',
+              data: maxSalaries
+            }
+          ];
         }
       });
     });
