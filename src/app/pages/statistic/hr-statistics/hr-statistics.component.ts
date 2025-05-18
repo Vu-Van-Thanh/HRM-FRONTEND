@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { ChartType, GrowthWorkforce,EmployeeCounter, EmployeeInDepartment, DepartmentPerformance } from './hr-statistics.model';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexFill, ApexGrid, ApexLegend, ApexMarkers, ApexNonAxisChartSeries, ApexPlotOptions, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis, ApexResponsive } from "ng-apexcharts";
 import * as L from 'leaflet';
 import { Observable } from 'rxjs';
@@ -232,6 +232,9 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
         this.seniorityChartOptions.xaxis.categories = seniorityLabels;
         (this.seniorityChartOptions.series as ApexAxisChartSeries)[0].data = seniorityCount;
     });
+
+    this.updateworkforceGrowthChart();
+    this.UpdatePerformanceChart();
   }
 
   /**
@@ -254,13 +257,58 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  getEmployeeInDepartment() : Observable<DepartmentPerformance[]> {
-    return this.http.get<DepartmentPerformance[]>(API_ENDPOINT.getDepartmentPerfomance);
+  getEmployeeInDepartment() : Observable<EmployeeInDepartment> {
+    return this.http.get<EmployeeInDepartment>(API_ENDPOINT.getEmployeeInDepartment);
   }
 
   UpdatePerformanceChart(){
-    let performanceData = this.getEmployeeInDepartment();
-    
+    // Get data from first API
+    this.getEmployeeInDepartment().subscribe(employeeData => {
+      console.log('Employee department data:', employeeData);
+      
+      // Prepare data for performance API as query parameters
+      // We need to create an HttpParams object for proper array parameter handling
+      let params = new HttpParams();
+      
+      // Add the department IDs and employee IDs
+      // For .NET Core Web API, arrays are passed as repeated parameters
+      if (employeeData.departmentID && employeeData.employeeIDList) {
+        for (let i = 0; i < employeeData.departmentID.length; i++) {
+          params = params.append('DepartmentID', employeeData.departmentID[i]);
+          
+          // Only add the corresponding employee ID if it exists
+          if (i < employeeData.employeeIDList.length) {
+            params = params.append('employeeIDList', employeeData.employeeIDList[i]);
+          }
+        }
+      }
+      
+      console.log(params);
+      // Call the performance API with the department data as query params
+      this.http.get<DepartmentPerformance[]>(
+        API_ENDPOINT.getDepartmentPerfomance, 
+        { params: params }
+      ).subscribe(performanceData => {
+        console.log('Department performance data:', performanceData);
+        
+        if (performanceData && performanceData.length > 0) {
+          // Process performance data
+          const departmentNames = performanceData.map(item => item.departmentName);
+          
+          // Handle the performanceScore as an array
+          // Approach 1: Use all data points in a multi-series chart - each department gets its own series
+          const seriesData = performanceData.map(item => ({
+            name: item.departmentName,
+            data: item.performanceScore
+          }));
+          
+          // Update the chart options for multi-series data
+          this.departmentPerformanceChartOptions.xaxis.categories = 
+            Array.from({ length: Math.max(...performanceData.map(d => d.performanceScore.length)) }, (_, i) => `Q${i+1}`);
+          this.departmentPerformanceChartOptions.series = seriesData;
+        }
+      });
+    });
   }
  
 
