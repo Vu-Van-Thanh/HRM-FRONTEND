@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { ChartType, GrowthWorkforce,EmployeeCounter, EmployeeInDepartment, DepartmentPerformance } from './hr-statistics.model';
+import { ChartType, GrowthWorkforce,EmployeeCounter, EmployeeInDepartment, DepartmentPerformance, EmployeeSkills } from './hr-statistics.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexFill, ApexGrid, ApexLegend, ApexMarkers, ApexNonAxisChartSeries, ApexPlotOptions, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis, ApexResponsive } from "ng-apexcharts";
 import * as L from 'leaflet';
@@ -145,6 +145,26 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
     this.map.fitBounds(this.vietnamBounds);
   }
 
+  updateEmployeeSkillChart() {
+    this.http.get<EmployeeSkills[]>(API_ENDPOINT.getEmployeeSkills).subscribe(data => {
+      console.log(data);
+      const categories = data.map(skill => skill.name);
+      const seriesData = data.map(skill => Number((skill.averageScore / 10 * 100).toFixed(2)));
+
+      
+      this.employeeSkillsChartOptions = {
+        ...this.employeeSkillsChartOptions,
+        series: [{
+          name: 'Kỹ năng trung bình',
+          data: seriesData
+        }],
+        xaxis: {
+          ...this.employeeSkillsChartOptions.xaxis,
+          categories: categories
+        }
+      };
+    });
+  }
   updateworkforceGrowthChart() {
     this.http.get<GrowthWorkforce>(API_ENDPOINT.getGrowthWorkforce).subscribe(data => {
       console.log(data);

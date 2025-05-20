@@ -43,6 +43,8 @@ export const API_ENDPOINT = {
    getAllEmailByEmployee : 'https://localhost:7062/Email/employee',
    getAllTemplateMail : 'https://localhost:7062/EmailTemplate',
    sendMail : 'http://localhost:5281/Mail/send',
-   getPayrollStatistic : 'https://localhost:7090/SalaryBase/statistic'
+   getPayrollStatistic : 'https://localhost:7090/SalaryBase/statistic',
+   getEmployeeSkills : 'https://localhost:7214/EmployeeEvaluation/statistics',
+   getFacilities : "https://localhost:7176/Facility"
    
 };

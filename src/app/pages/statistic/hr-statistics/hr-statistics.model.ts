@@ -56,6 +56,15 @@ export interface EmployeeInDepartment {
     departmentID: string[];
     employeeIDList: string[];
 }
+export interface EmployeeSkills
+{
+    criterionID : string;
+    name : string;
+    category : string;
+    averageScore : number;
+    totalEvaluations : number;
+    weight : number;
+}
 export interface DepartmentPerformance {
     departmentName : string;
     performanceScore : number[];
