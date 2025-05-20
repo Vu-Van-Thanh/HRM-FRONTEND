@@ -3,6 +3,7 @@ import { DecimalPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { UntypedFormBuilder, UntypedFormGroup, FormArray, Validators } from '@angular/forms';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import Swal from 'sweetalert2';
 
@@ -10,6 +11,8 @@ import { jobListModel } from './list.model';
 import { JobListService } from './list.service';
 import { NgbdJobListSortableHeader, SortEvent } from './list-sortable.directive';
 import { JobListdata } from './data';
+import { Job, JobResponse } from '../jobs.model';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
 @Component({
   selector: 'app-list',
@@ -36,15 +39,23 @@ export class ListComponent implements OnInit {
   jobList!: Observable<jobListModel[]>;
   total: Observable<number>;
   @ViewChildren(NgbdJobListSortableHeader) headers!: QueryList<NgbdJobListSortableHeader>;
-  currentPage: any;
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalItems: number = 0;
+  totalPages: number = 0;
 
-  constructor(private modalService: BsModalService, public service: JobListService, private formBuilder: UntypedFormBuilder) {
+  jobs: Job[] = [];
+  loading: boolean = false;
+  error: string = '';
+
+  constructor(private modalService: BsModalService, public service: JobListService, private formBuilder: UntypedFormBuilder, private http: HttpClient) {
     this.jobList = service.jobList$;
     this.total = service.total$;
   }
 
   ngOnInit(): void {
-    this.breadCrumbItems = [{ label: 'Jobs' }, { label: 'Jobs List', active: true }];
+    this.breadCrumbItems = [{ label: 'Tuyển dụng' }, { label: 'Danh sách việc làm', active: true }];
+    this.loadJobs();
 
     /**
      * Form Validation
@@ -68,6 +79,36 @@ export class ListComponent implements OnInit {
       this.content = this.lists;
       this.lists = Object.assign([], x);
     });
+  }
+
+  loadJobs() {
+    this.loading = true;
+    const params = new HttpParams()
+      .set('page', this.currentPage)
+      .set('pageSize', this.pageSize);
+
+    this.http.get<Job[]>(API_ENDPOINT.getAllJob, { params }).subscribe({
+      next: (response) => {
+        this.jobs = response;
+        this.totalItems = response.length;
+        this.totalPages = Math.ceil(response.length / this.pageSize);
+        this.loading = false;
+      },
+      error: (error) => {
+        this.error = 'Không thể tải danh sách việc làm';
+        this.loading = false;
+        console.error('Error loading jobs:', error);
+      }
+    });
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('vi-VN');
+  }
+
+  openJobLink(link: string) {
+    window.open(link, '_blank');
   }
 
   /**
@@ -201,8 +242,15 @@ export class ListComponent implements OnInit {
     this.jobListForm.controls['ids'].setValue(listData[0].id);
   }
 
-  pageChanged(event: any) {
-    this.currentPage = event.page;
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.loadJobs();
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
+    this.currentPage = 1;
+    this.loadJobs();
   }
 
 }

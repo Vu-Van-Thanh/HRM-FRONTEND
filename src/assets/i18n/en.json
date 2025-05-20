@@ -114,14 +114,14 @@
       "TEXT": "Apps"
     },
     "CALENDAR": {
-      "TEXT": "Calendar"
+      "TEXT": "Lịch làm việc"
     },
     "CHAT": {
       "TEXT": "Chat",
       "BADGE": "New"
     },
     "FILEMANAGER": {
-      "TEXT": "File Manager",
+      "TEXT": "Quản lý file",
       "BADGE": "New"
     },
     "ECOMMERCE": {
@@ -152,9 +152,9 @@
     "EMAIL": {
       "TEXT": "Email",
       "LIST": {
-        "INBOX": "Inbox",
-        "READEMAIL": "Read Email",
-        "GENERATE": "Generate Email",
+        "INBOX": "Hòm thư",
+        "READEMAIL": "Đọc email",
+        "GENERATE": "Tạo email",
         "TEMPLATE": {
           "BADGE": "New",
           "TEXT": "Template",
@@ -174,53 +174,53 @@
       }
     },
     "PROJECTS": {
-      "TEXT": "Projects",
+      "TEXT": "Quản lý dự án",
       "LIST": {
-        "GRID": "Projects Grid",
-        "PROJECTLIST": "Projects List",
-        "OVERVIEW": "Project Overview",
-        "CREATE": "Create New"
+        "GRID": "Danh sách dự án",
+        "PROJECTLIST": "Danh sách dự án",
+        "OVERVIEW": "Tổng quan dự án",
+        "CREATE": "Tạo mới"
       }
     },
     "TASKS": {
-      "TEXT": "Tasks",
+      "TEXT": "Quản lý công việc",
       "LIST": {
-        "TASKLIST": "Task List",
-        "KANBAN": "Kanban Board",
-        "CREATETASK": "Create Task"
+        "TASKLIST": "Danh sách công việc",
+        "KANBAN": "Bảng Kanban",
+        "CREATETASK": "Tạo công việc"
       }
     },
     "CONTACTS": {
-      "TEXT": "Contacts",
+      "TEXT": "Quản lý liên hệ",
       "LIST": {
-        "USERGRID": "User Grid",
-        "USERLIST": "User List",
-        "PROFILE": "Profile"
+        "USERGRID": "Danh sách người dùng",
+        "USERLIST": "Danh sách người dùng",
+        "PROFILE": "Hồ sơ người dùng"
       }
     },
     "BLOG": {
-      "TEXT": "Blog",
+      "TEXT": "Quản lý cơ sở vật chất",
       "BADGE": "New",
       "LIST": {
-        "BLOGLIST": "Blog List",
-        "BLOGGRID": "Blog Grid",
-        "DETAIL": "Blog Details"
+        "BLOGLIST": "Danh sách cơ sở vật chất",
+        "BLOGGRID": "Lưới cơ sở vật chất",
+        "DETAIL": "Chi tiết cơ sở vật chất"
       }
     },
     "JOBS": {
       "TEXT": "Jobs",
       "BADGE": "New",
       "LIST": {
-        "JOBLIST": "Job List",
-        "JOBGRID": "Job Grid",
-        "APPLYJOB": "Apply Job",
-        "JOBDETAILS": "Job Details",
-        "JOBCATEGORIES": "Jobs Categories",
+        "JOBLIST": "Danh sách công việc",
+        "JOBGRID": "Danh sách công việc (Lưới)",
+        "APPLYJOB": "Ứng tuyển công việc",
+        "JOBDETAILS": "Chi tiết công việc",
+        "JOBCATEGORIES": "Danh mục công việc",
         "CANDIDATE": {
-          "TEXT": "Candidate",
+          "TEXT": "Ứng viên",
           "LIST": {
-            "LIST": "List",
-            "OVERVIEW": "Overview"
+            "LIST": "Danh sách",
+            "OVERVIEW": "Tổng quan"
           }
         }
       }
@@ -353,11 +353,11 @@
       }
     },
     "ACTIVITY": {
-      "TEXT": "Activity Management",
+      "TEXT": "Quản lý hoạt động",
       "LIST": {
         "ATTENDANCE": "Quản lý chấm công",
-        "LEAVE": "Leave Requests",
-        "REMOTE": "Remote Work"
+        "LEAVE": "Đăng ký nghỉ phép",
+        "REMOTE": "Đăng ký làm việc từ xa"
       }
     }
   }
