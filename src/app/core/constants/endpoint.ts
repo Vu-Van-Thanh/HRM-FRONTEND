@@ -46,6 +46,7 @@ export const API_ENDPOINT = {
    getPayrollStatistic : 'https://localhost:7090/SalaryBase/statistic',
    getEmployeeSkills : 'https://localhost:7214/EmployeeEvaluation/statistics',
    getFacilities : "https://localhost:7176/Facility",
-   getAllJob : "https://localhost:7176/Job?page={page}&pageSize={pageSize}"
+   getAllJob : "https://localhost:7176/Job?page={page}&pageSize={pageSize}",
+   getAllJobInternal : "https://localhost:7176/JobPosition"
    
 };

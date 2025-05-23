@@ -1,114 +1,105 @@
-const JobGriddata = [
-    {
-      id: 1,
-      image : "assets/images/companies/adobe.svg",
-      title : "Magento Developer",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 2,
-      image : "assets/images/companies/adobe-photoshop.svg",
-      title : "Product Designer",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 3,
-      image : "assets/images/companies/airbnb.svg",
-      title : "Marketing Director",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 4,
-      image : "assets/images/companies/amazon.svg",
-      title : "Project Manager",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 5,
-      image : "assets/images/companies/flutter.svg",
-      title : "HTML Developer",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 6,
-      image : "assets/images/companies/mailchimp.svg",
-      title : "Business Associate",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 7,
-      image : "assets/images/companies/line.svg",
-      title : "Product Sales Specialist",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 8,
-      image : "assets/images/companies/spotify.svg",
-      title : "Magento Developer",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 9,
-      image : "assets/images/companies/wordpress.svg",
-      title : "Magento Developer",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 10,
-      image : "assets/images/companies/upwork.svg",
-      title : "Magento Developer",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 11,
-      image : "assets/images/companies/sass.svg",
-      title : "Magento Developer",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    {
-      id: 12,
-      image : "assets/images/companies/reddit.svg",
-      title : "Magento Developer",
-      year : "0-2",
-      company : "Skote Technology Pvt.Ltd",
-      location : "California",
-      price : "$250 - $800"
-    },
-    
-  ];
-  
-  export { JobGriddata };
+import { jobGridModel } from './grid.model';
+
+export const JobGriddata: jobGridModel[] = [
+  {
+    id: '1',
+    TenCV: 'Senior Web Developer',
+    CongTy: 'Web Technology pvt.Ltd',
+    TinhThanh: 'Hà Nội',
+    Luong: '15-20 triệu',
+    LoaiHinh: 'Toàn thời gian',
+    KinhNghiem: '3-5 năm',
+    CapBac: 'Senior',
+    HanNopCV: '2024-03-30',
+    YeuCau: 'Thành thạo Angular, React, Node.js',
+    MoTa: 'Phát triển và duy trì các ứng dụng web',
+    PhucLoi: 'Lương tháng 13, Bảo hiểm sức khỏe',
+    SoLuong: '2',
+    Image: 'assets/images/companies/img-1.png',
+    Link: 'https://example.com/job1',
+    Web: 'https://example.com',
+    Nganh: 'Công nghệ thông tin',
+    status: 'active'
+  },
+  {
+    id: '2',
+    TenCV: 'UI/UX Designer',
+    CongTy: 'Creative Design Studio',
+    TinhThanh: 'TP.HCM',
+    Luong: '12-15 triệu',
+    LoaiHinh: 'Toàn thời gian',
+    KinhNghiem: '2-3 năm',
+    CapBac: 'Middle',
+    HanNopCV: '2024-04-15',
+    YeuCau: 'Thành thạo Figma, Adobe XD',
+    MoTa: 'Thiết kế giao diện người dùng',
+    PhucLoi: 'Lương tháng 13, Đào tạo',
+    SoLuong: '1',
+    Image: 'assets/images/companies/img-2.png',
+    Link: 'https://example.com/job2',
+    Web: 'https://example.com',
+    Nganh: 'Thiết kế',
+    status: 'active'
+  },
+  {
+    id: '3',
+    TenCV: 'Mobile Developer',
+    CongTy: 'Mobile Solutions Inc',
+    TinhThanh: 'Đà Nẵng',
+    Luong: '18-25 triệu',
+    LoaiHinh: 'Toàn thời gian',
+    KinhNghiem: '4-6 năm',
+    CapBac: 'Senior',
+    HanNopCV: '2024-04-30',
+    YeuCau: 'Thành thạo React Native, Flutter',
+    MoTa: 'Phát triển ứng dụng di động',
+    PhucLoi: 'Lương tháng 13, Bảo hiểm sức khỏe',
+    SoLuong: '3',
+    Image: 'assets/images/companies/img-3.png',
+    Link: 'https://example.com/job3',
+    Web: 'https://example.com',
+    Nganh: 'Công nghệ thông tin',
+    status: 'active'
+  },
+  {
+    id: '4',
+    TenCV: 'DevOps Engineer',
+    CongTy: 'Cloud Solutions Ltd',
+    TinhThanh: 'Hà Nội',
+    Luong: '20-30 triệu',
+    LoaiHinh: 'Toàn thời gian',
+    KinhNghiem: '3-5 năm',
+    CapBac: 'Senior',
+    HanNopCV: '2024-05-15',
+    YeuCau: 'Thành thạo Docker, Kubernetes, AWS',
+    MoTa: 'Quản lý và tự động hóa hệ thống',
+    PhucLoi: 'Lương tháng 13, Bảo hiểm sức khỏe',
+    SoLuong: '2',
+    Image: 'assets/images/companies/img-4.png',
+    Link: 'https://example.com/job4',
+    Web: 'https://example.com',
+    Nganh: 'Công nghệ thông tin',
+    status: 'active'
+  },
+  {
+    id: '5',
+    TenCV: 'Marketing Manager',
+    CongTy: 'Digital Marketing Agency',
+    TinhThanh: 'TP.HCM',
+    Luong: '15-20 triệu',
+    LoaiHinh: 'Toàn thời gian',
+    KinhNghiem: '5-7 năm',
+    CapBac: 'Manager',
+    HanNopCV: '2024-05-30',
+    YeuCau: 'Kinh nghiệm quản lý team marketing',
+    MoTa: 'Quản lý chiến dịch marketing',
+    PhucLoi: 'Lương tháng 13, Thưởng dự án',
+    SoLuong: '1',
+    Image: 'assets/images/companies/img-5.png',
+    Link: 'https://example.com/job5',
+    Web: 'https://example.com',
+    Nganh: 'Marketing',
+    status: 'active'
+  }
+];
   

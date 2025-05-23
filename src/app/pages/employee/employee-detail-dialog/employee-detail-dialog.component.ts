@@ -260,6 +260,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
       if (this.selectedFile) {
         formData.photo = this.imagePreview;
       }
+      console.log('Form data:', formData);
       if (this.isEditMode) {
         this.employeeService.updateEmployee(this.data.code, formData).subscribe({
           next: (updatedEmployee) => {

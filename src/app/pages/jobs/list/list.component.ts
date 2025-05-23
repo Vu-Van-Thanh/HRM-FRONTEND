@@ -81,25 +81,36 @@ export class ListComponent implements OnInit {
     });
   }
 
-  loadJobs() {
+  loadJobs(): void {
     this.loading = true;
-    const params = new HttpParams()
-      .set('page', this.currentPage)
-      .set('pageSize', this.pageSize);
+    this.error = '';
 
-    this.http.get<Job[]>(API_ENDPOINT.getAllJob, { params }).subscribe({
-      next: (response) => {
-        this.jobs = response;
-        this.totalItems = response.length;
-        this.totalPages = Math.ceil(response.length / this.pageSize);
-        this.loading = false;
-      },
-      error: (error) => {
-        this.error = 'Không thể tải danh sách việc làm';
-        this.loading = false;
-        console.error('Error loading jobs:', error);
-      }
-    });
+    let url = API_ENDPOINT.getAllJob
+      .replace('{page}', this.currentPage.toString())
+      .replace('{pageSize}', this.pageSize.toString());
+
+    this.http.get<Job[]>(url)
+      .subscribe({
+        next: (response) => {
+          // Tính toán phân trang
+          const startIndex = (this.currentPage - 1) * this.pageSize;
+          const endIndex = startIndex + this.pageSize;
+          
+          // Lấy danh sách jobs cho trang hiện tại
+          this.jobs = response.slice(startIndex, endIndex);
+          
+          // Cập nhật thông tin phân trang
+          this.totalItems = response.length;
+          this.totalPages = Math.ceil(response.length / this.pageSize);
+          
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Có lỗi xảy ra khi tải danh sách việc làm';
+          this.loading = false;
+          console.error('Error loading jobs:', err);
+        }
+      });
   }
 
   formatDate(dateString: string): string {
@@ -242,12 +253,38 @@ export class ListComponent implements OnInit {
     this.jobListForm.controls['ids'].setValue(listData[0].id);
   }
 
-  onPageChange(page: number) {
-    this.currentPage = page;
-    this.loadJobs();
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPages = 3;
+    
+    if (this.totalPages <= maxPages) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let startPage = Math.max(1, this.currentPage - 1);
+      let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
+      
+      if (endPage - startPage + 1 < maxPages) {
+        startPage = Math.max(1, endPage - maxPages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
   }
 
-  onPageSizeChange(size: number) {
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadJobs();
+    }
+  }
+
+  onPageSizeChange(size: number): void {
     this.pageSize = size;
     this.currentPage = 1;
     this.loadJobs();

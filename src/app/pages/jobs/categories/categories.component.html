@@ -1,72 +1,71 @@
 <div class="container-fluid">
-    <app-page-title title="Job Categories" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+    <app-page-title title="Danh mục công việc" [breadcrumbItems]="breadCrumbItems"></app-page-title>
 
     <div class="row justify-content-center text-center">
         <div class="col-xl-4">
             <div class="mb-4">
-                <h4>Browse Job By Categories</h4>
-                <p class="text-muted">Post a job to tell us about your project. We'll quickly match you with the right freelancers.</p>
+                <h4>Danh mục công việc nội bộ</h4>
+                <p class="text-muted">Xem danh sách các vị trí công việc đang tuyển dụng trong công ty</p>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card jobs-categories">
-                <div class="card-body">
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Accounting & Finance <span class="badge text-bg-info float-end bg-opacity-100">52</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Development <span class="badge text-bg-info float-end bg-opacity-100">10</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Customer Service <span class="badge text-bg-info float-end bg-opacity-100">64</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Marketing <span class="badge text-bg-info float-end bg-opacity-100">105</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Human Resource <span class="badge text-bg-info float-end bg-opacity-100">142</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Health and Care <span class="badge text-bg-info float-end bg-opacity-100">01</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Project Management<span class="badge text-bg-info float-end bg-opacity-100">254</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block">Automotive Jobs <span class="badge text-bg-info float-end bg-opacity-100">79</span></a>
-                </div>
-            </div>
+    <!-- Loading spinner -->
+    <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card jobs-categories">
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="error" class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+
+    <!-- Job categories -->
+    <div class="row" *ngIf="!loading && !error">
+        <div class="col-xl-4 col-md-6" *ngFor="let job of jobs">
+            <div class="card">
                 <div class="card-body">
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Accounting & Finance <span class="badge text-bg-info float-end bg-opacity-100">85</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Development <span class="badge text-bg-info float-end bg-opacity-100">19</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Customer Service <span class="badge text-bg-info float-end bg-opacity-100">48</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Marketing <span class="badge text-bg-info float-end bg-opacity-100">34</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Human Resource <span class="badge text-bg-info float-end bg-opacity-100">33</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Health and Care <span class="badge text-bg-info float-end bg-opacity-100">748</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Project Management<span class="badge text-bg-info float-end bg-opacity-100">16</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block">Automotive Jobs <span class="badge text-bg-info float-end bg-opacity-100">94</span></a>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card jobs-categories">
-                <div class="card-body">
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Accounting & Finance <span class="badge text-bg-info float-end bg-opacity-100">17</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Development <span class="badge text-bg-info float-end bg-opacity-100">64</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Customer Service <span class="badge text-bg-info float-end bg-opacity-100">72</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Marketing <span class="badge text-bg-info float-end bg-opacity-100">19</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Human Resource <span class="badge text-bg-info float-end bg-opacity-100">305</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Health and Care <span class="badge text-bg-info float-end bg-opacity-100">64</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Project Management<span class="badge text-bg-info float-end bg-opacity-100">112</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block">Automotive Jobs <span class="badge text-bg-info float-end bg-opacity-100">31</span></a>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card jobs-categories">
-                <div class="card-body">
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Accounting & Finance <span class="badge text-bg-info float-end bg-opacity-100">85</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Development <span class="badge text-bg-info float-end bg-opacity-100">19</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Customer Service <span class="badge text-bg-info float-end bg-opacity-100">48</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Marketing <span class="badge text-bg-info float-end bg-opacity-100">34</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Human Resource <span class="badge text-bg-info float-end bg-opacity-100">33</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Health and Care <span class="badge text-bg-info float-end bg-opacity-100">748</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block mb-2">Project Management<span class="badge text-bg-info float-end bg-opacity-100">16</span></a>
-                    <a href="javascript:void(0);" class="px-3 py-2 rounded bg-light bg-opacity-50 d-block">Automotive Jobs <span class="badge text-bg-info float-end bg-opacity-100">94</span></a>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">{{ job.positionName }}</h5>
+                            <p class="text-muted mb-0">{{ job.departmentId }}</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="badge bg-primary">{{ job.level }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted mb-2">{{ job.description }}</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fe fe-user me-2 text-muted"></i>
+                        <span class="text-muted">Quản lý: {{ job.manager }}</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5em 0.75em;
+}
+
+.text-muted {
+    font-size: 0.875rem;
+}
+</style>
