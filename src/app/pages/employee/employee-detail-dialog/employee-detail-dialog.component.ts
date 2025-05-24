@@ -282,7 +282,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
         Province : '',
         District : '',
         Commune : '',
-        Address : '' , 
+        Address : formData.address , 
         InsuranceNumber : ''
       }
       console.log('Form data:', formData);
