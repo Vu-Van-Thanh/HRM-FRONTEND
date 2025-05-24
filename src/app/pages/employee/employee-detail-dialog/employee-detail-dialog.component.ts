@@ -5,6 +5,7 @@ import { EmployeeService } from '../employee.service';
 import { RelativeDialogComponent } from '../relative-dialog/relative-dialog.component';
 import { ContractDialogComponent } from '../contract-dialog/contract-dialog.component';
 import { Employee } from '../employee.model';
+import { fromEventPattern } from 'rxjs';
 
 @Component({
   selector: 'app-employee-detail-dialog',
@@ -257,8 +258,32 @@ export class EmployeeDetailDialogComponent implements OnInit {
   onSubmit(): void {
     if (this.employeeForm.valid) {
       const formData = this.employeeForm.value;
+      
       if (this.selectedFile) {
         formData.photo = this.imagePreview;
+      }
+      const employeeUpdate = {
+        ManagerID : '',
+        Position : '',
+        FirstName : formData.firstName,
+        LastName : formData.lastName,
+        Gender : formData.gender.value === 'male' ? 0 : 1,
+        Tax : formData.taxCode,
+        Nationality : '',
+        Ethnic : '',
+        Religion : '',
+        PlaceOfBirth : '',
+        DateOfBirth : formData.dateOfBirth,
+        IndentityCard : '',
+        PlaceIssued : '',
+        Phone : formData.phone ,
+        Email : formData.email, 
+        Country : '',
+        Province : '',
+        District : '',
+        Commune : '',
+        Address : '' , 
+        InsuranceNumber : ''
       }
       console.log('Form data:', formData);
       if (this.isEditMode) {
