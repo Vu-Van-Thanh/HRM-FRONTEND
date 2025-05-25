@@ -125,7 +125,7 @@
                 <!-- Phòng ban -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Phòng ban:</label>
-                  <span>{{employee?.departmentName}}</span>
+                  <span>{{employee?.departmentId}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
                   <mat-label>Phòng ban</mat-label>
@@ -137,12 +137,12 @@
                 <!-- Chức vụ -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Chức vụ:</label>
-                  <span>{{employee?.positionName}}</span>
+                  <span>{{getPositionName(employee?.positionId) || employee?.positionId}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
                   <mat-label>Chức vụ</mat-label>
                   <mat-select formControlName="positionId">
-                    <mat-option *ngFor="let pos of positions" [value]="pos">{{pos}}</mat-option>
+                    <mat-option *ngFor="let pos of positions" [value]="pos.positionName">{{pos.positionName}}</mat-option>
                   </mat-select>
                 </mat-form-field>
 
@@ -168,7 +168,7 @@
                 <!-- Ngày vào làm -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Ngày vào làm:</label>
-                  <span>{{employee?.joinDate | date:'dd/MM/yyyy'}}</span>
+                  <span>{{employee?.dateIssued | date:'dd/MM/yyyy'}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Ngày vào làm</mat-label>

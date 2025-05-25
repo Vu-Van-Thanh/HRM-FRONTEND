@@ -4,11 +4,32 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dial
 import { EmployeeService } from '../employee.service';
 import { RelativeDialogComponent } from '../relative-dialog/relative-dialog.component';
 import { ContractDialogComponent } from '../contract-dialog/contract-dialog.component';
-import { Employee } from '../employee.model';
+import {  Employee } from '../employee.model';
 import { fromEventPattern } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
+
+export interface Position{
+  jobPositionId : string,
+  positionName : string,
+  level : string,
+  description : string,
+  departmentId : string,
+  manager : string
+}
+export interface Contract{
+  employeeId : string,
+  contractNumber : string,
+  contractType : string,
+  startDate : string,
+  endDate : string,
+  salaryIndex : string,
+  salaryBase : string,
+  position : string,
+  contractUrl : string,
+  status : string
+}
 @Component({
   selector: 'app-employee-detail-dialog',
   templateUrl: './employee-detail-dialog.component.html',
@@ -19,7 +40,8 @@ export class EmployeeDetailDialogComponent implements OnInit {
   isEditMode = false;
   educationLevels = ['Trung học', 'Trung cấp', 'Cao đẳng', 'Đại học', 'Thạc sĩ', 'Tiến sĩ'];
   selectedTabIndex = 0;
-  positions = []
+  contractNow : Contract;
+  positions : Position[] = []
   workHistoryColumns = ['date', 'type', 'description'];
   workHistory: any[] = [];
   employeeForm: FormGroup;
@@ -55,14 +77,42 @@ export class EmployeeDetailDialogComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadPositions();
+    this.loadContracts();
     if (this.data.code) {
       this.loadEmployee();
     }
   }
   loadPositions() : void {
-    this.http.get<any>(`${API_ENDPOINT.getAllJobInternal}`).subscribe(positions => {
+    this.http.get<Position[]>(`${API_ENDPOINT.getAllJobInternal}`).subscribe(positions => {
+      console.log('Positions:', positions);
       this.positions = positions;
     });
+  }
+  loadContracts() : void {
+    let url = API_ENDPOINT.getContractByEmployeeId.replace('{employeeId}', this.data.code);
+    this.http.get<Contract[]>(url).subscribe(contracts => {
+      console.log('Contracts:', contracts);
+      this.contracts = contracts;
+    });
+    this.contractNow = this.contracts[0];
+    if(this.contracts.length === 0){
+    this.contracts = [
+      {
+        id: 1,
+        contractNo: 'HD001',
+        type: 'Hợp đồng không xác định thời hạn',
+        startDate: '2023-01-01',
+        endDate: null
+      },
+      {
+        id: 2,
+        contractNo: 'HD002',
+        type: 'Hợp đồng thử việc',
+        startDate: '2022-10-01',
+        endDate: '2022-12-31'
+      }
+    ];
+  }
   }
   initForm(): void {
     this.employeeForm = this.fb.group({
@@ -158,25 +208,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
     ];
   }
 
-  loadContracts() {
-    // Mock contracts data
-    this.contracts = [
-      {
-        id: 1,
-        contractNo: 'HD001',
-        type: 'Hợp đồng không xác định thời hạn',
-        startDate: '2023-01-01',
-        endDate: null
-      },
-      {
-        id: 2,
-        contractNo: 'HD002',
-        type: 'Hợp đồng thử việc',
-        startDate: '2022-10-01',
-        endDate: '2022-12-31'
-      }
-    ];
-  }
+  
 
   onAddRelative() {
     const dialogRef = this.dialog.open(RelativeDialogComponent, {
@@ -278,6 +310,11 @@ export class EmployeeDetailDialogComponent implements OnInit {
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  getPositionName(positionId: string): string {
+    const position = this.positions.find(p => p.jobPositionId === positionId);
+    return position ? position.positionName : '';
   }
 
   onSubmit(): void {

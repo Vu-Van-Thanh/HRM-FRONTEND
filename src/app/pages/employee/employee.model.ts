@@ -46,6 +46,7 @@ export interface Employee {
   lastName?: string;
   fullName?: string;
   dateOfBirth?: Date | string;
+  dateIssued?: Date | string;
   gender?: string;
   tax: string;
   address?: string;

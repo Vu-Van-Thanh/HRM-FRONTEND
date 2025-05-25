@@ -84,6 +84,7 @@ export class EmployeeService {
         ? `${employee.firstName} ${employee.lastName}`
         : employee.firstName || employee.lastName || '',
       dateOfBirth: employee.dateOfBirth,
+      dateIssued: employee.dateIssued,
       gender: employee.gender,
       tax: employee.tax || '',
       address: employee.address,
@@ -109,9 +110,9 @@ export class EmployeeService {
       status: true, // Default to active
       
       // Map position to departmentName and positionName if they don't exist
-      departmentId: employee.departmentId || 0,
+      departmentId: employee.departmentID || 0,
       departmentName: employee.departmentName || employee.position || '',
-      positionId: employee.positionId || 0,
+      positionId: employee.position || 0,
       positionName: employee.positionName || employee.position || '',
       
       createdAt: employee.createdAt,
