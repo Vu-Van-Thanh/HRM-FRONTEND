@@ -49,4 +49,5 @@ export const API_ENDPOINT = {
    getAllJob : "https://localhost:7176/Job?page={page}&pageSize={pageSize}",
    getAllJobInternal : "https://localhost:7176/JobPosition"
    
+   
 };

@@ -94,6 +94,7 @@ export class EmployeeListComponent implements OnInit {
     console.log('code:', code);
     const employee = this.dataSource.data.find(emp => emp.code === code);
     console.log('Employee:', employee);
+    
     const dialogRef = this.dialog.open(EmployeeDetailDialogComponent, {
       width: '80%',
       maxWidth: '1200px',
@@ -113,14 +114,19 @@ export class EmployeeListComponent implements OnInit {
       this.showErrorMessage('Không tìm thấy thông tin nhân viên');
       return;
     }
-
+    const safeEmployee = {
+      ...employee,
+      emergencyContact: employee?.emergencyContact || '',
+      emergencyPhone: employee?.emergencyPhone || ''
+    };
+    console.log('safeEmployee:', safeEmployee);
     const dialogRef = this.dialog.open(EmployeeDetailDialogComponent, {
       width: '80%',
       maxWidth: '1200px',
       data: { 
         id, 
         isEdit: true,
-        employee
+        safeEmployee
       },
       disableClose: true
     });

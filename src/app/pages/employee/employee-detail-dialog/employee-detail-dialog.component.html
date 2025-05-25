@@ -5,7 +5,7 @@
       <button mat-icon-button *ngIf="!isEditMode" (click)="onEdit()" matTooltip="Chỉnh sửa">
         <mat-icon>edit</mat-icon>
       </button>
-      <button mat-icon-button *ngIf="isEditMode" (click)="onSave()" matTooltip="Lưu">
+      <button mat-icon-button *ngIf="isEditMode" (click)="onSubmit()" matTooltip="Lưu">
         <mat-icon>save</mat-icon>
       </button>
       <button mat-icon-button *ngIf="isEditMode" (click)="onCancel()" matTooltip="Hủy">
@@ -75,8 +75,8 @@
                 <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
                   <mat-label>Giới tính</mat-label>
                   <mat-select formControlName="gender">
-                    <mat-option value="male">Nam</mat-option>
-                    <mat-option value="female">Nữ</mat-option>
+                    <mat-option value="Male">Nam</mat-option>
+                    <mat-option value="Female">Nữ</mat-option>
                   </mat-select>
                 </mat-form-field>
 

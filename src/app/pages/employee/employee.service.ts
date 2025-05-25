@@ -55,11 +55,8 @@ export class EmployeeService {
       );
   }
 
-  updateEmployee(id: string | number, employee: Partial<Employee>): Observable<Employee> {
-    return this.http.put<Employee>(`${API_ENDPOINT.updateEmployee}/${id}`, this.mapEmployeeRequest(employee))
-      .pipe(
-        map(employee => this.mapEmployeeResponse(employee,0))
-      );
+  updateEmployee(userId: string, employeeUpdate: any): Observable<any> {
+    return this.http.put(`${API_ENDPOINT.updateEmployee}/${userId}`, employeeUpdate);
   }
 
   deleteEmployee(id: string | number): Observable<boolean> {

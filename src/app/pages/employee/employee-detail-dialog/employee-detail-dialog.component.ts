@@ -6,6 +6,8 @@ import { RelativeDialogComponent } from '../relative-dialog/relative-dialog.comp
 import { ContractDialogComponent } from '../contract-dialog/contract-dialog.component';
 import { Employee } from '../employee.model';
 import { fromEventPattern } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
 @Component({
   selector: 'app-employee-detail-dialog',
@@ -15,7 +17,9 @@ import { fromEventPattern } from 'rxjs';
 export class EmployeeDetailDialogComponent implements OnInit {
   employee: Employee;
   isEditMode = false;
+  educationLevels = ['Trung học', 'Trung cấp', 'Cao đẳng', 'Đại học', 'Thạc sĩ', 'Tiến sĩ'];
   selectedTabIndex = 0;
+  positions = []
   workHistoryColumns = ['date', 'type', 'description'];
   workHistory: any[] = [];
   employeeForm: FormGroup;
@@ -42,19 +46,24 @@ export class EmployeeDetailDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { code: string, isEdit: boolean },
     private employeeService: EmployeeService,
     private fb: FormBuilder,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private http: HttpClient
   ) {
     this.isEditMode = data.isEdit;
   }
 
   ngOnInit(): void {
     this.initForm();
-    console.log('CODEEEEEEE:', this.data.code);
+    this.loadPositions();
     if (this.data.code) {
       this.loadEmployee();
     }
   }
-
+  loadPositions() : void {
+    this.http.get<any>(`${API_ENDPOINT.getAllJobInternal}`).subscribe(positions => {
+      this.positions = positions;
+    });
+  }
   initForm(): void {
     this.employeeForm = this.fb.group({
       code: ['', Validators.required],
@@ -68,6 +77,22 @@ export class EmployeeDetailDialogComponent implements OnInit {
       departmentId: ['', Validators.required],
       positionId: ['', Validators.required],
       status: [true],
+      emergencyContact: ['', Validators.required],
+      emergencyPhone: ['', Validators.required],
+      taxCode: ['', Validators.required],
+      joinDate: ['', Validators.required],
+      salary: ['', Validators.required],
+      contractType: ['', Validators.required],  
+      education: ['', Validators.required],
+      major: ['', Validators.required],
+      school: ['', Validators.required],
+      graduationYear: ['', Validators.required],
+      idCard : ['', Validators.required],
+      idCardIssueDate : ['', Validators.required],
+      idCardIssuePlace : ['', Validators.required],
+      bankAccount : ['', Validators.required],
+      bankName : ['', Validators.required],
+      bankBranch : ['', Validators.required],
       photo: ['']
     });
   }
@@ -256,18 +281,18 @@ export class EmployeeDetailDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
+    
     if (this.employeeForm.valid) {
-      const formData = this.employeeForm.value;
       
-      if (this.selectedFile) {
-        formData.photo = this.imagePreview;
-      }
-      const employeeUpdate = {
-        ManagerID : '',
+    }
+    const formData = this.employeeForm.value;
+  
+      let employeeUpdate = {
+        EmployeeID : this.data.code,
         Position : '',
         FirstName : formData.firstName,
         LastName : formData.lastName,
-        Gender : formData.gender.value === 'male' ? 0 : 1,
+        Gender : formData.gender.value ,
         Tax : formData.taxCode,
         Nationality : '',
         Ethnic : '',
@@ -276,18 +301,20 @@ export class EmployeeDetailDialogComponent implements OnInit {
         DateOfBirth : formData.dateOfBirth,
         IndentityCard : '',
         PlaceIssued : '',
-        Phone : formData.phone ,
-        Email : formData.email, 
         Country : '',
         Province : '',
         District : '',
         Commune : '',
-        Address : formData.address , 
-        InsuranceNumber : ''
-      }
-      console.log('Form data:', formData);
+        Address : formData.address,
+        InsuranceNumber : '',
+
+      };
+      
+  
+      console.log('Employee update payload:', employeeUpdate);
+  
       if (this.isEditMode) {
-        this.employeeService.updateEmployee(this.data.code, formData).subscribe({
+        this.employeeService.updateEmployee(this.data.code, employeeUpdate).subscribe({
           next: (updatedEmployee) => {
             this.dialogRef.close(updatedEmployee);
           },
@@ -295,8 +322,8 @@ export class EmployeeDetailDialogComponent implements OnInit {
             console.error('Error updating employee:', error);
           }
         });
-      } else {
-        this.employeeService.createEmployee(formData).subscribe({
+      } /*else {
+        this.employeeService.createEmployee(employeeUpdate).subscribe({
           next: (newEmployee) => {
             this.dialogRef.close(newEmployee);
           },
@@ -304,9 +331,14 @@ export class EmployeeDetailDialogComponent implements OnInit {
             console.error('Error creating employee:', error);
           }
         });
-      }
-    }
+      }*/
+
+        let userUpdate = {
+          Phone : formData.phone,
+          Email : formData.email,
+        }
   }
+  
 
   onCancel(): void {
     this.dialogRef.close();
