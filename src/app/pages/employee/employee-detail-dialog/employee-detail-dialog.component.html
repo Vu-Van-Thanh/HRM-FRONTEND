@@ -180,7 +180,7 @@
                 <!-- Mức lương -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Mức lương:</label>
-                  <span>{{employee?.salary | currency:'VND':'symbol-narrow':'1.0-0'}}</span>
+                  <span>{{contractNow?.salaryBase | currency:'VND':'symbol-narrow':'1.0-0'}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Mức lương</mat-label>
@@ -191,7 +191,7 @@
                 <!-- Loại hợp đồng -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Loại hợp đồng:</label>
-                  <span>{{employee?.contractType}}</span>
+                  <span>{{contractNow?.contractType}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Loại hợp đồng</mat-label>

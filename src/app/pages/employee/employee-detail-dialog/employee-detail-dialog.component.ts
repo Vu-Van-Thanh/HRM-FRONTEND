@@ -89,13 +89,23 @@ export class EmployeeDetailDialogComponent implements OnInit {
     });
   }
   loadContracts() : void {
+    const now = new Date();
     let url = API_ENDPOINT.getContractByEmployeeId.replace('{employeeId}', this.data.code);
     this.http.get<Contract[]>(url).subscribe(contracts => {
       console.log('Contracts:', contracts);
       this.contracts = contracts;
     });
-    this.contractNow = this.contracts[0];
+    this.contractNow = this.contracts.map(c => ({
+      ...c,
+      startDateObj: new Date(c.startDate)
+    }))
+    .filter(c => !isNaN(c.startDateObj.getTime()))
+    .sort((a, b) =>
+      Math.abs(a.startDateObj.getTime() - now.getTime()) -
+      Math.abs(b.startDateObj.getTime() - now.getTime())
+    )[0];
     if(this.contracts.length === 0){
+      
     this.contracts = [
       {
         id: 1,
