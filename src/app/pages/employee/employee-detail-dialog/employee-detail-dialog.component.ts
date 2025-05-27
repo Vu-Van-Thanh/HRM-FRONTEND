@@ -4,9 +4,8 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dial
 import { EmployeeService } from '../employee.service';
 import { RelativeDialogComponent } from '../relative-dialog/relative-dialog.component';
 import { ContractDialogComponent } from '../contract-dialog/contract-dialog.component';
-import {  Employee } from '../employee.model';
-import { fromEventPattern } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import {  Employee, Relative } from '../employee.model';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
 
@@ -30,6 +29,16 @@ export interface Contract{
   contractUrl : string,
   status : string
 }
+export interface Education{
+  educationID : string,
+  employeeID : string,
+  degree : string,
+  major : string,
+  school : string,
+  startDate : string,
+  endDate : string,
+  description : string
+}
 @Component({
   selector: 'app-employee-detail-dialog',
   templateUrl: './employee-detail-dialog.component.html',
@@ -41,7 +50,9 @@ export class EmployeeDetailDialogComponent implements OnInit {
   educationLevels = ['Trung học', 'Trung cấp', 'Cao đẳng', 'Đại học', 'Thạc sĩ', 'Tiến sĩ'];
   selectedTabIndex = 0;
   contractNow : Contract;
-  positions : Position[] = []
+  educations : Education[] = [];
+  educationNow : Education;
+  positions : Position[] = [];
   workHistoryColumns = ['date', 'type', 'description'];
   workHistory: any[] = [];
   employeeForm: FormGroup;
@@ -49,8 +60,8 @@ export class EmployeeDetailDialogComponent implements OnInit {
   imagePreview: string | null = null;
 
   // Thêm các thuộc tính cho người thân và hợp đồng
-  relatives: any[] = [];
-  contracts: any[] = [];
+  relatives: Relative[] = [];
+  contracts: Contract[] = [];
   relativesColumns = ['name', 'relationship', 'phone', 'actions'];
   contractsColumns = ['contractNo', 'type', 'startDate', 'endDate', 'actions'];
 
@@ -78,6 +89,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
     this.initForm();
     this.loadPositions();
     this.loadContracts();
+    this.loadEducation();
     if (this.data.code) {
       this.loadEmployee();
     }
@@ -88,6 +100,35 @@ export class EmployeeDetailDialogComponent implements OnInit {
       this.positions = positions;
     });
   }
+  loadEducation(): void {
+    const filter: any = {
+      degree: '',
+      employeeIDList: this.data.code,
+      school: ''
+    };
+    const now = new Date();
+    const params = new HttpParams({ fromObject: filter });
+  
+    this.http.get<Education[]>(`${API_ENDPOINT.getEducationByFilter}`, { params })
+      .subscribe(data => {
+        this.educations = data;
+        console.log("Education:", this.educations);
+  
+        this.educationNow = this.educations
+          .map(e => ({
+            ...e,
+            startDateObj: new Date(e.startDate)
+          }))
+          .filter(e => !isNaN(e.startDateObj.getTime()))
+          .sort((a, b) =>
+            Math.abs(a.startDateObj.getTime() - now.getTime()) -
+            Math.abs(b.startDateObj.getTime() - now.getTime())
+          )[0];
+  
+        console.log("Education Now:", this.educationNow);
+      });
+  }
+  
   loadContracts() : void {
     const now = new Date();
     let url = API_ENDPOINT.getContractByEmployeeId.replace('{employeeId}', this.data.code);
@@ -104,25 +145,15 @@ export class EmployeeDetailDialogComponent implements OnInit {
       Math.abs(a.startDateObj.getTime() - now.getTime()) -
       Math.abs(b.startDateObj.getTime() - now.getTime())
     )[0];
-    if(this.contracts.length === 0){
-      
-    this.contracts = [
-      {
-        id: 1,
-        contractNo: 'HD001',
-        type: 'Hợp đồng không xác định thời hạn',
-        startDate: '2023-01-01',
-        endDate: null
-      },
-      {
-        id: 2,
-        contractNo: 'HD002',
-        type: 'Hợp đồng thử việc',
-        startDate: '2022-10-01',
-        endDate: '2022-12-31'
-      }
-    ];
+    
   }
+  loadRelative(): void {
+    const url = API_ENDPOINT.getAllRelative.replace('{employeeId}', this.data.code);
+    this.http.get<Relative[]>(url).subscribe(relatives => {
+      console.log('Relatives:', relatives);
+      this.relatives = relatives;
+    });
+    console.log("Relatives:", this.relatives);
   }
   initForm(): void {
     this.employeeForm = this.fb.group({
@@ -168,7 +199,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
         this.employeeForm.patchValue(employee);
         this.loading = false;
         this.loadWorkHistory();
-        this.loadRelatives();
+        this.loadRelative();
         this.loadContracts();
       },
       error: (error) => {
@@ -200,24 +231,6 @@ export class EmployeeDetailDialogComponent implements OnInit {
     ];
   }
 
-  loadRelatives() {
-    // Mock relatives data
-    this.relatives = [
-      {
-        id: 1,
-        name: 'Nguyễn Văn A',
-        relationship: 'Cha',
-        phone: '0123456789'
-      },
-      {
-        id: 2,
-        name: 'Trần Thị B',
-        relationship: 'Mẹ',
-        phone: '0987654321'
-      }
-    ];
-  }
-
   
 
   onAddRelative() {
@@ -238,7 +251,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
     });
   }
 
-  onEditRelative(relative: any) {
+  /*onEditRelative(relative: Relative) {
     const dialogRef = this.dialog.open(RelativeDialogComponent, {
       width: '500px',
       data: { employeeId: this.data.code, relative }
@@ -260,7 +273,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
       // Xóa người thân khỏi danh sách
       this.relatives = this.relatives.filter(r => r.id !== relativeId);
     }
-  }
+  }*/
 
   onAddContract() {
     const dialogRef = this.dialog.open(ContractDialogComponent, {
@@ -289,7 +302,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         // Cập nhật thông tin hợp đồng
-        const index = this.contracts.findIndex(c => c.id === contract.id);
+        const index = this.contracts.findIndex(c => c.contractNumber === contract.contractNumber);
         if (index !== -1) {
           this.contracts[index] = { ...this.contracts[index], ...result };
         }
@@ -297,10 +310,10 @@ export class EmployeeDetailDialogComponent implements OnInit {
     });
   }
 
-  onDeleteContract(contractId: number) {
+  onDeleteContract(contract: Contract) {
     if (confirm('Bạn có chắc chắn muốn xóa hợp đồng này?')) {
       // Xóa hợp đồng khỏi danh sách
-      this.contracts = this.contracts.filter(c => c.id !== contractId);
+      this.contracts = this.contracts.filter(c => c.contractNumber !== contract.contractNumber);
     }
   }
 

@@ -209,7 +209,7 @@
                 <!-- Học vấn -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Học vấn:</label>
-                  <span>{{employee?.education}}</span>
+                  <span>{{educationNow?.degree}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Học vấn</mat-label>
@@ -221,7 +221,7 @@
                 <!-- Chuyên ngành -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Chuyên ngành:</label>
-                  <span>{{employee?.major}}</span>
+                  <span>{{educationNow?.major}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Chuyên ngành</mat-label>
@@ -231,7 +231,7 @@
                 <!-- Trường học -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Trường học:</label>
-                  <span>{{employee?.school}}</span>
+                  <span>{{educationNow?.school}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Trường học</mat-label>
@@ -241,7 +241,7 @@
                 <!-- Năm tốt nghiệp -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Năm tốt nghiệp:</label>
-                  <span>{{employee?.graduationYear}}</span>
+                  <span>{{educationNow?.endDate | date:'yyyy'}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Năm tốt nghiệp</mat-label>
@@ -267,7 +267,7 @@
                 <!-- Ngày cấp -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Ngày cấp:</label>
-                  <span>{{employee?.idCardIssueDate | date:'dd/MM/yyyy'}}</span>
+                  <span>{{employee?.dateIssued | date:'dd/MM/yyyy'}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Ngày cấp</mat-label>
@@ -342,17 +342,17 @@
           <table mat-table [dataSource]="relatives" class="w-100 mt-3">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef> Họ tên </th>
-              <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+              <td mat-cell *matCellDef="let element"> {{element.firstName}} {{element.lastName}} </td>
             </ng-container>
 
             <ng-container matColumnDef="relationship">
               <th mat-header-cell *matHeaderCellDef> Quan hệ </th>
-              <td mat-cell *matCellDef="let element"> {{element.relationship}} </td>
+              <td mat-cell *matCellDef="let element"> {{element.relativeType}} </td>
             </ng-container>
 
             <ng-container matColumnDef="phone">
               <th mat-header-cell *matHeaderCellDef> Số điện thoại </th>
-              <td mat-cell *matCellDef="let element"> {{element.phone}} </td>
+              <td mat-cell *matCellDef="let element"> {{element.phoneNumber}} </td>
             </ng-container>
 
             <ng-container matColumnDef="actions">
@@ -386,12 +386,12 @@
           <table mat-table [dataSource]="contracts" class="w-100 mt-3">
             <ng-container matColumnDef="contractNo">
               <th mat-header-cell *matHeaderCellDef> Số hợp đồng </th>
-              <td mat-cell *matCellDef="let element"> {{element.contractNo}} </td>
+              <td mat-cell *matCellDef="let element"> {{element.contractNumber}} </td>
             </ng-container>
 
             <ng-container matColumnDef="type">
               <th mat-header-cell *matHeaderCellDef> Loại hợp đồng </th>
-              <td mat-cell *matCellDef="let element"> {{element.type}} </td>
+              <td mat-cell *matCellDef="let element"> {{element.contractType}} </td>
             </ng-container>
 
             <ng-container matColumnDef="startDate">
@@ -401,8 +401,9 @@
 
             <ng-container matColumnDef="endDate">
               <th mat-header-cell *matHeaderCellDef> Ngày kết thúc </th>
-              <td mat-cell *matCellDef="let element"> {{element.endDate | date}} </td>
+              <td mat-cell *matCellDef="let element"> {{element.endDate ? (element.endDate | date) : 'Hiện tại'}} </td>
             </ng-container>
+            
 
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef> Thao tác </th>

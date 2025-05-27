@@ -47,6 +47,7 @@ export const API_ENDPOINT = {
    getEmployeeSkills : 'https://localhost:7214/EmployeeEvaluation/statistics',
    getFacilities : "https://localhost:7176/Facility",
    getAllJob : "https://localhost:7176/Job?page={page}&pageSize={pageSize}",
-   getAllJobInternal : "https://localhost:7176/JobPosition",   
+   getAllJobInternal : "https://localhost:7176/JobPosition",
+   getEducationByFilter : "https://localhost:7214/Education/filter-education"
    
 };
