@@ -1,0 +1,82 @@
+<h2 mat-dialog-title>{{ data.relative ? 'Chỉnh sửa' : 'Thêm' }} người thân</h2>
+<form [formGroup]="relativeForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <div class="form-container">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Họ và tên</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Quan hệ</mat-label>
+        <mat-select formControlName="relationship">
+          <mat-option *ngFor="let relation of relationships" [value]="relation">{{ relation }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Ngày sinh</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="dateOfBirth">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Số điện thoại</mat-label>
+        <input matInput formControlName="phone">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Địa chỉ</mat-label>
+        <input matInput formControlName="address">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Quốc tịch</mat-label>
+        <input matInput formControlName="nationality">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Dân tộc</mat-label>
+        <input matInput formControlName="ethnic">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Tôn giáo</mat-label>
+        <input matInput formControlName="religion">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nơi sinh</mat-label>
+        <input matInput formControlName="placeOfBirth">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Số CMND/CCCD</mat-label>
+        <input matInput formControlName="indentityCard">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Tỉnh/Thành</mat-label>
+        <input matInput formControlName="province">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Quận/Huyện</mat-label>
+        <input matInput formControlName="district">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Phường/Xã</mat-label>
+        <input matInput formControlName="commune">
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Hủy</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!relativeForm.valid">
+      {{ data.relative ? 'Cập nhật' : 'Thêm' }}
+    </button>
+  </mat-dialog-actions>
+</form>

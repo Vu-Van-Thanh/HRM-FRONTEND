@@ -1,78 +1,99 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Relative } from '../employee.model';
+import { SocketAddress } from 'net';
+import { HttpClient } from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import { ToastService } from 'angular-toastify';
 
 @Component({
   selector: 'app-relative-dialog',
-  template: `
-    <h2 mat-dialog-title>{{data.relative ? 'Chỉnh sửa' : 'Thêm'}} người thân</h2>
-    <form [formGroup]="relativeForm" (ngSubmit)="onSubmit()">
-      <mat-dialog-content>
-        <div class="form-container">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Họ và tên</mat-label>
-            <input matInput formControlName="name" required>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Quan hệ</mat-label>
-            <mat-select formControlName="relationship" required>
-              <mat-option *ngFor="let relation of relationships" [value]="relation">
-                {{relation}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Số điện thoại</mat-label>
-            <input matInput formControlName="phone" required>
-          </mat-form-field>
-        </div>
-      </mat-dialog-content>
-
-      <mat-dialog-actions align="end">
-        <button mat-button (click)="onCancel()">Hủy</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="!relativeForm.valid">
-          {{data.relative ? 'Cập nhật' : 'Thêm'}}
-        </button>
-      </mat-dialog-actions>
-    </form>
-  `,
-  styles: [`
-    .form-container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px 0;
-    }
-    .full-width {
-      width: 100%;
-    }
-  `]
+  template: './relative-dialog.component.html',
+ 
 })
 export class RelativeDialogComponent implements OnInit {
   relativeForm: FormGroup;
+  OldID: string = '';
+  typeAction : string = 'Edit';
   relationships = ['Vợ/Chồng', 'Cha', 'Mẹ', 'Con', 'Anh/Chị', 'Em', 'Khác'];
 
   constructor(
     private dialogRef: MatDialogRef<RelativeDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { employeeId: string, relative?: any },
-    private fb: FormBuilder
+    @Inject(MAT_DIALOG_DATA) public data: { employeeId: string, typeAction : string,relative?: Relative },
+    private fb: FormBuilder,
+    private http : HttpClient,
+    private toastService: ToastService
   ) {
     this.relativeForm = this.fb.group({
-      name: ['', Validators.required],
-      relationship: ['', Validators.required],
-      phone: ['', Validators.required]
-    });
+      name: [''],
+      firstName: [''],
+      lastName: [''],
+      relationship: [''],
+      relativeType: [''],
+      dateOfBirth: [''],
+      phone: [''],
+      phoneNumber: [''],
+      address: [''],
+      nationality: [''],
+      ethnic: [''],
+      religion: [''],
+      placeOfBirth: [''],
+      indentityCard: [''],
+      country: [''],
+      province: [''],
+      district: [''],
+      commune: [''],
+      employeeID: [this.data.employeeId] // hoặc null nếu không có
+    });    
   }
 
   ngOnInit() {
     if (this.data.relative) {
       this.relativeForm.patchValue(this.data.relative);
     }
+    this.OldID = this.data.relative.indentityCard || ''; 
+    this.typeAction = this.data.typeAction;
   }
 
   onSubmit() {
+
+    const relativeData: Relative = this.relativeForm.value;
+    const relative = {
+      EmployeeID : this.data.employeeId,
+      FirstName: relativeData.firstName,
+      LastName: relativeData.lastName,
+      RelativeType: relativeData.relativeType,
+      DateOfBirth: relativeData.dateOfBirth,
+      Address : relativeData.address,
+      Nationnality  : relativeData.nationality,
+      Ethnic : relativeData.ethnic,
+      Religion : relativeData.religion,
+      PlaceOfBirth : relativeData.placeOfBirth,
+      IndentityCard : relativeData.indentityCard,
+      Country : relativeData.country,
+      Province : relativeData.province,
+      District : relativeData.district,
+      Commune : relativeData.commune,
+      PhoneNumber : relativeData.phoneNumber,
+      OldID : this.OldID
+    }
+    this.http.post(API_ENDPOINT.updateRelative, relative).subscribe({
+      next: (response) => {
+        console.log('Relative updated successfully', response);
+        if(this.typeAction === 'Edit')
+        {
+          this.toastService.success('Cập nhật thông tin người thân thành công!');
+        }
+        else
+        {
+          this.toastService.success('Thêm mới người thân thành công!');
+        }
+      },
+      error: (error) => {
+        console.error('Error updating relative', error);
+      }
+    });
     if (this.relativeForm.valid) {
       this.dialogRef.close(this.relativeForm.value);
     }

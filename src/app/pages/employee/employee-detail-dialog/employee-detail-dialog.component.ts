@@ -88,8 +88,6 @@ export class EmployeeDetailDialogComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadPositions();
-    this.loadContracts();
-    this.loadEducation();
     if (this.data.code) {
       this.loadEmployee();
     }
@@ -201,6 +199,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
         this.loadWorkHistory();
         this.loadRelative();
         this.loadContracts();
+        this.loadEducation();
       },
       error: (error) => {
         this.error = 'Có lỗi xảy ra khi tải thông tin nhân viên';
@@ -251,16 +250,16 @@ export class EmployeeDetailDialogComponent implements OnInit {
     });
   }
 
-  /*onEditRelative(relative: Relative) {
+  onEditRelative(relative: Relative) {
     const dialogRef = this.dialog.open(RelativeDialogComponent, {
       width: '500px',
-      data: { employeeId: this.data.code, relative }
+      data: { employeeId: this.data.code, typeAction: 'Edit' ,relative }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         // Cập nhật thông tin người thân
-        const index = this.relatives.findIndex(r => r.id === relative.id);
+        const index = this.relatives.findIndex(r => r.employeeID === relative.employeeID && r.indentityCard === relative.indentityCard);
         if (index !== -1) {
           this.relatives[index] = { ...this.relatives[index], ...result };
         }
@@ -268,7 +267,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
     });
   }
 
-  onDeleteRelative(relativeId: number) {
+  /*onDeleteRelative(relativeId: number) {
     if (confirm('Bạn có chắc chắn muốn xóa người thân này?')) {
       // Xóa người thân khỏi danh sách
       this.relatives = this.relatives.filter(r => r.id !== relativeId);
