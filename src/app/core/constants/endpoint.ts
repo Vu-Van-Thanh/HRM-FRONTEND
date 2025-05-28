@@ -50,5 +50,6 @@ export const API_ENDPOINT = {
    getAllJobInternal : "https://localhost:7176/JobPosition",
    getEducationByFilter : "https://localhost:7214/Education/filter-education",
    updateRelative : 'https://localhost:7214/Relative',
+   deleteRelative : 'https://localhost:7214/Relative',
    
 };

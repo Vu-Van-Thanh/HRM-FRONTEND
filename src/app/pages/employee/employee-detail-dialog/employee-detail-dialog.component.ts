@@ -7,7 +7,7 @@ import { ContractDialogComponent } from '../contract-dialog/contract-dialog.comp
 import {  Employee, Relative } from '../employee.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
-
+import { ToastService } from 'angular-toastify';
 
 export interface Position{
   jobPositionId : string,
@@ -80,7 +80,8 @@ export class EmployeeDetailDialogComponent implements OnInit {
     private employeeService: EmployeeService,
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private http: HttpClient
+    private http: HttpClient,
+    private toastService: ToastService
   ) {
     this.isEditMode = data.isEdit;
   }
@@ -267,12 +268,16 @@ export class EmployeeDetailDialogComponent implements OnInit {
     });
   }
 
-  /*onDeleteRelative(relativeId: number) {
+  onDeleteRelative(relative: Relative) {
     if (confirm('Bạn có chắc chắn muốn xóa người thân này?')) {
-      // Xóa người thân khỏi danh sách
-      this.relatives = this.relatives.filter(r => r.id !== relativeId);
+      this.http.delete<{message : string}>(`${API_ENDPOINT.deleteRelative}/${relative.indentityCard}`).subscribe({
+        next: (res) => {
+          this.toastService.info(res.message);
+          this.relatives = this.relatives.filter(r => r.indentityCard !== relative.indentityCard);
+      }});
+     
     }
-  }*/
+  }
 
   onAddContract() {
     const dialogRef = this.dialog.open(ContractDialogComponent, {
