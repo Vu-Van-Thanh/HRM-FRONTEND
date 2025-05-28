@@ -4,49 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-contract-dialog',
-  template: `
-    <h2 mat-dialog-title>{{data.contract ? 'Chỉnh sửa' : 'Thêm'}} hợp đồng</h2>
-    <form [formGroup]="contractForm" (ngSubmit)="onSubmit()">
-      <mat-dialog-content>
-        <div class="form-container">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Số hợp đồng</mat-label>
-            <input matInput formControlName="contractNo" required>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Loại hợp đồng</mat-label>
-            <mat-select formControlName="type" required>
-              <mat-option *ngFor="let type of contractTypes" [value]="type">
-                {{type}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Ngày bắt đầu</mat-label>
-            <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" required>
-            <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
-            <mat-datepicker #startDatePicker></mat-datepicker>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Ngày kết thúc</mat-label>
-            <input matInput [matDatepicker]="endDatePicker" formControlName="endDate">
-            <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
-            <mat-datepicker #endDatePicker></mat-datepicker>
-          </mat-form-field>
-        </div>
-      </mat-dialog-content>
-
-      <mat-dialog-actions align="end">
-        <button mat-button (click)="onCancel()">Hủy</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="!contractForm.valid">
-          {{data.contract ? 'Cập nhật' : 'Thêm'}}
-        </button>
-      </mat-dialog-actions>
-    </form>
-  `,
+  template: './contract-dialog.component.html',
   styles: [`
     .form-container {
       display: flex;
@@ -69,11 +27,17 @@ export class ContractDialogComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.contractForm = this.fb.group({
-      contractNo: ['', Validators.required],
-      type: ['', Validators.required],
+      contractNumber: ['', Validators.required],
+      contractType: ['', Validators.required],
       startDate: ['', Validators.required],
-      endDate: ['']
+      endDate: [''],
+      salaryIndex: ['', Validators.required],
+      salaryBase: ['', Validators.required],
+      position: ['', Validators.required],
+      contractUrl: [''],
+      status: ['', Validators.required]
     });
+    
   }
 
   ngOnInit() {
