@@ -236,7 +236,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
   onAddRelative() {
     const dialogRef = this.dialog.open(RelativeDialogComponent, {
       width: '500px',
-      data: { employeeId: this.data.code }
+      data: { employeeId: this.data.code,typeAction: 'Add' }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -297,7 +297,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
     });
   }
 
-  onEditContract(contract: any) {
+  onEditContract(contract: Contract) {
     const dialogRef = this.dialog.open(ContractDialogComponent, {
       width: '500px',
       data: { employeeId: this.data.code, contract }

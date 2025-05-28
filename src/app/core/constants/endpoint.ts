@@ -51,5 +51,6 @@ export const API_ENDPOINT = {
    getEducationByFilter : "https://localhost:7214/Education/filter-education",
    updateRelative : 'https://localhost:7214/Relative',
    deleteRelative : 'https://localhost:7214/Relative',
+   uploadContract : 'https://localhost:7214/EmployeeContract',
    
 };

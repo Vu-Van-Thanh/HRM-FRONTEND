@@ -2,15 +2,13 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Relative } from '../employee.model';
-import { SocketAddress } from 'net';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { ToastService } from 'angular-toastify';
 
 @Component({
   selector: 'app-relative-dialog',
-  template: './relative-dialog.component.html',
- 
+  templateUrl: './relative-dialog.component.html',
 })
 export class RelativeDialogComponent implements OnInit {
   relativeForm: FormGroup;
@@ -52,7 +50,10 @@ export class RelativeDialogComponent implements OnInit {
     if (this.data.relative) {
       this.relativeForm.patchValue(this.data.relative);
     }
-    this.OldID = this.data.relative.indentityCard || ''; 
+    if(this.data.typeAction === 'Edit')
+    {
+      this.OldID = this.data.relative.indentityCard || ''; 
+    }
     this.typeAction = this.data.typeAction;
   }
 
@@ -63,10 +64,10 @@ export class RelativeDialogComponent implements OnInit {
       EmployeeID : this.data.employeeId,
       FirstName: relativeData.firstName,
       LastName: relativeData.lastName,
-      RelativeType: relativeData.relativeType,
+      RelativeType: relativeData.relationship,
       DateOfBirth: relativeData.dateOfBirth,
       Address : relativeData.address,
-      Nationnality  : relativeData.nationality,
+      Nationality  : relativeData.nationality,
       Ethnic : relativeData.ethnic,
       Religion : relativeData.religion,
       PlaceOfBirth : relativeData.placeOfBirth,
@@ -75,7 +76,7 @@ export class RelativeDialogComponent implements OnInit {
       Province : relativeData.province,
       District : relativeData.district,
       Commune : relativeData.commune,
-      PhoneNumber : relativeData.phoneNumber,
+      PhoneNumber : relativeData.phone,
       OldID : this.OldID
     }
     this.http.post(API_ENDPOINT.updateRelative, relative).subscribe({
