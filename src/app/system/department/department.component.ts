@@ -3,6 +3,7 @@ import { Department } from './department.model';
 import { DepartmentService } from './department.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ToastService } from 'angular-toastify';
 
 @Component({
   selector: 'app-department',
@@ -18,13 +19,16 @@ export class DepartmentComponent implements OnInit {
   constructor(
     private departmentService: DepartmentService,
     private modalService: NgbModal,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private toastService: ToastService
   ) {
     this.departmentForm = this.fb.group({
       code: ['', [Validators.required]],
       name: ['', [Validators.required]],
       description: [''],
-      managerId: [null],
+      managerName: [null],
+      contact: [''],
+      location: [''],
       status: [true]
     });
   }
@@ -38,12 +42,14 @@ export class DepartmentComponent implements OnInit {
       departments => this.departments = departments,
       error => console.error('Error loading departments:', error)
     );
+    
   }
 
   openModal(content: any, department?: Department): void {
     this.isEditing = !!department;
     if (department) {
       this.selectedDepartment = department;
+      console.log('Selected Department:', department);
       this.departmentForm.patchValue(department);
     } else {
       this.selectedDepartment = null;
@@ -55,23 +61,33 @@ export class DepartmentComponent implements OnInit {
   onSubmit(): void {
     if (this.departmentForm.valid) {
       const departmentData = this.departmentForm.value;
-      if (this.isEditing && this.selectedDepartment) {
-        this.departmentService.updateDepartment(this.selectedDepartment.id, departmentData).subscribe(
+      let location = departmentData.location;
+      if( this.isEditing && this.selectedDepartment) {
+        location = this.departments.find(dep => dep.code === this.selectedDepartment?.code)?.location || '';
+      }
+      const body = {
+        DepartmentName : departmentData.name,
+        DepartmentId : departmentData.code,
+        Manager : departmentData.managerName,
+        Contact : departmentData.contact,
+        Description : departmentData.description,
+        Location : location
+      }
+      console.log('Department Data:', body);
+      this.departmentService.createDepartment(body).subscribe(
           () => {
             this.modalService.dismissAll();
+            this.toastService.success('Tạo phòng ban thành công!');
             this.loadDepartments();
-          },
-          error => console.error('Error updating department:', error)
-        );
-      } else {
-        this.departmentService.createDepartment(departmentData).subscribe(
-          () => {
-            this.modalService.dismissAll();
-            this.loadDepartments();
+            if (this.isEditing) {
+              this.toastService.success('Cập nhật phòng ban thành công!');
+            }
+            else {
+              this.toastService.success('Tạo phòng ban thành công!');}
           },
           error => console.error('Error creating department:', error)
         );
-      }
+      
     }
   }
 

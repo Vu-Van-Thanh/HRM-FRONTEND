@@ -5,6 +5,7 @@ export interface Department {
   description?: string;
   managerId?: number;
   managerName?: string;
+  location?: string;
   contact?: string;
   status?: boolean;
   createdAt?: Date;

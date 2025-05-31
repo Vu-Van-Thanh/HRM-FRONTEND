@@ -86,7 +86,15 @@
 
       <div class="mb-3">
         <label class="form-label">Trưởng phòng</label>
-        <input type="number" class="form-control" formControlName="managerId">
+        <input type="text" class="form-control" formControlName="managerName">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Liên hệ</label>
+        <input type="text" class="form-control" formControlName="contact">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Vị trí</label>
+        <input type="text" class="form-control" formControlName="location">
       </div>
 
       <div class="mb-3">
@@ -95,6 +103,7 @@
           <label class="form-check-label">Hoạt động</label>
         </div>
       </div>
+      
 
       <div class="text-end">
         <button type="button" class="btn btn-secondary me-2" (click)="modal.dismiss()">Hủy</button>

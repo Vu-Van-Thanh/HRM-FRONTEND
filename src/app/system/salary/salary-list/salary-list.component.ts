@@ -68,14 +68,10 @@ export class SalaryListComponent implements OnInit {
       managerId: formValues.managerId || '',
       employeeId: formValues.employeeId || ''
     };
-
-    console.log('🔍 Áp dụng bộ lọc:', employeeFilter);
-
     // Tải danh sách nhân viên dựa trên bộ lọc
     this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeFilter })
       .pipe(
         tap(employees => {
-          console.log('📌 Danh sách nhân viên sau khi lọc:', employees);
           this.employeeList = employees;
         })
       )
@@ -91,11 +87,11 @@ export class SalaryListComponent implements OnInit {
       this.employees = [];
       return;
     }
-
+    
     const employeeIds = this.employeeList
-      .map(emp => emp.employeeID)
-      .filter(id => !!id);
-
+    .map(emp => emp.employeeID)
+    .filter(id => !!id);
+    
     if (employeeIds.length === 0) {
       this.employees = [];
       return;

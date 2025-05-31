@@ -52,5 +52,5 @@ export const API_ENDPOINT = {
    updateRelative : 'https://localhost:7214/Relative',
    deleteRelative : 'https://localhost:7214/Relative',
    uploadContract : 'https://localhost:7214/EmployeeContract',
-   
+   createDepartment : "https://localhost:7176/Department",
 };

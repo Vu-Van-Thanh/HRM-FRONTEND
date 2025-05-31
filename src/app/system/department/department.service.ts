@@ -16,6 +16,7 @@ export class DepartmentService {
 
   getDepartments(): Observable<Department[]> {
     return this.http.get<Department[]>(API_ENDPOINT.getAllDepartment).pipe(
+      tap(departments => console.log('Fetched Departments:', departments)),
       map(departments => departments.map((dep,index) => this.mapDepartmentResponse(dep,index))),
     );
     //return this.http.get<Department[]>(this.apiUrl);
@@ -34,8 +35,8 @@ export class DepartmentService {
     //return this.http.get<Department>(`${this.apiUrl}/${id}`);
   }
 
-  createDepartment(department: Department): Observable<Department> {
-    return this.http.post<Department>(this.apiUrl, department);
+  createDepartment(department: any): Observable<any> {
+    return this.http.post<any>(API_ENDPOINT.createDepartment, department);
   }
 
   updateDepartment(id: number, department: Department): Observable<Department> {
@@ -53,6 +54,7 @@ export class DepartmentService {
       contact: department.contact,
       description: department.description,
       managerName: department.manager,
+      location : department.location,
       status: true,
       createdAt: department.createdAt,
       updatedAt: department.updatedAt,
