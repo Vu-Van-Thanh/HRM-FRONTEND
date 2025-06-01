@@ -115,7 +115,7 @@ export class SalaryDetailComponent implements OnInit {
     this.calculateTotal();
   }
 
-  addAllowance(): void {
+  addBonus(): void {
     this.allowances.push({
       id: this.nextId++,
       name: '',
