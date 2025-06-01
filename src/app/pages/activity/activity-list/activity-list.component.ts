@@ -138,7 +138,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
     }
     this.loadProjects();
     this.loadPositions();
-    //this.loadDepartments();
+    this.loadDepartments();
     this.loadActivities();
     this.loadPersonalActivities();
     //this.loadEmployeeData();
