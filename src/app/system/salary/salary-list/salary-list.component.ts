@@ -173,7 +173,8 @@ export class SalaryListComponent implements OnInit {
       name: this.getEmployeeName(salary.employeeId),
       department: departmentName,
       position: this.getPosition(salary.employeeId),
-      baseSalary: salary.salaryBase?.baseSalary || 0
+      baseSalary: salary.salaryBase?.baseSalary || 0,
+      baseId : salary.salaryBase?.salaryId || ''
     };
     
     const modalRef = this.modalService.open(SalaryDetailComponent, {

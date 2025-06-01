@@ -2,6 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SalaryInfo, AdjustmentResult } from '../salary.model';
+import {HttpClient} from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
 @Component({
   selector: 'app-salary-detail',
@@ -12,12 +14,16 @@ export class SalaryDetailComponent implements OnInit {
   @Input() employee: any;
   salaryForm: FormGroup;
   deductions: any[] = [];
+  originalDeductions: any[] = [];
   allowances: any[] = [];
+  originalAllowances: any[] = [];
   others: any[] = [];
+  originalOthers: any[] = [];
   nextId = 1;
 
   constructor(
     private fb: FormBuilder,
+    private http: HttpClient,
     public activeModal: NgbActiveModal
   ) {
     this.salaryForm = this.fb.group({
@@ -45,12 +51,10 @@ export class SalaryDetailComponent implements OnInit {
 
     // Xử lý các khoản điều chỉnh từ SalaryInfo
     if (this.employee.adjustments && this.employee.adjustments.length > 0) {
-      // Reset các mảng hiện tại
+      
       this.deductions = [];
       this.allowances = [];
       this.others = [];
-      
-      // Log để xem giá trị adjustType thực tế
       console.log('Các adjustType trong dữ liệu:', this.employee.adjustments.map(a => a.adjustType));
       
       // Phân loại các khoản điều chỉnh theo adjustType, không phân biệt chữ hoa/chữ thường
@@ -100,7 +104,12 @@ export class SalaryDetailComponent implements OnInit {
         }
       });
     }
-    
+    this.originalAllowances = JSON.parse(JSON.stringify(this.allowances));
+    this.originalDeductions = JSON.parse(JSON.stringify(this.deductions));
+    this.originalOthers = JSON.parse(JSON.stringify(this.others));
+    console.log('Deductions:', this.originalDeductions);
+    console.log('Allowances:', this.originalAllowances);
+    console.log('Others:', this.originalOthers);
     this.calculateTotal();
   }
 
@@ -184,6 +193,84 @@ export class SalaryDetailComponent implements OnInit {
 
   saveSalaryDetails(): void {
     if (this.salaryForm.valid) {
+      const changedAllowances = this.allowances.filter(current => {
+      const original = this.originalAllowances.find(o => o.adjustmentId === current.adjustmentId);
+
+      if (!original) return true; // mới thêm
+
+      return (
+        original.name !== current.name ||
+        parseFloat(original.amount) !== parseFloat(current.amount) ||
+        parseFloat(original.percentage) !== parseFloat(current.percentage) ||
+        original.adjustType !== current.adjustType
+      );
+    });
+
+      const changedDeductions = this.deductions.filter(current => {
+        const original = this.originalDeductions.find(o => o.adjustmentId === current.adjustmentId);
+
+        if (!original) return true; // mới thêm
+
+        return (
+          original.name !== current.name ||
+          parseFloat(original.amount) !== parseFloat(current.amount) ||
+          parseFloat(original.percentage) !== parseFloat(current.percentage) ||
+          original.adjustType !== current.adjustType
+        );
+      });
+
+      const changedOthers = this.others.filter(current => {
+        const original = this.originalOthers.find(o => o.adjustmentId === current.adjustmentId);
+
+        if (!original) return true; 
+
+        return (
+          original.name !== current.name ||
+          parseFloat(original.amount) !== parseFloat(current.amount) ||
+          parseFloat(original.percentage) !== parseFloat(current.percentage) ||
+          original.adjustType !== current.adjustType
+        );
+      });
+
+      console.log('Changed Allowances:', changedAllowances);
+      console.log('Changed Deductions:', changedDeductions);
+      console.log('Changed Others:', changedOthers);
+
+      // update
+      const updateAdjustmentList = [
+      ...changedAllowances.map(a => ({
+        AdjustmentId: a.adjustmentId , 
+        BaseId: this.employee.baseId,
+        AdjustType: 0, 
+        AdjustmentName: a.name,
+        Amount: parseFloat(a.amount),
+        Percentage: parseFloat(a.percentage)
+      })),
+      ...changedDeductions.map(d => ({
+        AdjustmentId: d.adjustmentId ,
+        BaseId: this.employee.baseId,
+        AdjustType: 1, 
+        AdjustmentName: d.name,
+        Amount: parseFloat(d.amount),
+        Percentage: parseFloat(d.percentage)
+      })),
+      ...changedOthers.map(o => ({
+        AdjustmentId: o.adjustmentId,
+        BaseId: this.employee.baseId,
+        AdjustType: 2, 
+        AdjustmentName: o.name,
+        Amount: parseFloat(o.amount),
+        Percentage: parseFloat(o.percentage)
+      }))
+    ];
+    
+    this.http.post(API_ENDPOINT.updateSalaryAdjustment, updateAdjustmentList)
+      .subscribe(response => {
+        console.log('✅ Cập nhật dữ liệu điều chỉnh thành công:', response);
+       
+      }, error => {
+        console.error('❌ Lỗi khi cập nhật dữ liệu điều chỉnh:', error)});
+    console.log('Update Adjustment List:', updateAdjustmentList);
       // Tạo đối tượng kết quả bao gồm cả dữ liệu gốc và dữ liệu đã chỉnh sửa
       const result = {
         employeeId: this.employee.employeeId,
