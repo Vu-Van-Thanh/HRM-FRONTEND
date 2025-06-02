@@ -244,7 +244,8 @@ export class SalaryDetailComponent implements OnInit {
         AdjustType: 0, 
         AdjustmentName: a.name,
         Amount: parseFloat(a.amount),
-        Percentage: parseFloat(a.percentage)
+        Percentage: parseFloat(a.percentage),
+        EffectiveDate : new Date().toISOString()
       })),
       ...changedDeductions.map(d => ({
         AdjustmentId: d.adjustmentId ,
@@ -252,7 +253,8 @@ export class SalaryDetailComponent implements OnInit {
         AdjustType: 1, 
         AdjustmentName: d.name,
         Amount: parseFloat(d.amount),
-        Percentage: parseFloat(d.percentage)
+        Percentage: parseFloat(d.percentage),
+        EffectiveDate : new Date().toISOString()
       })),
       ...changedOthers.map(o => ({
         AdjustmentId: o.adjustmentId,
@@ -260,7 +262,8 @@ export class SalaryDetailComponent implements OnInit {
         AdjustType: 2, 
         AdjustmentName: o.name,
         Amount: parseFloat(o.amount),
-        Percentage: parseFloat(o.percentage)
+        Percentage: parseFloat(o.percentage),
+        EffectiveDate : new Date().toISOString()
       }))
     ];
     
