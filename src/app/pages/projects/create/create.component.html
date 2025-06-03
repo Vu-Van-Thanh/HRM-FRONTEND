@@ -7,7 +7,7 @@
               <div class="mb-3">
                   <label for="projectname-input" class="form-label">Project Name</label>
                   
-                  <input id="projectname-input" name="projectname-input" type="text" class="form-control" placeholder="Enter project name..." required>
+                  <input id="projectname-input" [(ngModel)]="Name" name="projectname-input" type="text" class="form-control" placeholder="Enter project name..." required>
                   <div class="invalid-feedback">Please enter a project name.</div>
               </div>
               <div class="mb-3">
@@ -23,11 +23,11 @@
                                       </div>
                                   </div>
                               </label>
-                              <input class="form-control d-none" value="" id="project-image-input" type="file" accept="image/png, image/gif, image/jpeg">
+                              <input class="form-control d-none" value="" id="project-image-input" type="file" accept="image/png, image/gif, image/jpeg" (change)="onFileSelected($event)">
                           </div>
                           <div class="avatar-lg">
                               <div class="avatar-title bg-light rounded-circle">
-                                  <img src="" id="projectlogo-img" class="avatar-md h-auto rounded-circle" />
+                                  <img [src]="imageURL" id="projectlogo-img" class="avatar-md h-auto rounded-circle" />
                               </div>
                           </div>
                       </div>
@@ -35,7 +35,7 @@
               </div>
               <div class="mb-3">
                   <label for="projectdesc-input" class="form-label">Project Description</label>
-                  <textarea class="form-control" id="projectdesc-input" rows="3" placeholder="Enter project description..." required></textarea>
+                  <textarea class="form-control" [(ngModel)]="Description" id="projectdesc-input" rows="3" placeholder="Enter project description..." required></textarea>
                   <div class="invalid-feedback">Please enter a project description.</div>
               </div>
               <div class="mb-3 position-relative">
@@ -122,31 +122,37 @@
               </div>
               <div>
                   <label class="form-label">Attached Files</label>
-                  <ngx-dropzone class="dropzone" (change)="onSelect($event)" [accept]="'image/*'">
+                  <ngx-dropzone class="dropzone" (change)="onSelect($event)" [accept]="'image/*,.doc,.docx,.pdf'">
                     <ngx-dropzone-label class="dz-message needsclick">
                         <div class="mb-3">
-                            <i class="display-4 text-muted bx bxs-cloud-upload"></i>
+                        <i class="display-4 text-muted bx bxs-cloud-upload"></i>
                         </div>
-    
                         <h5>Drop files here or click to upload.</h5>
                     </ngx-dropzone-label>
                 </ngx-dropzone>
-                <ngx-dropzone-preview *ngIf="imageURL" class="border rounded" [removable]="true" (removed)="onRemove()">
-                    <ngx-dropzone-label>
-                        <div class="d-flex p-2">
-                            <div class="flex-shrink-0 me-3">
-                                <div class="avatar-sm bg-light rounded">
-                                    <img class="img-fluid rounded d-block" src="{{imageURL}}" alt="Dropzone-Image">
-                                </div>
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="pt-1">
-                                    <strong class="error text-danger"></strong>
-                                </div>
-                            </div>
+
+                <!-- Preview -->
+                <ngx-dropzone-preview *ngFor="let file of ProjectAttachment" class="border rounded mb-2" [removable]="true" (removed)="onRemove(file)">
+                <ngx-dropzone-label>
+                    <div class="d-flex p-2 align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="avatar-sm bg-light rounded">
+                        <ng-container *ngIf="file.type.startsWith('image/'); else otherFile">
+                            <img class="img-fluid rounded d-block" [src]="getPreview(file)" alt="Preview" />
+                        </ng-container>
+                        <ng-template #otherFile>
+                            <i class="bx bxs-file-doc text-primary display-6"></i>
+                        </ng-template>
                         </div>
-                    </ngx-dropzone-label>
+                    </div>
+                    <div class="flex-grow-1">
+                        <strong>{{ file.name }}</strong>
+                        <p class="mb-0 text-muted small">{{ file.size / 1024 | number:'1.0-2' }} KB</p>
+                    </div>
+                    </div>
+                </ngx-dropzone-label>
                 </ngx-dropzone-preview>
+
                 <!-- end dropzon-preview -->
               </div>
           </div>
@@ -163,7 +169,7 @@
 
               <div class="mb-3">
                   <label class="form-label" for="project-status-input">Status</label>
-                  <select class="form-select" id="project-status-input">
+                  <select class="form-select" [(ngModel)]="Status" id="project-status-input">
                       <option value="Completed">Completed</option>
                       <option value="Inprogress" selected>Inprogress</option>
                       <option value="Delay">Delay</option>
@@ -187,19 +193,32 @@
       <div class="card">
           <div class="card-body">
               <h5 class="card-title mb-3">Due Date</h5>
-              
-              <input type="text" id="duedate-input" class="form-control" placeholder="Select due date" name="due date" data-date-format="dd M, yyyy" data-provide="datepicker" data-date-autoclose="true" required />
+              <input type="date" id="duedate-input" [(ngModel)]="EndDate" class="form-control" placeholder="Select due date" name="due date" data-date-format="dd M, yyyy" data-provide="datepicker" data-date-autoclose="true" required />
+              <div class="invalid-feedback">Please select due date.</div>
+            <br/>
+              <h5 class="card-title mb-3">Start Date</h5>
+              <input type="date" id="duedate-input" [(ngModel)]="StartDate" class="form-control" placeholder="Select due date" name="due date" data-date-format="dd M, yyyy" data-provide="datepicker" data-date-autoclose="true" required />
               <div class="invalid-feedback">Please select due date.</div>
           </div>
           <!-- end card body -->
       </div>
       <!-- end card -->
+       <div class="card">
+          <div class="card-body">
+              <label class="form-label" for="department-input">Department</label>
+            <select class="form-select" id="department-input" [(ngModel)]="DepartmentId">
+                <option *ngFor="let department of Departments" [value]="department.code">{{ department.name }}</option>
+                <!-- Load từ API nếu có -->
+            </select>
+          </div>
+          <!-- end card body -->
+      </div>
   </div>
   <!-- end col -->
 
   <div class="col-lg-8">
       <div class="text-end mb-4">
-          <button type="submit" class="btn btn-primary">Create Project</button>
+          <button type="button" class="btn btn-primary" (click)="CreateProject()">Create Project</button>
       </div>
   </div>
 </div>

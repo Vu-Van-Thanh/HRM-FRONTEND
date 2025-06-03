@@ -54,4 +54,5 @@ export const API_ENDPOINT = {
    uploadContract : 'https://localhost:7214/EmployeeContract',
    createDepartment : "https://localhost:7176/Department",
    updateSalaryAdjustment : "http://localhost:5285/SalaryAdjustment/list",
+   createProject : "https://localhost:7176/Project",
 };

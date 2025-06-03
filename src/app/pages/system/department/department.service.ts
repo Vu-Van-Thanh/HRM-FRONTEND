@@ -72,6 +72,7 @@ export class DepartmentService {
 
   getDepartments(): Observable<Department[]> {
     return this.http.get<ApiResponse<Department[]>>(API_ENDPOINT.getAllDepartment).pipe(
+      tap(response => console.log('Raw data from API get all department:', response)),
       map(response => response.data),
       map(departments => departments.map((dep,index) => this.mapDepartmentResponse(dep,index))),
       tap(mapped => console.log('Mapped Department data:', mapped))
