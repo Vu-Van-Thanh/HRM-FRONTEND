@@ -17,7 +17,22 @@ export class CreatetaskComponent implements OnInit {
   // bread crumb items
   breadCrumbItems: Array<{}>;
 
+  // data
+  Title : string;
+  Description : string;
+  StartDate : Date;
+  EndDate : Date;
+  Priority : string;
+  Status : string;
+  ProjectId : string;
+  AssignedTo : string;
+  Attachments : File[] = [];
+
   public Editor = ClassicEditor;
+  bsConfig = {
+  dateInputFormat: 'DD/MM/YYYY',
+  containerClass: 'theme-default' // bạn có thể đổi sang 'theme-dark-blue', 'theme-red', etc.
+  };
 
   form = new UntypedFormGroup({
     member: new UntypedFormArray([
@@ -60,6 +75,10 @@ export class CreatetaskComponent implements OnInit {
 
     this.hidden = true;
   }
-
+  onFileChange(event: any) {
+  if (event.target.files && event.target.files.length > 0) {
+    this.Attachments = Array.from(event.target.files);
+  }
+}
   
 }

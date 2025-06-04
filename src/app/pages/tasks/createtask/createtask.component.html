@@ -15,25 +15,75 @@
                 <div class="row mb-4">
                   <label for="taskname" class="col-form-label col-lg-2">Task Name</label>
                   <div class="col-lg-10">
-                    <input id="taskname" name="taskname" type="text" class="form-control" placeholder="Enter Task Name...">
+                    <input id="taskname" name="taskname" type="text" [(ngModel)]="Title" class="form-control" placeholder="Enter Task Name...">
                   </div>
                 </div>
                 <div class="row mb-4">
                   <label class="col-form-label col-lg-2">Task Description</label>
                   <div class="col-lg-10">
-                    <ckeditor [editor]="Editor" data="<p>Content of the editor.</p>"></ckeditor>
+                    <ckeditor [editor]="Editor" [(ngModel)]="Description" data="<p>Content of the editor.</p>"></ckeditor>
                   </div>
                 </div>
 
                 <div class="form-group row mb-4">
-                  <label class="col-form-label col-lg-2">Task Date</label>
-                  <div class="col-lg-10">
-                    <div class="input-daterange input-group">
-                      <input type="text" class="form-control" (click)="hidden=!hidden" placeholder="Start Date" name="start" [(ngModel)]="selected" bsDatepicker />
-                      <input type="text" class="form-control" (click)="hidden=!hidden" placeholder="End Date" name="end" [(ngModel)]="selected" bsDatepicker />
+  <label class="col-form-label col-lg-2">Task Date</label>
+  <div class="col-lg-10">
+    <div class="row">
+      <div class="col-md-6 position-relative">
+        <input
+          class="form-control pe-5"
+          placeholder="Start Date"
+          name="start"
+          [(ngModel)]="StartDate"
+          [bsConfig]="bsConfig"
+          bsDatepicker />
+        <i class="bi bi-calendar-date position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
+      </div>
+      <div class="col-md-6 position-relative mt-2 mt-md-0">
+        <input
+          class="form-control pe-5"
+          placeholder="End Date"
+          name="end"
+          [(ngModel)]="EndDate"
+          [bsConfig]="bsConfig"
+          bsDatepicker />
+        <i class="bi bi-calendar-date position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+                <!--  priority -->
+                 <div class="row mb-4">
+                    <label class="col-form-label col-lg-2">Priority</label>
+                    <div class="col-lg-10">
+                      <select class="form-control" [(ngModel)]="Priority" name="priority">
+                        <option value="">Select Priority</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                      </select>
                     </div>
                   </div>
-                </div>
+                  <div class="row mb-4">
+                      <label class="col-form-label col-lg-2">Status</label>
+                      <div class="col-lg-10">
+                        <select class="form-control" [(ngModel)]="Status" name="status">
+                          <option value="">Select Status</option>
+                          <option value="Todo">To Do</option>
+                          <option value="InProgress">In Progress</option>
+                          <option value="Done">Done</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-4">
+                      <label class="col-form-label col-lg-2">Project</label>
+                      <div class="col-lg-10">
+                        <input type="text" class="form-control" placeholder="Enter Project ID..." [(ngModel)]="ProjectId" name="projectId">
+                      </div>
+                    </div>
 
                 <div class="inner-repeater mb-4">
                   <form [formGroup]="form">
@@ -65,11 +115,18 @@
                   </div>
                 </div>
                 <div class="row mb-4">
-                  <label for="taskbudget" class="col-form-label col-lg-2">Budget</label>
-                  <div class="col-lg-10">
-                    <input id="taskbudget" name="taskbudget" type="text" placeholder="Enter Task Budget..." class="form-control">
-                  </div>
+                <label class="col-form-label col-lg-2">Assign To</label>
+                <div class="col-lg-10">
+                  <input type="text" class="form-control" placeholder="Enter Assignee..." [(ngModel)]="AssignedTo" name="assignedTo">
                 </div>
+              </div>
+
+              <div class="row mb-4">
+                <label class="col-form-label col-lg-2">Attachments</label>
+                <div class="col-lg-10">
+                  <input type="file" class="form-control" (change)="onFileChange($event)" multiple />
+                </div>
+              </div>
               </div>
             </div>
           </form>

@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { environment } from '../environments/environment';
 
 import { TabsModule } from 'ngx-bootstrap/tabs';
