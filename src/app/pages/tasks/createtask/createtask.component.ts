@@ -31,8 +31,10 @@ export class CreatetaskComponent implements OnInit {
   public Editor = ClassicEditor;
   bsConfig = {
   dateInputFormat: 'DD/MM/YYYY',
-  containerClass: 'theme-default' // bạn có thể đổi sang 'theme-dark-blue', 'theme-red', etc.
-  };
+  containerClass: 'theme-default',
+  showWeekNumbers: false
+};
+
 
   form = new UntypedFormGroup({
     member: new UntypedFormArray([
@@ -75,10 +77,16 @@ export class CreatetaskComponent implements OnInit {
 
     this.hidden = true;
   }
-  onFileChange(event: any) {
-  if (event.target.files && event.target.files.length > 0) {
-    this.Attachments = Array.from(event.target.files);
+  onFileChange(event: any): void {
+  const selectedFiles: FileList = event.target.files;
+  if (selectedFiles) {
+    for (let i = 0; i < selectedFiles.length; i++) {
+      this.Attachments.push(selectedFiles.item(i)!);
+    }
   }
 }
-  
+
+removeAttachment(index: number): void {
+  this.Attachments.splice(index, 1);
+}
 }

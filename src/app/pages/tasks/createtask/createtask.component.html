@@ -85,35 +85,7 @@
                       </div>
                     </div>
 
-                <div class="inner-repeater mb-4">
-                  <form [formGroup]="form">
-                    <div class="inner mb-0 row" formArrayName="member">
-                      <label class="col-form-label col-lg-2">Add Team Member</label>
-                      <div class="inner col-lg-10 ms-md-auto" *ngFor="let data of member.controls; index as i;">
-                        <div class="mb-3 row align-items-center">
-                          <div class="col-md-6">
-                            <input type="text" [formControlName]="i" class="inner form-control" placeholder="Enter Name..." />
-                          </div>
-                          <div class="col-md-4">
-                            <div class="mt-4 mt-md-0">
-                              <input class="form-control" type="file">
-                            </div>
-                          </div>
-                          <div class="col-md-2">
-                            <div class="mt-2 mt-md-0 d-grid">
-                              <input type="button" class="btn btn-primary inner" value="Delete" (click)="deleteMember(i)" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </form>
-                  <div class="row justify-content-end">
-                    <div class="col-lg-10">
-                      <input data-repeater-create type="button" class="btn btn-success inner" value="Add Member" (click)="addMember()" />
-                    </div>
-                  </div>
-                </div>
+                
                 <div class="row mb-4">
                 <label class="col-form-label col-lg-2">Assign To</label>
                 <div class="col-lg-10">
@@ -122,11 +94,24 @@
               </div>
 
               <div class="row mb-4">
-                <label class="col-form-label col-lg-2">Attachments</label>
-                <div class="col-lg-10">
-                  <input type="file" class="form-control" (change)="onFileChange($event)" multiple />
-                </div>
-              </div>
+  <label class="col-form-label col-lg-2">Attachments</label>
+  <div class="col-lg-10">
+    <!-- Upload input -->
+    <input type="file" class="form-control mb-2" (change)="onFileChange($event)" multiple />
+
+    <!-- File preview list -->
+    <ul class="list-group mt-2" *ngIf="Attachments.length > 0">
+      <li class="list-group-item d-flex justify-content-between align-items-center"
+          *ngFor="let file of Attachments; index as i">
+        {{ file.name }}
+        <button type="button" class="btn btn-sm btn-danger" (click)="removeAttachment(i)">
+          <i class="bi bi-x-circle"></i> Remove
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>
+
               </div>
             </div>
           </form>
