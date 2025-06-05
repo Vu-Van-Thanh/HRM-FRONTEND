@@ -54,36 +54,47 @@
 </div>
 
 
-                <!--  priority -->
-                 <div class="row mb-4">
-                    <label class="col-form-label col-lg-2">Priority</label>
-                    <div class="col-lg-10">
-                      <select class="form-control" [(ngModel)]="Priority" name="priority">
-                        <option value="">Select Priority</option>
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="row mb-4">
-                      <label class="col-form-label col-lg-2">Status</label>
-                      <div class="col-lg-10">
-                        <select class="form-control" [(ngModel)]="Status" name="status">
-                          <option value="">Select Status</option>
-                          <option value="Todo">To Do</option>
-                          <option value="InProgress">In Progress</option>
-                          <option value="Done">Done</option>
-                        </select>
-                      </div>
-                    </div>
+<div class="row mb-4">
+  <!-- Label chung -->
+  <label class="col-lg-2 col-form-label">Task Attributes</label>
 
-                    <div class="row mb-4">
-                      <label class="col-form-label col-lg-2">Project</label>
-                      <div class="col-lg-10">
-                        <input type="text" class="form-control" placeholder="Enter Project ID..." [(ngModel)]="ProjectId" name="projectId">
-                      </div>
-                    </div>
+  <!-- 3 ô chọn trên cùng 1 dòng -->
+  <div class="col-lg-10">
+    <div class="row">
+      <div class="col-md-4">
+        <select class="form-control" [(ngModel)]="Priority" name="priority">
+          <option value="" disabled selected>-- Priority --</option>
+          <option value="">Priority</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <select class="form-control" [(ngModel)]="Status" name="status">
+          <option value="" disabled selected>-- Status --</option>
+          <option value="">Status</option>
+          <option value="Todo">To Do</option>
+          <option value="InProgress">In Progress</option>
+          <option value="Done">Done</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <select class="form-control" [(ngModel)]="ProjectId" name="projectId">
+          <option [ngValue]="''" disabled selected>-- Project --</option>
+          <option *ngFor="let project of Projects" [value]="project.projectId">
+            {{ project.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+                
+                    
 
                 
                 <div class="row mb-4">
@@ -117,7 +128,7 @@
           </form>
           <div class="row justify-content-end">
             <div class="col-lg-10">
-              <button type="submit" class="btn btn-primary">Create Task</button>
+              <button type="submit" class="btn btn-primary" onclick="CreateTask()">Create Task</button>
             </div>
           </div>
 

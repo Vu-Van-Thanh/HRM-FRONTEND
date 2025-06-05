@@ -1,8 +1,11 @@
 import { Component, OnInit, ViewChild, EventEmitter, Output, Input } from '@angular/core';
 import { UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-
+import { Project } from '../../projects/project.model';
+import { HttpClient } from '@angular/common/http';
+import { ProjectService } from '../../projects/project.service';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import {ToastService} from 'angular-toastify';
 @Component({
   selector: 'app-createtask',
   templateUrl: './createtask.component.html',
@@ -22,12 +25,12 @@ export class CreatetaskComponent implements OnInit {
   Description : string;
   StartDate : Date;
   EndDate : Date;
-  Priority : string;
-  Status : string;
-  ProjectId : string;
+  Priority : string = '';
+  Status : string = '';
+  ProjectId : string = '';
   AssignedTo : string;
   Attachments : File[] = [];
-
+  Projects: Project[] = [];
   public Editor = ClassicEditor;
   bsConfig = {
   dateInputFormat: 'DD/MM/YYYY',
@@ -70,12 +73,25 @@ export class CreatetaskComponent implements OnInit {
     this.member.removeAt(i);
   }
 
-  constructor() { }
+  constructor(private http : HttpClient, private projectService : ProjectService, private toastService : ToastService) { }
 
   ngOnInit() {
     this.breadCrumbItems = [{ label: 'Tasks' }, { label: 'Create Task', active: true }];
 
     this.hidden = true;
+  }
+
+  loadProjects() {
+
+    this.projectService.getAllProjects().subscribe({
+      next: (data) => {
+        console.log('Projects data:', data);
+        this.Projects = data;
+      },
+      error: (error) => {
+        console.error('Error loading projects:', error);
+      }
+    });
   }
   onFileChange(event: any): void {
   const selectedFiles: FileList = event.target.files;
@@ -86,7 +102,35 @@ export class CreatetaskComponent implements OnInit {
   }
 }
 
-removeAttachment(index: number): void {
-  this.Attachments.splice(index, 1);
-}
+  removeAttachment(index: number): void {
+    this.Attachments.splice(index, 1);
+  }
+
+  CreateTask(){
+    const startDate = this.StartDate instanceof Date ? this.StartDate : new Date(this.StartDate);
+    const endDate = this.EndDate instanceof Date ? this.EndDate : new Date(this.EndDate);
+    const formData = new FormData();
+    formData.append('Title', this.Title);
+    formData.append('Description', this.Description);
+    formData.append('StartDate', startDate.toISOString());
+    formData.append('EndDate', endDate.toISOString());
+    formData.append('Status', this.Status);
+    formData.append('ProjectId', this.ProjectId);
+    formData.append('AssignedTo', this.AssignedTo);
+    formData.append('Priority', this.Priority);
+    this.Attachments.forEach(file => {
+      formData.append('Attachments', file, file.name);
+    });
+
+    this.http.post(API_ENDPOINT.createTask, formData).subscribe({
+          next: (res) => {
+            console.log('Upload thành công', res);
+            this.toastService.success('Upload thành công');
+          },
+          error: (err) => {
+            console.error('Lỗi upload', err);
+            this.toastService.error('Lỗi upload');
+          }
+        });
+  }
 }
