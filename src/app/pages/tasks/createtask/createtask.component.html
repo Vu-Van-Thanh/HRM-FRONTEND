@@ -21,7 +21,7 @@
                 <div class="row mb-4">
                   <label class="col-form-label col-lg-2">Task Description</label>
                   <div class="col-lg-10">
-                    <ckeditor [editor]="Editor" [(ngModel)]="Description" data="<p>Content of the editor.</p>"></ckeditor>
+                    <ckeditor [ngModelOptions]="{standalone: true}" [editor]="Editor" [(ngModel)]="Description" data="<p>Content of the editor.</p>"></ckeditor>
                   </div>
                 </div>
 
@@ -92,17 +92,20 @@
     </div>
   </div>
 </div>
-
-                
-                    
-
-                
+        <!--
                 <div class="row mb-4">
                 <label class="col-form-label col-lg-2">Assign To</label>
                 <div class="col-lg-10">
                   <input type="text" class="form-control" placeholder="Enter Assignee..." [(ngModel)]="AssignedTo" name="assignedTo">
                 </div>
               </div>
+-->
+<div class="row mb-4">
+  <label class="col-form-label col-lg-2">Assign To</label>
+  <div class="col-lg-10">
+    <app-assigned-user-select  (selectedChange)="onAssignedUserChanged($event)" [(ngModel)]="AssignedTo" name="assignedTo"></app-assigned-user-select>
+  </div>
+</div>
 
               <div class="row mb-4">
   <label class="col-form-label col-lg-2">Attachments</label>
@@ -128,7 +131,7 @@
           </form>
           <div class="row justify-content-end">
             <div class="col-lg-10">
-              <button type="submit" class="btn btn-primary" onclick="CreateTask()">Create Task</button>
+              <button type="submit" class="btn btn-primary" (click)="CreateTask()">Create Task</button>
             </div>
           </div>
 

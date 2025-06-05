@@ -6,7 +6,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { environment } from '../environments/environment';
-
+import { NgSelectModule } from '@ng-select/ng-select';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
@@ -47,6 +47,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
+import {UIModule} from './shared/ui/ui.module';
 
 export function createTranslateLoader(http: HttpClient): any {
   return new TranslateHttpLoader(http, environment.externalService.translateServiceUrl, '.json');
@@ -85,7 +86,7 @@ export function createTranslateLoader(http: HttpClient): any {
     
     // Feature Modules
     AttendanceModule,
-    
+    NgSelectModule,
     // Material Modules
     MatTableModule,
     MatPaginatorModule,
@@ -99,7 +100,8 @@ export function createTranslateLoader(http: HttpClient): any {
     MatNativeDateModule,
     MatFormFieldModule,
     MatChipsModule,
-    MatCardModule
+    MatCardModule,
+    UIModule
   ],
   bootstrap: [AppComponent],
   providers: [

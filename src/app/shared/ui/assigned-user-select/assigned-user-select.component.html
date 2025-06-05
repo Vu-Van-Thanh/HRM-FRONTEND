@@ -1,0 +1,13 @@
+<ng-select
+  [items]="users"
+  bindLabel="name"
+  bindValue="id"
+  [(ngModel)]="value"
+  (ngModelChange)="onSelectChange($event)"
+  [clearable]="true"
+  [searchable]="true">
+
+  <ng-template ng-option-tmp let-user="item">
+    {{ user.name }} — {{ user.email }}
+  </ng-template>
+</ng-select>

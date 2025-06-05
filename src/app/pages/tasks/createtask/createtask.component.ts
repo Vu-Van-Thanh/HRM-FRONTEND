@@ -22,7 +22,7 @@ export class CreatetaskComponent implements OnInit {
 
   // data
   Title : string;
-  Description : string;
+  Description : string = '';
   StartDate : Date;
   EndDate : Date;
   Priority : string = '';
@@ -77,7 +77,7 @@ export class CreatetaskComponent implements OnInit {
 
   ngOnInit() {
     this.breadCrumbItems = [{ label: 'Tasks' }, { label: 'Create Task', active: true }];
-
+    this.loadProjects(); 
     this.hidden = true;
   }
 
@@ -133,4 +133,10 @@ export class CreatetaskComponent implements OnInit {
           }
         });
   }
+
+  onAssignedUserChanged(user: any) {
+    console.log('User selected:', user);
+    this.AssignedTo = user?.id;
+  }
+  
 }
