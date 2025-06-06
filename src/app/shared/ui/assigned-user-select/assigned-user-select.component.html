@@ -1,7 +1,7 @@
 <ng-select
-  [items]="users"
-  bindLabel="name"
-  bindValue="id"
+  [items]="employees"
+  bindLabel="firstName || lastName"
+  bindValue="employeeID"
   [(ngModel)]="value"
   (ngModelChange)="onSelectChange($event)"
   [clearable]="true"

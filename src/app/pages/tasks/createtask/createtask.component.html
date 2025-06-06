@@ -82,7 +82,7 @@
       </div>
 
       <div class="col-md-4">
-        <select class="form-control" [(ngModel)]="ProjectId" name="projectId">
+        <select class="form-control" [(ngModel)]="ProjectId" name="projectId" (ngModelChange)="onProjectChange($event)">
           <option [ngValue]="''" disabled selected>-- Project --</option>
           <option *ngFor="let project of Projects" [value]="project.projectId">
             {{ project.name }}
@@ -103,7 +103,7 @@
 <div class="row mb-4">
   <label class="col-form-label col-lg-2">Assign To</label>
   <div class="col-lg-10">
-    <app-assigned-user-select  (selectedChange)="onAssignedUserChanged($event)" [(ngModel)]="AssignedTo" name="assignedTo"></app-assigned-user-select>
+    <app-assigned-user-select  [departmentId]="selectedDepartmentId" (selectedChange)="onAssignedUserChanged($event)" [(ngModel)]="AssignedTo" name="assignedTo"></app-assigned-user-select>
   </div>
 </div>
 

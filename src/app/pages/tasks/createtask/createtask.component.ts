@@ -31,6 +31,7 @@ export class CreatetaskComponent implements OnInit {
   AssignedTo : string;
   Attachments : File[] = [];
   Projects: Project[] = [];
+  selectedDepartmentId : string = '';
   public Editor = ClassicEditor;
   bsConfig = {
   dateInputFormat: 'DD/MM/YYYY',
@@ -106,6 +107,12 @@ export class CreatetaskComponent implements OnInit {
     this.Attachments.splice(index, 1);
   }
 
+  onProjectChange(projectId: string) {
+    const selectedProject = this.Projects.find(p => p.projectId === projectId);
+    this.selectedDepartmentId = selectedProject ? selectedProject.departmentId : null;
+    console.log('Selected DepartmentID:', this.selectedDepartmentId);
+  }
+
   CreateTask(){
     const startDate = this.StartDate instanceof Date ? this.StartDate : new Date(this.StartDate);
     const endDate = this.EndDate instanceof Date ? this.EndDate : new Date(this.EndDate);
@@ -136,7 +143,7 @@ export class CreatetaskComponent implements OnInit {
 
   onAssignedUserChanged(user: any) {
     console.log('User selected:', user);
-    this.AssignedTo = user?.id;
+    this.AssignedTo = user;
   }
   
 }

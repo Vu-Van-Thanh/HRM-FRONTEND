@@ -27,6 +27,22 @@ export class EmployeeService {
     );
   }
 
+
+  getEmployeesByDepartment(departmentID : string): Observable<Employee[]> {
+    var body =  { 
+      department: departmentID, 
+      jobTitle: '', 
+      managerId: '',
+      employeeId: ''
+    };
+    return this.http.post<ApiResponse<Employee[]>>(API_ENDPOINT.getAllEmployee, body).pipe(
+      tap(data => console.log('Raw data from API:', data)), 
+      map(response => response.data),
+      map(employees => employees.map((emp,index) => this.mapEmployeeResponse(emp,index))),
+      tap(mapped => console.log('Mapped Employee data:', mapped)) // log sau khi map
+    );
+  }
+
   getEmployeeById(id: string | number): Observable<Employee> {
     console.log('id:', id);
     var body =  { 
