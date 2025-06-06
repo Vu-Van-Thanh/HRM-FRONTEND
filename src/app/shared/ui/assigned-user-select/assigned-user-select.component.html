@@ -1,6 +1,6 @@
 <ng-select
   [items]="employees"
-  bindLabel="firstName || lastName"
+  bindLabel="fullname"
   bindValue="employeeID"
   [(ngModel)]="value"
   (ngModelChange)="onSelectChange($event)"
@@ -8,6 +8,6 @@
   [searchable]="true">
 
   <ng-template ng-option-tmp let-user="item">
-    {{ user.name }} — {{ user.email }}
+    {{ user.fullname }}
   </ng-template>
 </ng-select>

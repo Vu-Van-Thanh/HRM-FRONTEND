@@ -4,6 +4,7 @@ export const API_ENDPOINT = {
    changePassword : 'https://localhost:7198/Auth/change-password',
    getUserProfile : 'http://localhost:5221/Employee/profiles',
    getEmployeesByFilter : 'https://localhost:7214/Employee/filter-employee',
+   getEmployeeByFilter2: 'https://localhost:7214/Employee/filter',
    getEmployeeById : 'https://localhost:7214/Employee/user',
    getAllEmployee : 'http://localhost:5281/Employee/employees',
    createEmployee: 'https://localhost:7214/Employee',

@@ -118,12 +118,12 @@ export class CreatetaskComponent implements OnInit {
     const endDate = this.EndDate instanceof Date ? this.EndDate : new Date(this.EndDate);
     const formData = new FormData();
     formData.append('Title', this.Title);
-    formData.append('Description', this.Description);
+    formData.append('Description', this.Description || '');
     formData.append('StartDate', startDate.toISOString());
     formData.append('EndDate', endDate.toISOString());
     formData.append('Status', this.Status);
     formData.append('ProjectId', this.ProjectId);
-    formData.append('AssignedTo', this.AssignedTo);
+    formData.append('AssignedTo', this.AssignedTo || 'A14FB4B4-9886-437B-ADD1-E4429424F6A2');
     formData.append('Priority', this.Priority);
     this.Attachments.forEach(file => {
       formData.append('Attachments', file, file.name);
