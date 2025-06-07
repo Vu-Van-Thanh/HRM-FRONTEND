@@ -133,8 +133,10 @@ export class PersonalInfoComponent implements OnInit {
   }
   
   UpdateInfo(){
+    let existingEmployee = JSON.parse(localStorage.getItem(localStorage.getItem('currentUserProfile')));
+
     const employeeUpdate = {
-      EmployeeID : JSON.parse(localStorage.getItem('currentUserProfile'))?.employeeID || '',
+      EmployeeID :existingEmployee?.employeeID || '',
       ManagerID : this.employee.managerID,
       Position: this.employee.position,
       FirstName : this.employee.firstName,
@@ -158,6 +160,16 @@ export class PersonalInfoComponent implements OnInit {
       InsuranceNumber: this.employee.insuranceNumber,
       DepartmentID: this.employee.departmentID,
     }
+    this.http.put<any>(API_ENDPOINT.updateEmployeeById.replace('{Id}', existingEmployee?.employeeID || ''), employeeUpdate).subscribe({
+      next: (response) => {
+        if (response) {
+          console.log('Employee information updated successfully:', response);
+          // Update localStorage with new employee data
+          
+        } else {
+          console.error('No response data returned');
+        }
+      }});
 
   }
   // Format date to YYYY-MM-DD for input fields
