@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Relative } from '../employee.model';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { EmployeeService } from '../employee.service';
+import { LocalStorage } from 'src/app/core/enums/local-storage.enum';
 
 @Component({
   selector: 'app-personal-info',
@@ -131,6 +132,34 @@ export class PersonalInfoComponent implements OnInit {
     }
   }
   
+  UpdateInfo(){
+    const employeeUpdate = {
+      EmployeeID : JSON.parse(localStorage.getItem('currentUserProfile'))?.employeeID || '',
+      ManagerID : this.employee.managerID,
+      Position: this.employee.position,
+      FirstName : this.employee.firstName,
+      LastName : this.employee.lastName,
+      Gender : '',
+      Tax : this.employee.tax,
+      Nationality : this.employee.nationality,
+      Ethnic : this.employee.ethnic,
+      Religion : this.employee.religion,
+      PlaceOfBirth : this.employee.placeOfBirth,
+      DateOfBirth : this.employee.dateOfBirth,
+      IndentityCard : this.employee.indentityCard,
+      PlaceIssued : this.employee.placeIssued,
+      Phone : this.employee.phone,
+      Email : this.employee.email,
+      Country : this.employee.country,
+      Province : this.employee.province,
+      District : this.employee.district,
+      Commune : this.employee.commune,
+      Address : this.employee.address,
+      InsuranceNumber: this.employee.insuranceNumber,
+      DepartmentID: this.employee.departmentID,
+    }
+
+  }
   // Format date to YYYY-MM-DD for input fields
   formatDateForInput(date: Date): string {
     const year = date.getFullYear();

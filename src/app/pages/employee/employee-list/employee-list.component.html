@@ -9,6 +9,19 @@
         <mat-icon>add</mat-icon>
         Thêm nhân viên
       </button>
+      
+      <button style="margin-left: 10px;" mat-raised-button color="primary" (click)="fileInput.click()">
+        <mat-icon>add</mat-icon>
+        Import nhân viên
+      </button>
+
+      <input
+        #fileInput
+        type="file"
+        accept=".xlsx, .xls"
+        style="display: none"
+        (change)="onFileSelected($event)"
+      />
     </div>
   </div>
 

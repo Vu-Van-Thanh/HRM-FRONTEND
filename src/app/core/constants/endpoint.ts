@@ -8,6 +8,8 @@ export const API_ENDPOINT = {
    getEmployeeById : 'https://localhost:7214/Employee/user',
    getAllEmployee : 'http://localhost:5281/Employee/employees',
    createEmployee: 'https://localhost:7214/Employee',
+   importEmployee : 'https://localhost:7214/Employee/import-profile',
+   updateEmployeeById : 'https://localhost:7214/Employee/{Id}',
    updateEmployee: 'https://localhost:7214/Employee',
    deleteEmployee: 'https://localhost:7214/Employee',
    searchEmployees: 'https://localhost:7214/Employee/search',

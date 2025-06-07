@@ -8,6 +8,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeeService } from '../employee.service';
 import { EmployeeDetailDialogComponent } from '../employee-detail-dialog/employee-detail-dialog.component';
 import { Employee } from '../employee.model';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import {ToastService} from 'angular-toastify';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-employee-list',
@@ -33,7 +36,9 @@ export class EmployeeListComponent implements OnInit {
     private router: Router,
     private employeeService: EmployeeService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private toastService : ToastService,
+    private http: HttpClient
   ) {
     console.log('EmployeeListComponent constructor');
     this.dataSource = new MatTableDataSource<Employee>();
@@ -107,6 +112,31 @@ export class EmployeeListComponent implements OnInit {
       }
     });
   }
+
+onFileSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0];
+    console.log('Đã chọn file:', file.name);
+
+    const formData = new FormData();
+    formData.append('formFile', file); // 👈 Phải đặt đúng tên biến trùng với tên param ở backend: "formFile"
+
+    this.http.post(API_ENDPOINT.importEmployee, formData).subscribe({
+      next: (response) => {
+        console.log('File imported successfully:', response);
+        this.showSuccessMessage('Import file thành công');
+        this.toastService.success('Import file thành công');
+        this.loadEmployees(); 
+      },
+      error: (error) => {
+        console.error('Import thất bại:', error);
+        this.showErrorMessage('Import thất bại');
+        this.toastService.error('Import thất bại');
+      }
+    });
+  }
+}
 
   onEdit(id: number) {
     const employee = this.dataSource.data.find(emp => emp.id === id);
