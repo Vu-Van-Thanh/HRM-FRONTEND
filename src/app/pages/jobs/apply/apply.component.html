@@ -32,20 +32,43 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let data of applies">
-                                    <th scope="row">{{data.id}}</th>
-                                    <td>{{data.title}}</td>
-                                    <td>{{data.company}}</td>
-                                    <td><span class="badge" [ngClass]="{'badge-soft-success': data.type === 'Full Time','badge-soft-danger': data.type === 'Part Time','badge-soft-info': data.type === 'Freelance','badge-soft-warning': data.type === 'Internship'}">{{data.type}}</span></td>
-                                    <td>{{data.date}}</td>
-                                    <td><span class="badge" [ngClass]="{ 'bg-success': data.status === 'Active', 'bg-info': data.status === 'New', 'bg-danger': data.status === 'Close'}">{{data.status}}</span></td>
+                                <tr *ngFor="let data of Candidate; let i = index">
+                                    <th scope="row">{{ i + 1 }}</th>
+                                    <td>{{ data.position || data.header }}</td>
+                                    <td> <!-- Chưa có dữ liệu công ty, có thể lấy từ body hoặc để trống --> </td>
+                                    <td>
+                                        <span class="badge"
+                                              [ngClass]="{
+                                                'badge-soft-success': data.type === 'Full Time',
+                                                'badge-soft-danger': data.type === 'Part Time',
+                                                'badge-soft-info': data.type === 'Freelance',
+                                                'badge-soft-warning': data.type === 'Internship'
+                                              }">
+                                            {{ data.type }}
+                                        </span>
+                                    </td>
+                                    <td>{{ data.applyDate }}</td>
+                                    <td>
+                                        <span class="badge"
+                                              [ngClass]="{
+                                                'bg-success': data.status === 'Active',
+                                                'bg-info': data.status === 'New',
+                                                'bg-danger': data.status === 'Close'
+                                              }">
+                                            {{ data.status }}
+                                        </span>
+                                    </td>
                                     <td>
                                         <ul class="list-unstyled hstack gap-1 mb-0">
                                             <li data-bs-toggle="tooltip" data-bs-placement="top" title="View">
-                                                <a routerLink="/jobs/details" class="btn btn-sm btn-soft-primary"><i class="mdi mdi-eye-outline"></i></a>
+                                                <a routerLink="/jobs/details" class="btn btn-sm btn-soft-primary">
+                                                    <i class="mdi mdi-eye-outline"></i>
+                                                </a>
                                             </li>
                                             <li data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
-                                                <a href="javascript:void(0);" data-bs-toggle="modal" class="btn btn-sm btn-soft-danger" (click)="delete($event)"><i class="mdi mdi-delete-outline"></i></a>
+                                                <a href="javascript:void(0);" data-bs-toggle="modal" class="btn btn-sm btn-soft-danger" (click)="delete($event)">
+                                                    <i class="mdi mdi-delete-outline"></i>
+                                                </a>
                                             </li>
                                         </ul>
                                     </td>
@@ -55,7 +78,9 @@
                     </div>
                     <div class="row justify-content-between align-items-center">
                         <div class="col-auto me-auto">
-                            <p class="text-muted mb-0">Showing <b>{{service.startIndex}}</b> to <b>{{service.endIndex}}</b> of <b>{{service.totalRecords}}</b> entries</p>
+                            <p class="text-muted mb-0">
+                                Showing <b>{{ service.startIndex }}</b> to <b>{{ service.endIndex }}</b> of <b>{{ service.totalRecords }}</b> entries
+                            </p>
                         </div>
                         <div class="col-auto">
                             <div class="card d-inline-block ms-auto mb-0">

@@ -9,7 +9,20 @@ import Swal from 'sweetalert2';
 import {jobApplyModel} from './apply.model';
 import { JobApplyService } from './apply.service';
 import { NgbdJobApplySortableHeader, SortEvent } from './apply-sortable.directive';
+import { HttpClient } from '@angular/common/http';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 
+export interface Candidate{
+  applyDate : string;
+  attachment : string;
+  body : string;
+  cvid : string;
+  fromMail : string;
+  header : string;
+  position : string;
+  status : string;
+  type : string;
+}
 @Component({
   selector: 'app-apply',
   templateUrl: './apply.component.html',
@@ -26,6 +39,7 @@ export class ApplyComponent implements OnInit {
    breadCrumbItems: Array<{}>;
    jobApplyForm!: UntypedFormGroup;
    submitted:boolean = false;
+   Candidate : Candidate[] = [];
  
    // Table data
    content?: any;
@@ -34,7 +48,7 @@ export class ApplyComponent implements OnInit {
    total: Observable<number>;
    @ViewChildren(NgbdJobApplySortableHeader) headers!: QueryList<NgbdJobApplySortableHeader>;
  
-   constructor(private modalService: BsModalService,public service: JobApplyService, private formBuilder: UntypedFormBuilder) {
+   constructor(private modalService: BsModalService,public service: JobApplyService, private formBuilder: UntypedFormBuilder,private http : HttpClient) {
      this.jobApplay = service.jobApply$;
      this.total = service.total$;
     }
@@ -45,12 +59,25 @@ export class ApplyComponent implements OnInit {
      /**
      * fetches data
      */
+      this.loadCandidate();
+
       this.jobApplay.subscribe(x => {
        this.content = this.applies;
        this.applies =  Object.assign([], x);   
      });
    }
    
+   loadCandidate() : void {
+    this.http.get<Candidate[]>(API_ENDPOINT.getAllApplied).subscribe({
+       
+        next : (data)=> {
+          console.log("candidate : " , data)
+          this.Candidate = data;
+          console.log("candidate : " , this.Candidate)
+        }
+      }
+    )
+  }
     // Delete Data
     delete(event:any) {    
       const swalWithBootstrapButtons = Swal.mixin({
