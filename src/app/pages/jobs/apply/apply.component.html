@@ -24,7 +24,6 @@
                                 <tr>
                                     <th scope="col">No</th>
                                     <th scope="col">Job Title</th>
-                                    <th scope="col">Company Name</th>
                                     <th scope="col">Type</th>
                                     <th scope="col">Apply Date</th>
                                     <th scope="col">Status</th>
@@ -35,7 +34,6 @@
                                 <tr *ngFor="let data of Candidate; let i = index">
                                     <th scope="row">{{ i + 1 }}</th>
                                     <td>{{ data.position || data.header }}</td>
-                                    <td> <!-- Chưa có dữ liệu công ty, có thể lấy từ body hoặc để trống --> </td>
                                     <td>
                                         <span class="badge"
                                               [ngClass]="{
@@ -44,7 +42,7 @@
                                                 'badge-soft-info': data.type === 'Freelance',
                                                 'badge-soft-warning': data.type === 'Internship'
                                               }">
-                                            {{ data.type }}
+                                            {{ data.type | uppercase }}
                                         </span>
                                     </td>
                                     <td>{{ data.applyDate }}</td>
@@ -55,7 +53,7 @@
                                                 'bg-info': data.status === 'New',
                                                 'bg-danger': data.status === 'Close'
                                               }">
-                                            {{ data.status }}
+                                            {{ data.status | uppercase }}
                                         </span>
                                     </td>
                                     <td>
