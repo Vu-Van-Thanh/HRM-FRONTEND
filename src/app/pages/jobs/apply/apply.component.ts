@@ -11,6 +11,7 @@ import { JobApplyService } from './apply.service';
 import { NgbdJobApplySortableHeader, SortEvent } from './apply-sortable.directive';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import { AttachmentModalComponent } from '../attachment-modal/attachment-modal.component';
 
 export interface Candidate{
   applyDate : string;
@@ -67,6 +68,19 @@ export class ApplyComponent implements OnInit {
      });
    }
    
+   viewAttachments(candidate: Candidate): void {
+    const modalRef: BsModalRef = this.modalService.show(AttachmentModalComponent, {
+      
+      class: 'modal-lg',
+    });
+    modalRef.content.attachments = this.getAttachmentList(candidate.attachment);
+  }
+  
+  getAttachmentList(attachment: string): string[] {
+    return attachment ? attachment.split('|') : [];
+  }
+  
+  
    loadCandidate() : void {
     this.http.get<Candidate[]>(API_ENDPOINT.getAllApplied).subscribe({
        
