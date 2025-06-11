@@ -1,3 +1,4 @@
+<!-- 
 <div class="modal-header">
     <h5 class="modal-title">Attachments</h5>
     <button type="button" class="btn-close" aria-label="Close" (click)="modalRef.hide()"></button>
@@ -9,4 +10,35 @@
       </li>
     </ul>
   </div>
-  
+-->
+<div class="modal-header">
+  <h5 class="modal-title">Attachments</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="modalRef.hide()"></button>
+</div>
+<div class="modal-body">
+  <ul class="list-group">
+    <li *ngFor="let file of attachments" class="list-group-item d-flex align-items-center">
+      
+      <div class="preview me-3" style="width: 500px; height: 500px;">
+        <ng-container [ngSwitch]="getFileType(file)">
+          
+          <img *ngSwitchCase="'image'" [src]="file" alt="Preview" class="img-fluid" style="max-width: 100%; max-height: 100%;">
+          
+          
+          <iframe *ngSwitchCase="'pdf'" [src]="file | safeUrl" class="w-100 h-100" style="border: none;"></iframe>
+          
+          
+          <video *ngSwitchCase="'video'" [src]="file" controls class="w-100 h-100"></video>
+          
+          
+          <div *ngSwitchDefault class="d-flex align-items-center justify-content-center w-100 h-100 bg-light border">
+            <i [class]="getFileIcon(file)" class="fa fa-2x"></i>
+          </div>
+        </ng-container>
+      </div>
+      
+      
+      <a [href]="file" target="_blank" class="text-truncate">{{ getFileName(file) }}</a>
+    </li>
+  </ul>
+</div>

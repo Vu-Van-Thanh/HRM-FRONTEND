@@ -18,6 +18,7 @@ import { CategoriesComponent } from './categories/categories.component';
 import { CandidateListComponent } from './candidate-list/candidate-list.component';
 import { CandidateOverviewComponent } from './candidate-overview/candidate-overview.component'; 
 import {AttachmentModalComponent} from './attachment-modal/attachment-modal.component';
+import  {SafeUrlPipe} from './attachment-modal/safe-url.pipe';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import {AttachmentModalComponent} from './attachment-modal/attachment-modal.comp
     CategoriesComponent,
     CandidateListComponent,
     CandidateOverviewComponent,
-    AttachmentModalComponent
+    AttachmentModalComponent,
+    SafeUrlPipe
   ],
   imports: [
     CommonModule,

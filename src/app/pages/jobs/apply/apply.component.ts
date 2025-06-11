@@ -76,9 +76,13 @@ export class ApplyComponent implements OnInit {
     modalRef.content.attachments = this.getAttachmentList(candidate.attachment);
   }
   
-  getAttachmentList(attachment: string): string[] {
-    return attachment ? attachment.split('|') : [];
-  }
+ getAttachmentList(attachment: string): string[] {
+  const domain = 'https://localhost:7176/';
+  return attachment
+    ? attachment.split('|').map(path => `${domain}${path}`)
+    : [];
+}
+
   
   
    loadCandidate() : void {

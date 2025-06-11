@@ -32,7 +32,7 @@ export class AppComponent implements OnInit {
         while (child && child.firstChild) {
           child = child.firstChild;
         }
-        return child?.snapshot.data['title'] || 'Flex - Phần mềm quản lý và giao dịch chứng khoán';
+        return child?.snapshot.data['title'] || 'HRMTV-Phần mềm quản lý nhân sự';
       })
     ).subscribe((title: string) => {
       this.titleService.setTitle(title);
