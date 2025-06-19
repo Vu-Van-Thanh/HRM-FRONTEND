@@ -16,6 +16,20 @@ interface Position {
   label: string;
 }
 
+interface EmailTemplateSalary{
+  templateId : string;
+  templateName : string;
+  templateBody : string;
+  templateHeader : string;
+  searchSQLCMD : string;
+  departmentId : string;
+}
+class MailSalary{
+  MailboxId: string;
+  Subject : string = 'Thông báo lương tháng [Month]/[Year]'
+  Body : string;
+  Sender : string = 'HRMTV-Human Resource';
+}
 @Component({
   selector: 'app-salary-list',
   templateUrl: './salary-list.component.html',
@@ -24,6 +38,7 @@ interface Position {
 export class SalaryListComponent implements OnInit {
   filterForm: FormGroup;
   employees: SalaryInfo[] = [];
+  batchEmployees : SalaryInfo[] = [];
   departments: Department[] = [];
   employeeList: EmployeeDepartmentDTO[] = [];
   positions: Position[] = [];
@@ -82,6 +97,42 @@ export class SalaryListComponent implements OnInit {
       });
   }
 
+  batchSalary() : void {
+    if(this.batchEmployees.length === 0) {
+      console.warn('ℹ️ Không có nhân viên nào được chọn để gửi thông báo lương.');
+      return;
+    }   
+    let MailSalaryList: MailSalary[] = [];
+    const employeeEmails: string[] = [];
+    this.http.get<string[]>(API_ENDPOINT.getMailBoxIDList)
+      .subscribe(emails => {
+        employeeEmails.push(...emails);
+      });
+    this.http.get<EmailTemplateSalary>(API_ENDPOINT.getSalaryTemplate)
+      .subscribe(template => {
+        for(let i = 0; i < this.batchEmployees.length; i++) {
+          const mail = new MailSalary();
+          mail.MailboxId = employeeEmails[i];
+          mail.Subject = template.templateName.replace('[Month]', this.today.getMonth().toString()).replace('[Year]', this.today.getFullYear().toString());
+          mail.Body = this.processBody(template.templateBody, this.batchEmployees[i]);
+          MailSalaryList.push(mail);
+        }
+      });
+    this.http.post(API_ENDPOINT.sendMailList, MailSalaryList)
+      .subscribe(response => { 
+        if (response) {
+          console.log('✅ Gửi thông báo lương thành công:', response);
+        } else {
+          console.error('❌ Lỗi khi gửi thông báo lương:', response);
+        }
+      }, error => {
+        console.error('❌ Lỗi khi gửi thông báo lương:', error);
+      });
+  }
+  
+  processBody (templateBody: string, employee: SalaryInfo): string {
+    return '';
+  }
   loadSalaryData(): void {
     if (this.employeeList.length === 0) {
       this.employees = [];

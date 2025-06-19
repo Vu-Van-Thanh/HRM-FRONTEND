@@ -59,5 +59,8 @@ export const API_ENDPOINT = {
    updateSalaryAdjustment : "http://localhost:5285/SalaryAdjustment/list",
    createProject : "https://localhost:7176/Project",
    createTask : "https://localhost:7176/Task",
-   getAllApplied : "https://localhost:7176/Job/CvApplied"
+   getAllApplied : "https://localhost:7176/Job/CvApplied",
+   getSalaryTemplate : "https://localhost:7090/SalaryBase/template",
+   getMailBoxIDList : "https://localhost:/Mailbox/ListMailBoxID/{employeeIds}", 
+   sendMailList : "https://localhost:/Email/sendList"
 };
