@@ -11,6 +11,7 @@ export interface SalaryInfo {
     employeeId: string;
     salaryBase: SalaryBaseDTO;
     adjustments: AdjustmentResult[];
+    finalSalary? : string;
   }
   
   export interface SalaryBaseDTO {
@@ -31,5 +32,6 @@ export interface SalaryInfo {
     resultPercentage?: number;
     resultAmount?: number;
     result?: number;
+    effectiveDate? : Date;
   }
   

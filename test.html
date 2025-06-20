@@ -80,29 +80,62 @@
     <tr><td>Đơn vị công tác:</td><td>Phòng Nhân sự - [CompanyName]</td><td>Số phép còn lại đến hết năm:</td><td>[ExistLeave]</td></tr>
   </table>
 
-  <h3>2. Thông tin thanh toán</h3>
-  <table>
-    <tr class="bold"><td colspan="2">A. TỔNG THU NHẬP KỲ</td><td class="bold" style="text-align:right">10.000.000 VND</td></tr>
-    <tr><td>1.</td><td>Tiền lương tháng</td><td style="text-align:right">[SalaryBase]</td></tr>
-    <tr><td>2.</td><td>Tiền phụ cấp - tăng ca, thêm giờ:</td><td style="text-align:right">[BonusAmount]</td></tr>
-    <tr><td colspan="2">
+ <h3>2. Thông tin thanh toán</h3>
+<table>
+  <tr class="bold">
+    <td colspan="2">A. TỔNG THU NHẬP KỲ</td>
+    <td class="bold" style="text-align:right">[TotalIncome] VND</td>
+  </tr>
+
+  <tr>
+    <td>1.</td>
+    <td>Tiền lương tháng</td>
+    <td style="text-align:right">[SalaryBase]</td>
+  </tr>
+
+  <tr class="bold">
+    <td colspan="3">2. Tiền phụ cấp / tăng ca / thêm giờ:</td>
+  </tr>
+  [BonusItemsTable]
+
+  <tr>
+    <td colspan="2">
       ✓ Số giờ OT (T4 + OTBS T3): [OTTime] giờ<br>
       ✓ Số tiền OT: [OTAmount] VND
-    </td><td></td></tr>
-    <tr><td>3.</td><td>Tiền khen thưởng, phúc lợi và các khoản TT khác:</td><td style="text-align:right">[OtherAmount] VND</td></tr>
-    <tr><td colspan="2">
+    </td>
+    <td></td>
+  </tr>
+
+  <tr class="bold">
+    <td colspan="3">3. Khen thưởng / phúc lợi / trợ cấp khác:</td>
+  </tr>
+  [OtherItemsTable]
+
+  <tr>
+    <td colspan="2">
       ✓ Hỗ trợ sinh nhật / công đoàn / PC thai sản: [Adjustment] VND<br>
       ✓ PC nghỉ lễ 30/4, 1/5: [HolidayBonus] VND
-    </td><td></td></tr>
-    <tr><td>4.</td><td>Các khoản khác:</td><td style="text-align:right">[] VND</td></tr>
+    </td>
+    <td></td>
+  </tr>
 
-    <tr class="bold"><td colspan="2">B. TỔNG CÁC KHOẢN TẠM TRỪ</td><td style="text-align:right">[DeductionAmount] VND</td></tr>
-    <tr><td>1.</td><td>BHXH, BHYT, BHTN, Đoàn phí</td><td style="text-align:right">[BHYTAmount] VND</td></tr>
-    <tr><td>2.</td><td>Thuế TNCN</td><td style="text-align:right">[TaxAmount] VND</td></tr>
-    <tr><td>3.</td><td>Các khoản khác</td><td style="text-align:right">[OtherDeduction] VND</td></tr>
+  <tr>
+    <td>4.</td>
+    <td>Các khoản khác:</td>
+    <td style="text-align:right">0 VND</td>
+  </tr>
 
-    <tr class="bold"><td colspan="2" class="highlight">C. THU NHẬP NHẬN TRONG KỲ (A - B)</td><td class="highlight" style="text-align:right">9.475.000 VND</td></tr>
-  </table>
+  <tr class="bold">
+    <td colspan="2">B. TỔNG CÁC KHOẢN TẠM TRỪ</td>
+    <td style="text-align:right">[DeductionAmount] VND</td>
+  </tr>
+  [DeductionsTable]
+
+  <tr class="bold highlight">
+    <td colspan="2">C. THU NHẬN NHẬN TRONG KỲ (A - B)</td>
+    <td class="highlight" style="text-align:right">[FinalAmount] VND</td>
+  </tr>
+</table>
 
   <p><strong class="highlight">Tổng số ngày phép hiện tại của nhân viên: [ExistLeave] ngày</strong></p>
 

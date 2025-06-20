@@ -7,7 +7,7 @@ import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 import { ApiResponse } from 'src/app/core/models/kafkaresponse.model';
-import { EmployeeDepartmentDTO, SalaryInfo } from '../salary.model';
+import { EmployeeDepartmentDTO, SalaryInfo,AdjustmentResult } from '../salary.model';
 import { Department } from 'src/app/system/department/department.model';
 import { DepartmentService } from '../../department/department.service';
 
@@ -129,10 +129,75 @@ export class SalaryListComponent implements OnInit {
         console.error('❌ Lỗi khi gửi thông báo lương:', error);
       });
   }
-  
-  processBody (templateBody: string, employee: SalaryInfo): string {
-    return '';
-  }
+  processBody(templateBody: string, employee: SalaryInfo): string {
+  const { salaryBase, adjustments } = employee;
+  const finalSalaryNumber = parseFloat(employee.finalSalary) || 0;
+
+  const groupAdjustmentsByType = (type: string) =>
+    adjustments.filter(a => a.adjustType === type);
+
+  const renderAdjustmentTable = (list: AdjustmentResult[]) => {
+    if (list.length === 0) {
+      return `<tr><td colspan="3">Không có khoản nào.</td></tr>`;
+    }
+
+    return list.map((adj, index) => `
+      <tr>
+        <td>${index + 1}.</td>
+        <td>${adj.adjustmentName}</td>
+        <td style="text-align:right">${this.formatCurrency(Math.abs(adj.resultAmount || 0))}</td>
+      </tr>
+    `).join("");
+  };
+
+  const deductions = groupAdjustmentsByType("Deduction");
+  const bonus = groupAdjustmentsByType("Bonus");
+  const other = groupAdjustmentsByType("Other");
+
+  const totalDeduction = deductions.reduce((sum, a) => sum + (a.resultAmount || 0), 0);
+  const totalBonus = bonus.reduce((sum, a) => sum + (a.resultAmount || 0), 0);
+  const totalOther = other.reduce((sum, a) => sum + (a.resultAmount || 0), 0);
+
+  let result = templateBody;
+
+  // Replace adjustment tables
+  result = result.replace(/\[DeductionsTable\]/g, renderAdjustmentTable(deductions));
+  result = result.replace(/\[BonusItemsTable\]/g, renderAdjustmentTable(bonus));
+  result = result.replace(/\[OtherItemsTable\]/g, renderAdjustmentTable(other));
+
+  // Replace total values
+  result = result.replace(/\[SalaryBase\]/g, this.formatCurrency(salaryBase.baseSalary));
+  result = result.replace(/\[SalaryIndex\]/g, salaryBase.baseIndex.toString());
+  result = result.replace(/\[DeductionAmount\]/g, this.formatCurrency(Math.abs(totalDeduction)));
+  result = result.replace(/\[BonusAmount\]/g, this.formatCurrency(totalBonus));
+  result = result.replace(/\[OtherAmount\]/g, this.formatCurrency(totalOther));
+  result = result.replace(/9\.475\.000 VND/g, this.formatCurrency(finalSalaryNumber));
+
+  // Replace static info
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const year = today.getFullYear();
+  result = result.replace(/\[Month\]/g, month.toString());
+  result = result.replace(/\[Year\]/g, year.toString());
+  result = result.replace(/\[CompanyName\]/g, "Công ty ABC");
+  result = result.replace(/\[ContractType\]/g, "Hợp đồng chính thức");
+  result = result.replace(/\[Manager\]/g, "Nguyễn Văn A");
+  result = result.replace(/\[RealAttendance\]/g, "26");
+  result = result.replace(/\[TotalAttendace\]/g, "26");
+  result = result.replace(/\[ExistLeave\]/g, "0");
+
+  // Optional: Replace OT, Holiday placeholders
+  result = result.replace(/\[OTTime\]/g, "0");
+  result = result.replace(/\[OTAmount\]/g, "0 VND");
+  result = result.replace(/\[HolidayBonus\]/g, "0 VND");
+
+  return result;
+}
+
+ formatCurrency(value: number): string {
+  return value.toLocaleString("vi-VN") + " VND";
+}
+
   loadSalaryData(): void {
     if (this.employeeList.length === 0) {
       this.employees = [];
