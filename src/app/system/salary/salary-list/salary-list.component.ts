@@ -10,6 +10,7 @@ import { ApiResponse } from 'src/app/core/models/kafkaresponse.model';
 import { EmployeeDepartmentDTO, SalaryInfo,AdjustmentResult } from '../salary.model';
 import { Department } from 'src/app/system/department/department.model';
 import { DepartmentService } from '../../department/department.service';
+import {ToastService} from 'angular-toastify'
 
 interface Position {
   value: string;
@@ -37,18 +38,20 @@ class MailSalary{
 })
 export class SalaryListComponent implements OnInit {
   filterForm: FormGroup;
+  filterFormBatch : FormGroup;
   employees: SalaryInfo[] = [];
   batchEmployees : SalaryInfo[] = [];
   departments: Department[] = [];
   employeeList: EmployeeDepartmentDTO[] = [];
   positions: Position[] = [];
   today = new Date();
-
+  activeTab: 'salary' | 'accounting' = 'salary';
   constructor(
     private fb: FormBuilder,
     private departmentService: DepartmentService,
     private http: HttpClient,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private toastService: ToastService
   ) {
     this.filterForm = this.fb.group({
       department: [''],
@@ -57,6 +60,11 @@ export class SalaryListComponent implements OnInit {
       employeeId: ['']
     });
 
+    this.filterFormBatch = this.fb.group({
+      accountMonth : [''],
+      departmentID : [''],
+      employeeIdBatch : [''],
+    });
     // Khởi tạo danh sách vị trí công việc
     this.positions = [
       { value: 'developer', label: 'Lập trình viên' },
@@ -96,10 +104,31 @@ export class SalaryListComponent implements OnInit {
         console.error('❌ Lỗi khi tải dữ liệu nhân viên:', error);
       });
   }
-
+  
+  
+applyFilterBatch() : void {
+    const formValues = this.filterFormBatch.value;
+    
+    const employeeFilter = {
+      department: formValues.departmentID || '',
+      employeeId: formValues.employeeIdBatch || ''
+    };
+    this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeFilter })
+      .pipe(
+        tap(employees => {
+          this.employeeList = employees;
+        })
+      )
+      .subscribe(() => {
+        this.loadSalaryData();
+      }, error => {
+        console.error('❌ Lỗi khi tải dữ liệu nhân viên:', error);
+      });
+    
+  }
   batchSalary() : void {
     if(this.batchEmployees.length === 0) {
-      console.warn('ℹ️ Không có nhân viên nào được chọn để gửi thông báo lương.');
+      this.toastService.error('ℹ️ Không có nhân viên nào được chọn để gửi thông báo lương.');
       return;
     }   
     let MailSalaryList: MailSalary[] = [];
@@ -121,12 +150,12 @@ export class SalaryListComponent implements OnInit {
     this.http.post(API_ENDPOINT.sendMailList, MailSalaryList)
       .subscribe(response => { 
         if (response) {
-          console.log('✅ Gửi thông báo lương thành công:', response);
+          this.toastService.success('✅ Gửi thông báo lương thành công:' + response);
         } else {
-          console.error('❌ Lỗi khi gửi thông báo lương:', response);
+          this.toastService.error('❌ Lỗi khi gửi thông báo lương:'+ response);
         }
       }, error => {
-        console.error('❌ Lỗi khi gửi thông báo lương:', error);
+        this.toastService.error('❌ Lỗi khi gửi thông báo lương:'+ error);
       });
   }
   processBody(templateBody: string, employee: SalaryInfo): string {

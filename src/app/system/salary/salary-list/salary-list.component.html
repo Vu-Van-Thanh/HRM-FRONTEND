@@ -1,82 +1,116 @@
 <div class="container-fluid">
-  <!-- Page Title -->
-  <div class="row">
+  <!-- Tiêu đề -->
+  <div class="row mb-3">
     <div class="col-12">
-      <div class="page-title-box d-flex align-items-center justify-content-between">
-        <h4 class="mb-0">Quản lý lương/thưởng</h4>
+      <h4 class="mb-0">Quản lý lương/thưởng</h4>
+    </div>
+  </div>
+
+  <!-- Nav tabs (Angular-native) -->
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        [class.active]="activeTab === 'salary'"
+        (click)="activeTab = 'salary'"
+        href="javascript:void(0)"
+      >
+        Bảng Lương
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        [class.active]="activeTab === 'accounting'"
+        (click)="activeTab = 'accounting'"
+        href="javascript:void(0)"
+      >
+        Hạch Toán Lương
+      </a>
+    </li>
+  </ul>
+
+  <!-- Nội dung tab -->
+  <!-- Tab 1: Bảng Lương -->
+  <div *ngIf="activeTab === 'salary'">
+    <!-- === Filter === -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <form [formGroup]="filterForm" (ngSubmit)="applyFilter()">
+          <div class="row">
+            <!-- Phòng ban -->
+            <div class="col-md-3 mb-3">
+              <label for="department" class="form-label">Phòng ban</label>
+              <select
+                id="department"
+                class="form-select"
+                formControlName="department"
+              >
+                <option value="">Tất cả phòng ban</option>
+                <option *ngFor="let d of departments" [value]="d.code">
+                  {{ d.name }}
+                </option>
+              </select>
+            </div>
+            <!-- Vị trí công việc -->
+            <div class="col-md-3 mb-3">
+              <label for="jobTitle" class="form-label">Vị trí công việc</label>
+              <select
+                id="jobTitle"
+                class="form-select"
+                formControlName="jobTitle"
+              >
+                <option value="">Tất cả vị trí</option>
+                <option *ngFor="let p of positions" [value]="p.value">
+                  {{ p.label }}
+                </option>
+              </select>
+            </div>
+            <!-- ID quản lý -->
+            <div class="col-md-3 mb-3">
+              <label for="managerId" class="form-label">ID quản lý</label>
+              <input
+                id="managerId"
+                type="text"
+                class="form-control"
+                formControlName="managerId"
+                placeholder="Nhập ID quản lý"
+              />
+            </div>
+            <!-- ID nhân viên -->
+            <div class="col-md-3 mb-3">
+              <label for="employeeId" class="form-label">ID nhân viên</label>
+              <input
+                id="employeeId"
+                type="text"
+                class="form-control"
+                formControlName="employeeId"
+                placeholder="Nhập ID nhân viên"
+              />
+            </div>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button
+              type="button"
+              class="btn btn-secondary me-2"
+              (click)="onReset()"
+            >
+              Đặt lại
+            </button>
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+          </div>
+        </form>
       </div>
     </div>
-  </div>
 
-  
-  <!-- Filter Section -->
-  <div class="card">
-    <div class="card-body">
-      <form [formGroup]="filterForm" (ngSubmit)="applyFilter()">
-        <div class="row">
-          <!-- Phòng ban -->
-          <div class="col-md-3">
-            <div class="form-group mb-3">
-              <label for="department" class="form-label">Phòng ban</label>
-              <select class="form-select" id="department" formControlName="department">
-                <option value="">Tất cả phòng ban</option>
-                <option *ngFor="let dept of departments" [value]="dept.code">{{dept.name}}</option>
-              </select>
-            </div>
-          </div>
-          
-          <!-- Vị trí công việc -->
-          <div class="col-md-3">
-            <div class="form-group mb-3">
-              <label for="jobTitle" class="form-label">Vị trí công việc</label>
-              <select class="form-select" id="jobTitle" formControlName="jobTitle">
-                <option value="">Tất cả vị trí</option>
-                <option *ngFor="let position of positions" [value]="position.value">{{position.label}}</option>
-              </select>
-            </div>
-          </div>
-          
-          <!-- ID người quản lý -->
-          <div class="col-md-3">
-            <div class="form-group mb-3">
-              <label for="managerId" class="form-label">ID người quản lý</label>
-              <input type="text" class="form-control" id="managerId" formControlName="managerId" placeholder="Nhập ID người quản lý">
-            </div>
-          </div>
-          
-          <!-- ID nhân viên -->
-          <div class="col-md-3">
-            <div class="form-group mb-3">
-              <label for="employeeId" class="form-label">ID nhân viên</label>
-              <input type="text" class="form-control" id="employeeId" formControlName="employeeId" placeholder="Nhập ID nhân viên">
-            </div>
-          </div>
-        </div>
-        
-        <!-- Buttons -->
-        <div class="row">
-          <div class="col-12 d-flex justify-content-end">
-            <button type="button" class="btn btn-secondary me-2" (click)="onReset()">
-              <i class="fas fa-redo-alt me-1"></i> Đặt lại
-            </button>
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-search me-1"></i> Tìm kiếm
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Salary List Table -->
-  <div class="card mt-4">
-    <div class="card-body">
-      <div class="table-responsive">
+    <!-- === Bảng Lương === -->
+    <div class="card">
+      <div class="card-body table-responsive">
         <table class="table table-hover">
           <thead>
             <tr>
-              <th>Mã nhân viên</th>
-              <th>Họ và tên</th>
+              <th>Mã NV</th>
+              <th>Họ tên</th>
               <th>Phòng ban</th>
               <th>Vị trí</th>
               <th>Lương cơ bản</th>
@@ -85,25 +119,122 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let employee of employees">
-              <td>{{employee.employeeId}}</td>
-              <td>{{getEmployeeName(employee.employeeId)}}</td>
-              <td>{{getDepartmentName(employee.employeeId)}}</td>
-              <td>{{getPosition(employee.employeeId)}}</td>
-              <td>{{employee.salaryBase?.baseSalary | currency:'VND':'symbol-narrow':'1.0-0'}}</td>
-              <td>{{ (employee.salaryBase?.effectiveDate ?? today) | date:'dd/MM/yyyy' }}</td>
+            <tr *ngFor="let emp of employees">
+              <td>{{ emp.employeeId }}</td>
+              <td>{{ getEmployeeName(emp.employeeId) }}</td>
+              <td>{{ getDepartmentName(emp.employeeId) }}</td>
+              <td>{{ getPosition(emp.employeeId) }}</td>
+              <td>{{ emp.salaryBase?.baseSalary | currency:'VND':'symbol-narrow':'1.0-0' }}</td>
+              <td>{{ (emp.salaryBase?.effectiveDate ?? today) | date:'dd/MM/yyyy' }}</td>
               <td>
-                <button class="btn btn-info btn-sm me-2" (click)="viewSalaryDetails(employee)">
-                  <i class="fas fa-eye"></i> Chi tiết
+                <button
+                  class="btn btn-info btn-sm"
+                  (click)="viewSalaryDetails(emp)"
+                >
+                  Chi tiết
                 </button>
               </td>
             </tr>
             <tr *ngIf="employees.length === 0">
-              <td colspan="7" class="text-center py-3">Không có dữ liệu</td>
+              <td colspan="7" class="text-center">Không có dữ liệu</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
-</div> 
+
+  <!-- Tab 2: Hạch Toán Lương -->
+  <div *ngIf="activeTab === 'accounting'">
+    <!-- === Filter (có thể giống hoặc thêm trường tháng HT) === -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <form [formGroup]="filterFormBatch" (ngSubmit)="applyFilterBatch()">
+          <div class="row">
+            <!-- Ví dụ thêm Tháng HT -->
+            <div class="col-md-3 mb-3">
+              <label for="accountMonth" class="form-label">Tháng HT</label>
+              <input
+                id="accountMonth"
+                type="month"
+                class="form-control"
+                formControlName="accountMonth"
+              />
+            </div>
+            <!-- Copy lại các trường phòng ban, vị trí, managerId, employeeId… -->
+            <div class="col-md-3 mb-3">
+              <label for="department" class="form-label">Phòng ban</label>
+              <select
+                id="department"
+                class="form-select"
+                formControlName="departmentID"
+              >
+                <option value="">Tất cả phòng ban</option>
+                <option *ngFor="let d of departments" [value]="d.code">
+                  {{ d.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label for="department" class="form-label">Nhân viên</label>
+               <input
+                id="employeeIdBatch"
+                type="month"
+                class="form-control"
+                formControlName="employeeIdBatch"
+              />
+            </div>
+            <!-- …v.v. -->
+          </div>
+          <div class="d-flex justify-content-end">
+            <button
+              type="button"
+              class="btn btn-secondary me-2"
+              (click)="onReset()"
+            >
+              Đặt lại
+            </button>
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- === Bảng Hạch Toán Lương === -->
+    <div class="card">
+      <div class="card-body table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Mã NV</th>
+              <th>Họ tên</th>
+              <th>Số tiền HT</th>
+              <th>Tháng HT</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of batchEmployees">
+              <td>{{ emp.employeeId }}</td>
+              <td>{{ getEmployeeName(emp.employeeId) }}</td>
+              <td>{{ emp.finalSalary | currency:'VND':'symbol-narrow':'1.0-0' }}</td>
+              <td>{{ emp.salaryBase?.effectiveDate | date:'MM/yyyy' }}</td>
+              <td>
+                <button
+                  class="btn btn-info btn-sm"
+                  (click)="viewSalaryDetails(emp)"
+                >
+                  Chi tiết
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="batchEmployees.length === 0">
+              <td colspan="5" class="text-center">Không có dữ liệu</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
