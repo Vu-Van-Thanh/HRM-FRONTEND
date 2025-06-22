@@ -60,7 +60,8 @@ export const API_ENDPOINT = {
    createProject : "https://localhost:7176/Project",
    createTask : "https://localhost:7176/Task",
    getAllApplied : "https://localhost:7176/Job/CvApplied",
-   getSalaryTemplate : "https://localhost:7090/SalaryBase/template",
-   getMailBoxIDList : "https://localhost:/Mailbox/ListMailBoxID/{employeeIds}", 
-   sendMailList : "https://localhost:/Email/sendList"
+   getSalaryTemplate : "https://localhost:7062/EmailTemplate/D53F5EEB-2527-48CC-906D-9C335252CF05",
+   getMailBoxIDList : "https://localhost:7062/Mailbox/ListMailBoxID/{employeeIds}", 
+   sendMailList : "https://localhost:7062/Email/sendList",
+   getBatchSalary : "https://localhost:7090/SalaryPayment/SalaryPaymentList"
 };

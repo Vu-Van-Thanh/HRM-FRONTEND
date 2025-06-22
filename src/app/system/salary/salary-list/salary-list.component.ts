@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SalaryDetailComponent } from '../salary-detail/salary-detail.component';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
@@ -113,10 +113,23 @@ applyFilterBatch() : void {
       department: formValues.departmentID || '',
       employeeId: formValues.employeeIdBatch || ''
     };
+    console.log('employeeFilter:', employeeFilter);
     this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeFilter })
       .pipe(
         tap(employees => {
           this.employeeList = employees;
+          console.log('Filtered employees:', this.employeeList);
+           const batchEmployee = this.employeeList.map(emp => emp.employeeID);
+          let params = new HttpParams();
+            batchEmployee.forEach(id => {
+              params = params.append('employeeIds', id);
+            });
+
+          this.http.get<SalaryInfo[]>(API_ENDPOINT.getBatchSalary, { params }).subscribe(data => {
+            console.log("hehe" , data);
+            this.batchEmployees = data;
+          });
+    
         })
       )
       .subscribe(() => {
@@ -124,7 +137,7 @@ applyFilterBatch() : void {
       }, error => {
         console.error('❌ Lỗi khi tải dữ liệu nhân viên:', error);
       });
-    
+   
   }
   batchSalary() : void {
     if(this.batchEmployees.length === 0) {
@@ -133,12 +146,14 @@ applyFilterBatch() : void {
     }   
     let MailSalaryList: MailSalary[] = [];
     const employeeEmails: string[] = [];
-    this.http.get<string[]>(API_ENDPOINT.getMailBoxIDList)
+    this.http.get<string[]>(API_ENDPOINT.getMailBoxIDList.replace('{employeeIds}', this.batchEmployees.map(emp => emp.employeeId).join(',')) )
       .subscribe(emails => {
         employeeEmails.push(...emails);
       });
+    console.log('employeeEmails:', employeeEmails);
     this.http.get<EmailTemplateSalary>(API_ENDPOINT.getSalaryTemplate)
       .subscribe(template => {
+        console.log('Email template:', template);
         for(let i = 0; i < this.batchEmployees.length; i++) {
           const mail = new MailSalary();
           mail.MailboxId = employeeEmails[i];
@@ -146,8 +161,7 @@ applyFilterBatch() : void {
           mail.Body = this.processBody(template.templateBody, this.batchEmployees[i]);
           MailSalaryList.push(mail);
         }
-      });
-    this.http.post(API_ENDPOINT.sendMailList, MailSalaryList)
+        this.http.post(API_ENDPOINT.sendMailList, MailSalaryList)
       .subscribe(response => { 
         if (response) {
           this.toastService.success('✅ Gửi thông báo lương thành công:' + response);
@@ -157,6 +171,8 @@ applyFilterBatch() : void {
       }, error => {
         this.toastService.error('❌ Lỗi khi gửi thông báo lương:'+ error);
       });
+      });
+    
   }
   processBody(templateBody: string, employee: SalaryInfo): string {
   const { salaryBase, adjustments } = employee;

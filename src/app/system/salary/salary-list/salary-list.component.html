@@ -152,7 +152,7 @@
         <form [formGroup]="filterFormBatch" (ngSubmit)="applyFilterBatch()">
           <div class="row">
             <!-- Ví dụ thêm Tháng HT -->
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="false">
               <label for="accountMonth" class="form-label">Tháng HT</label>
               <input
                 id="accountMonth"
@@ -196,6 +196,7 @@
               Đặt lại
             </button>
             <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+            <button style="margin-left: 5px;" (click)="batchSalary()" type="submit" class="btn btn-primary">Thanh toán tất cả</button>
           </div>
         </form>
       </div>
@@ -210,7 +211,6 @@
               <th>Mã NV</th>
               <th>Họ tên</th>
               <th>Số tiền HT</th>
-              <th>Tháng HT</th>
               <th>Thao tác</th>
             </tr>
           </thead>
@@ -219,13 +219,19 @@
               <td>{{ emp.employeeId }}</td>
               <td>{{ getEmployeeName(emp.employeeId) }}</td>
               <td>{{ emp.finalSalary | currency:'VND':'symbol-narrow':'1.0-0' }}</td>
-              <td>{{ emp.salaryBase?.effectiveDate | date:'MM/yyyy' }}</td>
               <td>
                 <button
                   class="btn btn-info btn-sm"
                   (click)="viewSalaryDetails(emp)"
                 >
                   Chi tiết
+                </button>
+                <button
+                  style="margin-left: 5px;"
+                  class="btn btn-info btn-sm"
+                  (click)="viewSalaryDetails(emp)"
+                >
+                  Thanh toán
                 </button>
               </td>
             </tr>
