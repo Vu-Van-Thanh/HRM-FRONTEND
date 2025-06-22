@@ -75,7 +75,7 @@
   <table>
     <tr><td>Hợp đồng/Trạng thái:</td><td>[ContractType]</td><td>Số người giám hộ lương:</td><td>[Manager]</td></tr>
     <tr><td>Mã số: 510-08 / BTT:</td><td>[CompanyName]</td><td>Ngày công trong tháng:</td><td>[RealAttendance]/[TotalAttendace]</td></tr>
-    <tr><td>Lương cơ bản:</td><td>[SalaryBase] VND</td><td>Ngày nghỉ phép còn lại:</td><td>...</td></tr>
+    <tr><td>Lương cơ bản:</td><td>[SalaryBase]</td><td>Ngày nghỉ phép còn lại:</td><td>...</td></tr>
     <tr><td>Hệ số lương:</td><td>[SalaryIndex]</td><td>Ngày bắt đầu nghỉ thai sản (nếu có):</td><td>-</td></tr>
     <tr><td>Đơn vị công tác:</td><td>Phòng Nhân sự - [CompanyName]</td><td>Số phép còn lại đến hết năm:</td><td>[ExistLeave]</td></tr>
   </table>
@@ -94,37 +94,15 @@
   </tr>
 
   <tr class="bold">
-    <td colspan="3">2. Tiền phụ cấp / tăng ca / thêm giờ:</td>
+    <td colspan="3">2. Tiền phụ cấp / tăng ca / thêm giờ / thưởng:</td>
   </tr>
   [BonusItemsTable]
 
   <tr>
-    <td colspan="2">
-      ✓ Số giờ OT (T4 + OTBS T3): [OTTime] giờ<br>
-      ✓ Số tiền OT: [OTAmount] VND
-    </td>
-    <td></td>
-  </tr>
-
-  <tr class="bold">
-    <td colspan="3">3. Khen thưởng / phúc lợi / trợ cấp khác:</td>
+    <td>3.</td>
+    <td>Các khoản khác:</td>
   </tr>
   [OtherItemsTable]
-
-  <tr>
-    <td colspan="2">
-      ✓ Hỗ trợ sinh nhật / công đoàn / PC thai sản: [Adjustment] VND<br>
-      ✓ PC nghỉ lễ 30/4, 1/5: [HolidayBonus] VND
-    </td>
-    <td></td>
-  </tr>
-
-  <tr>
-    <td>4.</td>
-    <td>Các khoản khác:</td>
-    <td style="text-align:right">0 VND</td>
-  </tr>
-
   <tr class="bold">
     <td colspan="2">B. TỔNG CÁC KHOẢN TẠM TRỪ</td>
     <td style="text-align:right">[DeductionAmount] VND</td>
