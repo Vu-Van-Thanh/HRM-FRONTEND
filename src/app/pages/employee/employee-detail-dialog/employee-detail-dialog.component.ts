@@ -47,11 +47,12 @@ export interface Education{
 export class EmployeeDetailDialogComponent implements OnInit {
   employee: Employee;
   isEditMode = false;
-  educationLevels = ['Trung học', 'Trung cấp', 'Cao đẳng', 'Đại học', 'Thạc sĩ', 'Tiến sĩ'];
+  educationLevels = ['SecondarySchool', 'HighSchool', 'Intermediate', 'College', 'Bachelor', 'Engineer', 'Master','Doctor', 'Professor','Other'];
   selectedTabIndex = 0;
   contractNow : Contract;
   educations : Education[] = [];
   educationNow : Education;
+  relativeNow : Relative;
   positions : Position[] = [];
   workHistoryColumns = ['date', 'type', 'description'];
   workHistory: any[] = [];
@@ -89,6 +90,9 @@ export class EmployeeDetailDialogComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadPositions();
+    this.loadEducation();
+    this.loadRelative();
+    this.loadContracts();
     if (this.data.code) {
       this.loadEmployee();
     }
@@ -134,8 +138,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
     this.http.get<Contract[]>(url).subscribe(contracts => {
       console.log('Contracts:', contracts);
       this.contracts = contracts;
-    });
-    this.contractNow = this.contracts.map(c => ({
+      this.contractNow = this.contracts.map(c => ({
       ...c,
       startDateObj: new Date(c.startDate)
     }))
@@ -144,6 +147,8 @@ export class EmployeeDetailDialogComponent implements OnInit {
       Math.abs(a.startDateObj.getTime() - now.getTime()) -
       Math.abs(b.startDateObj.getTime() - now.getTime())
     )[0];
+    });
+    
     
   }
   loadRelative(): void {
@@ -151,6 +156,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
     this.http.get<Relative[]>(url).subscribe(relatives => {
       console.log('Relatives:', relatives);
       this.relatives = relatives;
+      this.relativeNow = this.relatives[0];
     });
     console.log("Relatives:", this.relatives);
   }
@@ -192,15 +198,28 @@ export class EmployeeDetailDialogComponent implements OnInit {
     this.error = null;
     this.employeeService.getEmployeeById(this.data.code).subscribe({
       next: (employee) => {
-        console.log('Inputemployee:', employee);
         this.employee = employee;
         console.log('Outputemployee:', this.employee);
+        console.log('Contract Now : ', this.contractNow);
         this.employeeForm.patchValue(employee);
+        this.employeeForm.patchValue({
+          major : this.educationNow?.major || this.employee.major,
+          school : this.educationNow?.school,
+          graduationYear : this.educationNow?.endDate,
+          education: this.educationNow?.degree || this.employee.education,
+          joinDate: employee.joinDate ? new Date(employee.joinDate) : null,
+          idCardIssueDate : employee.dateIssued ? new Date(employee.dateIssued) : null,
+          emergencyPhone : this.relativeNow.phoneNumber,
+          emergencyContact : this.relativeNow.firstName + this.relativeNow.lastName,
+          contractType : this.contractNow?.contractType,
+          salary : this.contractNow?.salaryBase
+        });
+        console.log('Employee Form Value:', this.employeeForm.value);
+        console.log('AVARTAR', employee?.avartar);
         this.loading = false;
         this.loadWorkHistory();
-        this.loadRelative();
-        this.loadContracts();
-        this.loadEducation();
+        
+        
       },
       error: (error) => {
         this.error = 'Có lỗi xảy ra khi tải thông tin nhân viên';
@@ -211,7 +230,6 @@ export class EmployeeDetailDialogComponent implements OnInit {
   }
 
   loadWorkHistory() {
-    // Mock work history data
     this.workHistory = [
       {
         date: '2023-01-15',
@@ -323,7 +341,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
 
   onEdit() {
     this.isEditMode = true;
-    this.selectedTabIndex = 2; // Switch to edit tab
+    this.selectedTabIndex = 1; 
   }
 
   onFileSelected(event: any): void {
@@ -345,12 +363,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    
-    if (this.employeeForm.valid) {
-      
-    }
     const formData = this.employeeForm.value;
-  
       let employeeUpdate = {
         EmployeeID : this.data.code,
         Position : '',
@@ -373,10 +386,7 @@ export class EmployeeDetailDialogComponent implements OnInit {
         InsuranceNumber : '',
 
       };
-      
-  
       console.log('Employee update payload:', employeeUpdate);
-  
       if (this.isEditMode) {
         this.employeeService.updateEmployee(this.data.code, employeeUpdate).subscribe({
           next: (updatedEmployee) => {
@@ -397,10 +407,22 @@ export class EmployeeDetailDialogComponent implements OnInit {
         });
       }*/
 
-        let userUpdate = {
-          Phone : formData.phone,
-          Email : formData.email,
+      const userFormData = new FormData();
+      userFormData.append('phone', formData.phone);
+      userFormData.append('email', formData.email);
+      if (this.selectedFile) {
+        userFormData.append('avatar', this.selectedFile);
+      }
+      this.http.put(API_ENDPOINT.updateUserProfile, userFormData).subscribe({
+        next: (res: any) => {
+          this.toastService.success("Cập nhật user thành công!");
+          this.dialogRef.close(res);
+        },
+        error: (err) => {
+          this.toastService.error("Có lỗi trong quá trình cập nhật user!");
         }
+      });
+
   }
   
 

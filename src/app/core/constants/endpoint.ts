@@ -63,5 +63,6 @@ export const API_ENDPOINT = {
    getSalaryTemplate : "https://localhost:7062/EmailTemplate/D53F5EEB-2527-48CC-906D-9C335252CF05",
    getMailBoxIDList : "https://localhost:7062/Mailbox/ListMailBoxID/{employeeIds}", 
    sendMailList : "https://localhost:7062/Email/sendList",
-   getBatchSalary : "https://localhost:7090/SalaryPayment/SalaryPaymentList"
+   getBatchSalary : "https://localhost:7090/SalaryPayment/SalaryPaymentList",
+   updateUserProfile : "https://localhost:7198/Auth/profile"
 };

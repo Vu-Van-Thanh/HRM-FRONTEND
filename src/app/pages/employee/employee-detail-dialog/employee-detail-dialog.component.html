@@ -30,7 +30,7 @@
               <h3>Thông tin cơ bản</h3>
               <div class="employee-avatar mb-4">
                 <div class="avatar-container">
-                  <img [src]="employee?.avartar || 'assets/images/default-avatar.png'" alt="Ảnh nhân viên" class="employee-image">
+                  <img [src]="imagePreview || employee?.avartar || 'assets/images/default-avatar.png'" alt="Ảnh nhân viên" class="employee-image">
                   <div class="avatar-upload" *ngIf="isEditMode">
                     <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none">
                     <button mat-raised-button color="primary" (click)="fileInput.click()">
@@ -48,7 +48,7 @@
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
                   <mat-label>Mã nhân viên</mat-label>
-                  <input matInput formControlName="code">
+                  <input matInput formControlName="code" readonly>
                 </mat-form-field>
 
                 <!-- Họ và tên -->
@@ -75,8 +75,8 @@
                 <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
                   <mat-label>Giới tính</mat-label>
                   <mat-select formControlName="gender">
-                    <mat-option value="Male">Nam</mat-option>
-                    <mat-option value="Female">Nữ</mat-option>
+                    <mat-option value="male">Nam</mat-option>
+                    <mat-option value="female">Nữ</mat-option>
                   </mat-select>
                 </mat-form-field>
 
@@ -142,7 +142,7 @@
                 <mat-form-field appearance="outline" *ngIf="isEditMode" class="compact-field">
                   <mat-label>Chức vụ</mat-label>
                   <mat-select formControlName="positionId">
-                    <mat-option *ngFor="let pos of positions" [value]="pos.positionName">{{pos.positionName}}</mat-option>
+                    <mat-option *ngFor="let pos of positions" [value]="pos.jobPositionId">{{pos.positionName}}</mat-option>
                   </mat-select>
                 </mat-form-field>
 
@@ -168,14 +168,18 @@
                 <!-- Ngày vào làm -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Ngày vào làm:</label>
-                  <span>{{employee?.dateIssued | date:'dd/MM/yyyy'}}</span>
+                  <span>{{employee?.joinDate | date:'dd/MM/yyyy'}}</span>
                 </div>
-                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                <!--<mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Ngày vào làm</mat-label>
-                  <input matInput [matDatepicker]="joinDatePicker" formControlName="joinDate">
+                  <input matInput [matDatepicker]="joinDatePicker" formControlName="joinDate" [disabled]="true">
                   <mat-datepicker-toggle matSuffix [for]="joinDatePicker"></mat-datepicker-toggle>
                   <mat-datepicker #joinDatePicker></mat-datepicker>
-                </mat-form-field>
+                </mat-form-field> -->
+                <mat-form-field appearance="outline" *ngIf="isEditMode">
+                <mat-label>Ngày vào làm</mat-label>
+                <input matInput [value]="employeeForm.get('joinDate')?.value | date: 'dd/MM/yyyy'" readonly>
+              </mat-form-field>
 
                 <!-- Mức lương -->
                 <div class="info-item" *ngIf="!isEditMode">
@@ -184,7 +188,7 @@
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Mức lương</mat-label>
-                  <input matInput type="number" formControlName="salary">
+                  <input matInput type="text" formControlName="salary">
                   <span matSuffix>VND</span>
                 </mat-form-field>
 
@@ -195,10 +199,9 @@
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Loại hợp đồng</mat-label>
-                  <mat-select formControlName="contractType">
-                    <mat-option *ngFor="let type of contractTypes" [value]="type">{{type}}</mat-option>
-                  </mat-select>
+                  <input matInput type="text" formControlName="contractType">
                 </mat-form-field>
+
               </div>
             </div>
 
@@ -214,9 +217,12 @@
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Học vấn</mat-label>
                   <mat-select formControlName="education">
-                    <mat-option *ngFor="let edu of educationLevels" [value]="edu">{{edu}}</mat-option>
+                    <mat-option *ngFor="let edu of educationLevels" [value]="edu">
+                      {{ edu }}
+                    </mat-option>
                   </mat-select>
                 </mat-form-field>
+
 
                 <!-- Chuyên ngành -->
                 <div class="info-item" *ngIf="!isEditMode">
@@ -245,7 +251,7 @@
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Năm tốt nghiệp</mat-label>
-                  <input matInput type="number" formControlName="graduationYear">
+                  <input matInput type="text" formControlName="graduationYear">
                 </mat-form-field>
               </div>
             </div>
