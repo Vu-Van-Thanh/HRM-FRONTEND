@@ -197,8 +197,14 @@
             
             <div *ngIf="!isLoading && !error" class="email-content-container">
               <!-- For current email from API, use innerHTML to render HTML body -->
-              <div *ngIf="currentEmail" [innerHTML]="safeHtmlBody" class="email-html-content"></div>
-              
+              <!--<div *ngIf="currentEmail" [innerHTML]="safeHtmlBody" class="email-html-content"></div> -->
+              <iframe
+                #iframeRef
+                [srcdoc]="safeHtmlBody"
+                class="email-frame"
+                frameborder="0"
+                sandbox="allow-same-origin"
+              ></iframe>
               <!-- Fallback to static data if API email not available -->
               <div *ngIf="!currentEmail">
                 <p>Dear Lorem Ipsum,</p>

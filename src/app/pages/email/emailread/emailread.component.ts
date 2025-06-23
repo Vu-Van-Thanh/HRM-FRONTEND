@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -137,4 +137,22 @@ export class EmailreadComponent implements OnInit {
   open(content) {
     this.modalRef = this.modalService.show(content);
   }
+
+  @ViewChild('iframeRef') iframeRef!: ElementRef<HTMLIFrameElement>;
+
+ngAfterViewInit() {
+  setTimeout(() => {
+    const iframe = this.iframeRef.nativeElement;
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+
+    if (iframeDoc?.body) {
+      // Ẩn scrollbar bên trong iframe
+      iframeDoc.body.style.overflow = 'hidden';
+
+      // Resize iframe theo nội dung bên trong
+      iframe.style.height = iframeDoc.body.scrollHeight + 'px';
+    }
+  }, 300); // có thể tăng delay nếu nội dung load chậm
+}
+
 }

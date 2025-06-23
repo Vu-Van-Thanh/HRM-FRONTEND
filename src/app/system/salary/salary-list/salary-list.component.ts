@@ -153,13 +153,13 @@ applyFilterBatch() : void {
     console.log('employeeEmails:', employeeEmails);
     this.http.get<EmailTemplateSalary>(API_ENDPOINT.getSalaryTemplate)
       .subscribe(template => {
-        console.log('Email template:', template);
         for(let i = 0; i < this.batchEmployees.length; i++) {
           const mail = new MailSalary();
-          mail.MailboxId = employeeEmails[i];
+          mail.MailboxId = employeeEmails[i].toUpperCase();
           mail.Subject = template.templateName.replace('[Month]', this.today.getMonth().toString()).replace('[Year]', this.today.getFullYear().toString());
           mail.Body = this.processBody(template.templateBody, this.batchEmployees[i]);
           MailSalaryList.push(mail);
+          console.log('Processed mail:', mail);
         }
         this.http.post(API_ENDPOINT.sendMailList, MailSalaryList)
       .subscribe(response => { 
@@ -216,7 +216,7 @@ applyFilterBatch() : void {
   result = result.replace(/\[DeductionAmount\]/g, this.formatCurrency(Math.abs(totalDeduction)));
   result = result.replace(/\[BonusAmount\]/g, this.formatCurrency(totalBonus));
   result = result.replace(/\[OtherAmount\]/g, this.formatCurrency(totalOther));
-  result = result.replace(/9\.475\.000 VND/g, this.formatCurrency(finalSalaryNumber));
+  result = result.replace(/\[FinalAmount\]/g, this.formatCurrency(finalSalaryNumber));
 
   // Replace static info
   const today = new Date();
