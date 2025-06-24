@@ -303,6 +303,37 @@ export class PersonalInfoComponent implements OnInit {
     });
   }
   
+  createRelative(){
+    let existingEmployee  = JSON.parse(localStorage.getItem('currentUserProfile'));
+    const body = {
+      EmployeeID : existingEmployee?.employeeID,
+      FirstName : this.newRelative.firstName,
+      LastName : this.newRelative.lastName,
+      DateOfBirth : this.newRelative.dateOfBirth,
+      PhoneNumber : this.newRelative.phoneNumber,
+      RelativeType : this.newRelative.relativeType,
+      Address : this.newRelative.address,
+      Nationality : this.newRelative.nationality,
+      Ethnic : this.newRelative.ethnic,
+      Religion : this.newRelative.religion,
+      PlaceOfBirth : this.newRelative.placeOfBirth,
+      IndentityCard : this.newRelative.indentityCard,
+      Country : this.newRelative.nationality,
+      Province : this.newRelative.province,
+      District : this.newRelative.district,
+      Commune : this.newRelative.commune
+    }
+    console.log('Relative add : ', body);
+    this.http.post(API_ENDPOINT.updateRelative, body).subscribe({
+      next: (response) => {
+        console.log('Relative updated successfully', response);
+        this.toastService.success('Thêm mới thông tin người thân thành công!');
+      },
+      error: (error) => {
+        console.error('Error updating relative', error);
+      }
+    });
+  }
   addRelative() {
     if (this.newRelative.firstName && this.newRelative.lastName && this.newRelative.relativeType) {
       // Get employeeID from localStorage
