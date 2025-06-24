@@ -5,7 +5,7 @@ import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { EmployeeService } from '../employee.service';
 import { LocalStorage } from 'src/app/core/enums/local-storage.enum';
 import { AuthenticationService } from '../../../core/services/auth.service';
-
+import {ToastService} from 'angular-toastify';
 
 @Component({
   selector: 'app-personal-info',
@@ -13,6 +13,8 @@ import { AuthenticationService } from '../../../core/services/auth.service';
   styleUrls: ['./personal-info.component.scss']
 })
 export class PersonalInfoComponent implements OnInit {
+  cccdFile: File | null = null;
+  bhxhFile : File | null = null;
   previewImages: { [key: string]: string | ArrayBuffer | null } = {};
   activeTab = 0; // 0: Thông tin cá nhân, 1: Thông tin người thân
   relatives: Relative[] = [];
@@ -73,6 +75,7 @@ export class PersonalInfoComponent implements OnInit {
   isLoading = false;
   
   constructor(
+    private toastService : ToastService,
     private authenticationService: AuthenticationService,
     private http: HttpClient,
     private employeeService: EmployeeService
@@ -170,6 +173,11 @@ export class PersonalInfoComponent implements OnInit {
         }
       }});
 
+    // upload ảnh cccd , bhyt
+    this.uploadBHXH(existingEmployee?.employeeID);
+    this.uploadCCCD(existingEmployee?.employeeID);
+      
+
   }
   // Format date to YYYY-MM-DD for input fields
   formatDateForInput(date: Date): string {
@@ -179,6 +187,73 @@ export class PersonalInfoComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
   
+  uploadBHXH(employeeId: string) {
+    const formDataBHXH = new FormData();
+    formDataBHXH.append('EmployeeId', employeeId);
+    formDataBHXH.append('MediaType', 'InsuranceCard');
+    formDataBHXH.append('MediaUrl', 'abc');
+
+     if (this.bhxhFile) {
+      formDataBHXH.append('Images', this.bhxhFile); 
+    }
+    else
+    {
+      return;
+    }
+    console.log('BHXH upload:');
+    formDataBHXH.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+
+    this.http.post(API_ENDPOINT.updateEmployeeMedia, formDataBHXH, {
+      responseType: 'text'
+        }).subscribe({
+          next: (res) => {
+            this.toastService.success('Upload thành công BHXH');
+          },
+          error: (err) => {
+            this.toastService.error('Upload BHXH thất bại');
+          }
+        });
+   
+  }
+  
+  uploadCCCD(employeeId: string) {
+  const formDataCCCD = new FormData();
+  formDataCCCD.append('EmployeeId', employeeId);
+  formDataCCCD.append('MediaType', 'IdentityCard');
+  formDataCCCD.append('MediaUrl', 'abc');
+
+  if (this.cccdFile) {
+    formDataCCCD.append('Images', this.cccdFile); 
+  }
+  else
+  {
+    return;
+  }
+
+  console.log('CCCD upload:');
+  formDataCCCD.forEach((value, key) => {
+    if (value instanceof File) {
+      console.log(`${key}:`, value.name, value.type, value.size);
+    } else {
+      console.log(`${key}:`, value);
+    }
+  });
+
+  this.http.post(API_ENDPOINT.updateEmployeeMedia, formDataCCCD, {
+  responseType: 'text'
+    }).subscribe({
+      next: (res) => {
+        this.toastService.success('Upload thành công CCCD');
+      },
+      error: (err) => {
+        this.toastService.error('Upload CCCD thất bại');
+      }
+    });
+
+}
+
   loadRelatives(employeeId: string) {
     const url = API_ENDPOINT.getAllRelative.replace('{employeeId}', employeeId);
     console.log("URL ", url);
@@ -273,15 +348,27 @@ export class PersonalInfoComponent implements OnInit {
   onFileChange(event: Event, type: string) {
     const input = event.target as HTMLInputElement;
   
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
+    if (input.files && input.files.length > 0) {
+    const file = input.files[0];
+
+    if (type === 'cccd') {
+      this.cccdFile = file;
+
       const reader = new FileReader();
-  
       reader.onload = () => {
-        this.previewImages[type] = reader.result;
+        this.previewImages['cccd'] = reader.result as string;
       };
-  
       reader.readAsDataURL(file);
     }
+    else
+    {
+      this.bhxhFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewImages['bhxh'] = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
   }
 }
