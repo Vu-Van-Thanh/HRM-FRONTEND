@@ -11,6 +11,8 @@ export const API_ENDPOINT = {
    importEmployee : 'https://localhost:7214/Employee/import-profile',
    updateEmployeeById : 'https://localhost:7214/Employee/{Id}',
    updateEmployee: 'https://localhost:7214/Employee',
+   updateEmployeeMedia : 'https://localhost:7214/EmployeeMedia/UpdateMedia',
+   importFromOrches : 'http://localhost:5281/Employee/import',
    deleteEmployee: 'https://localhost:7214/Employee',
    searchEmployees: 'https://localhost:7214/Employee/search',
    getAllDepartment : 'https://localhost:7176/Department/',

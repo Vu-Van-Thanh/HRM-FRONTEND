@@ -12,9 +12,21 @@
       
       <button style="margin-left: 10px;" mat-raised-button color="primary" (click)="fileInput.click()">
         <mat-icon>add</mat-icon>
-        Import nhân viên
+        Import nhân viên (only)
       </button>
 
+      <button style="margin-left: 10px;" mat-raised-button color="primary" (click)="fileInputMultiple.click()">
+        <mat-icon>add</mat-icon>
+        Import nhân viên (multiple)
+      </button>
+
+      <input
+        #fileInputMultiple
+        type="file"
+        accept=".xlsx, .xls"
+        style="display: none"
+        (change)="onFileMultiSelected($event)"
+      />
       <input
         #fileInput
         type="file"

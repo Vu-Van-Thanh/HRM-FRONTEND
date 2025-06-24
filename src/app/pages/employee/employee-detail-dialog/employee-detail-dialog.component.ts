@@ -45,6 +45,11 @@ export interface Education{
   styleUrls: ['./employee-detail-dialog.component.scss']
 })
 export class EmployeeDetailDialogComponent implements OnInit {
+  cccdFile: File | null = null;
+  bhxhFile: File | null = null;
+  cccdPreview: string | ArrayBuffer | null = null;
+  bhxhPreview: string | ArrayBuffer | null = null;
+
   employee: Employee;
   isEditMode = false;
   educationLevels = ['SecondarySchool', 'HighSchool', 'Intermediate', 'College', 'Bachelor', 'Engineer', 'Master','Doctor', 'Professor','Other'];
@@ -189,10 +194,70 @@ export class EmployeeDetailDialogComponent implements OnInit {
       bankAccount : ['', Validators.required],
       bankName : ['', Validators.required],
       bankBranch : ['', Validators.required],
-      photo: ['']
+      photo: [''],
+      insuranceNumber : ['',Validators.required]
     });
   }
 
+  uploadCCCD(employeeId: string) {
+  const formDataCCCD = new FormData();
+  formDataCCCD.append('EmployeeId', employeeId);
+  formDataCCCD.append('MediaType', 'IdentityCard');
+  formDataCCCD.append('MediaUrl', 'abc');
+
+  if (this.cccdFile) {
+    formDataCCCD.append('Images', this.cccdFile); 
+  }
+
+  console.log('CCCD upload:');
+  formDataCCCD.forEach((value, key) => {
+    if (value instanceof File) {
+      console.log(`${key}:`, value.name, value.type, value.size);
+    } else {
+      console.log(`${key}:`, value);
+    }
+  });
+
+  this.http.post(API_ENDPOINT.updateEmployeeMedia, formDataCCCD, {
+  responseType: 'text'
+    }).subscribe({
+      next: (res) => {
+        this.toastService.success('Upload thành công CCCD');
+      },
+      error: (err) => {
+        this.toastService.error('Upload CCCD thất bại');
+      }
+    });
+
+}
+
+
+  uploadBHXH(employeeId: string) {
+    const formDataBHXH = new FormData();
+    formDataBHXH.append('EmployeeId', employeeId);
+    formDataBHXH.append('MediaType', 'InsuranceCard');
+    formDataBHXH.append('MediaUrl', 'abc');
+
+     if (this.bhxhFile) {
+      formDataBHXH.append('Images', this.bhxhFile); 
+    }
+    console.log('BHXH upload:');
+    formDataBHXH.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+
+    this.http.post(API_ENDPOINT.updateEmployeeMedia, formDataBHXH, {
+      responseType: 'text'
+        }).subscribe({
+          next: (res) => {
+            this.toastService.success('Upload thành công BHXH');
+          },
+          error: (err) => {
+            this.toastService.error('Upload BHXH thất bại');
+          }
+        });
+   
+  }
   loadEmployee(): void {
     this.loading = true;
     this.error = null;
@@ -212,7 +277,8 @@ export class EmployeeDetailDialogComponent implements OnInit {
           emergencyPhone : this.relativeNow.phoneNumber,
           emergencyContact : this.relativeNow.firstName + this.relativeNow.lastName,
           contractType : this.contractNow?.contractType,
-          salary : this.contractNow?.salaryBase
+          salary : this.contractNow?.salaryBase,
+          insuranceNumber : this.employee.insuranceNumber 
         });
         console.log('Employee Form Value:', this.employeeForm.value);
         console.log('AVARTAR', employee?.avartar);
@@ -363,10 +429,12 @@ export class EmployeeDetailDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
+    this.uploadBHXH(this.data.code);
+    //this.uploadCCCD(this.data.code);
     const formData = this.employeeForm.value;
       let employeeUpdate = {
         EmployeeID : this.data.code,
-        Position : '',
+        Position : formData.positionId.value,
         FirstName : formData.firstName,
         LastName : formData.lastName,
         Gender : formData.gender.value ,
@@ -376,8 +444,8 @@ export class EmployeeDetailDialogComponent implements OnInit {
         Religion : '',
         PlaceOfBirth : '',
         DateOfBirth : formData.dateOfBirth,
-        IndentityCard : '',
-        PlaceIssued : '',
+        IndentityCard : formData.idCard,
+        PlaceIssued : formData.idCardIssuePlace,
         Country : '',
         Province : '',
         District : '',
@@ -423,6 +491,9 @@ export class EmployeeDetailDialogComponent implements OnInit {
         }
       });
 
+      this.uploadBHXH(this.data.code);
+      this.uploadCCCD(this.data.code);
+
   }
   
 
@@ -433,4 +504,24 @@ export class EmployeeDetailDialogComponent implements OnInit {
   onClose() {
     this.dialogRef.close();
   }
+
+  onFileOtherSelected(event: Event, type: 'cccd' | 'bhxh') {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (type === 'cccd') {
+        this.cccdFile = file;
+        this.cccdPreview = reader.result;
+      } else {
+        this.bhxhFile = file;
+        this.bhxhPreview = reader.result;
+      }
+    };
+
+    reader.readAsDataURL(file);
+  }
+}
 } 

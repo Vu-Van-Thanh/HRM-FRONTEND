@@ -304,18 +304,18 @@
 
                 <!-- Người liên hệ khẩn cấp -->
                 <div class="info-item" *ngIf="!isEditMode">
-                  <label>Người liên hệ khẩn cấp:</label>
-                  <span>{{employee?.emergencyContact}}</span>
+                  <label>Số BHYT:</label>
+                  <span>{{employee.insuranceNumber}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
-                  <mat-label>Người liên hệ khẩn cấp</mat-label>
-                  <input matInput formControlName="emergencyContact">
+                  <mat-label>Số BHYT</mat-label>
+                  <input matInput formControlName="insuranceNumber">
                 </mat-form-field>
 
                 <!-- Số điện thoại liên hệ khẩn cấp -->
                 <div class="info-item" *ngIf="!isEditMode">
                   <label>Số điện thoại liên hệ khẩn cấp:</label>
-                  <span>{{employee?.emergencyPhone}}</span>
+                  <span>{{relativeNow?.phoneNumber}}</span>
                 </div>
                 <mat-form-field appearance="outline" *ngIf="isEditMode">
                   <mat-label>Số điện thoại liên hệ khẩn cấp</mat-label>
@@ -324,10 +324,24 @@
               </div>
             </div>
 
+            <!-- Ảnh CCCD -->
+          <div class="form-section">
+            <label>Ảnh CCCD:</label>
+            <input type="file" accept="image/*" (change)="onFileOtherSelected($event, 'cccd')" />
+            <img *ngIf="cccdPreview" [src]="cccdPreview" alt="CCCD" class="preview-image" />
+          </div>
+
+          <!-- Ảnh BHXH -->
+          <div class="form-section">
+            <label>Ảnh BHXH:</label>
+            <input type="file" accept="image/*" (change)="onFileOtherSelected($event, 'bhxh')" />
+            <img *ngIf="bhxhPreview" [src]="bhxhPreview" alt="BHXH" class="preview-image" />
+          </div>
+
             <!-- Nút lưu/hủy khi ở chế độ chỉnh sửa -->
             <div class="form-actions" *ngIf="isEditMode">
               <button mat-stroked-button type="button" (click)="onCancel()">Hủy</button>
-              <button mat-raised-button color="primary" type="submit" (click)="onSave()" [disabled]="!employeeForm.valid">
+              <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
                 Lưu thay đổi
               </button>
             </div>
