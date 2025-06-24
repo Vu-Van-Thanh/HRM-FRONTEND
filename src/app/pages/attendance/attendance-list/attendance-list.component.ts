@@ -40,6 +40,7 @@ export interface Project {
 
 // Original interfaces for backward compatibility
 export interface Timesheet {
+  code? : string;
   id: number;
   date: string;
   checkIn: string;
@@ -56,6 +57,7 @@ export interface Timesheet {
   status: string;
   approved: number;
   cleared: number;
+  employeeId? : string;
 }
 
 export interface Activity {
@@ -620,6 +622,8 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       const statusDisplay = this.getStatusDisplay(attendance.status);
       
       return {
+        code: attendance.attendanceId,
+        employeeId : attendance.employeeId,
         id: index + 1, // Generate a temporary ID
         date: attendance.attendanceDate.split('T')[0], // Format as YYYY-MM-DD
         checkIn: startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
@@ -799,6 +803,8 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       }
       
       return {
+        code : attendance.attendanceId,
+        employeeId : attendance.employeeId,
         id: index + 1,
         employeeName: employee?.employeeName || attendance.employeeId,
         department: departmentName,
@@ -909,10 +915,20 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   approveTimesheet(row: ApprovalTimesheet): void {
+    const body =  {
+      AttendanceId : row.code,
+      EmployeeId : row.employeeId,
+      Status : 'APPROVED'
+    }
     // TODO: Call API to approve timesheet
-    row.status = 'approved';
-    row.approved = 1;
-    this.toastService.success('Đã duyệt khai công thành công');
+    console.log('Attendance : ' ,body);
+    this.http.post(API_ENDPOINT.updateAttendance,body)
+    .subscribe(timesheets => {
+        row.status = 'approved';
+        row.approved = 1;
+        this.toastService.success('Đã duyệt khai công thành công');
+      });
+    
   }
 
   rejectTimesheet(row: ApprovalTimesheet): void {

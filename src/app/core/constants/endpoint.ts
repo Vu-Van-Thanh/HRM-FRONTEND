@@ -66,5 +66,6 @@ export const API_ENDPOINT = {
    getMailBoxIDList : "https://localhost:7062/Mailbox/ListMailBoxID/{employeeIds}", 
    sendMailList : "https://localhost:7062/Email/sendList",
    getBatchSalary : "https://localhost:7090/SalaryPayment/SalaryPaymentList",
-   updateUserProfile : "https://localhost:7198/Auth/profile"
+   updateUserProfile : "https://localhost:7198/Auth/profile",
+   updateAttendance : 'https://localhost:7030/Attendance'
 };
