@@ -4,6 +4,8 @@ import { Relative } from '../employee.model';
 import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { EmployeeService } from '../employee.service';
 import { LocalStorage } from 'src/app/core/enums/local-storage.enum';
+import { AuthenticationService } from '../../../core/services/auth.service';
+
 
 @Component({
   selector: 'app-personal-info',
@@ -71,6 +73,7 @@ export class PersonalInfoComponent implements OnInit {
   isLoading = false;
   
   constructor(
+    private authenticationService: AuthenticationService,
     private http: HttpClient,
     private employeeService: EmployeeService
   ) { }
@@ -81,15 +84,12 @@ export class PersonalInfoComponent implements OnInit {
 
   getEmployeeData() {
     this.isLoading = true;
-    
-    // Get employeeID from localStorage
     const userProfileString = localStorage.getItem('currentUserProfile');
     if (userProfileString) {
       const userProfile = JSON.parse(userProfileString);
       const employeeId = userProfile.employeeID;
       
       if (employeeId) {
-        // Create filter with just employeeId
         const filter = {
           department: null,
           jobTitle: null,
@@ -97,7 +97,6 @@ export class PersonalInfoComponent implements OnInit {
           employeeId: employeeId
         };
         
-        // Call the API with the filter
         this.http.post<any>(API_ENDPOINT.getAllEmployee, filter).subscribe({
           next: (response) => {
             if (response && response.data && response.data.length > 0) {
@@ -133,8 +132,7 @@ export class PersonalInfoComponent implements OnInit {
   }
   
   UpdateInfo(){
-    let existingEmployee = JSON.parse(localStorage.getItem(localStorage.getItem('currentUserProfile')));
-
+    let existingEmployee  = JSON.parse(localStorage.getItem('currentUserProfile'));
     const employeeUpdate = {
       EmployeeID :existingEmployee?.employeeID || '',
       ManagerID : this.employee.managerID,
@@ -160,6 +158,7 @@ export class PersonalInfoComponent implements OnInit {
       InsuranceNumber: this.employee.insuranceNumber,
       DepartmentID: this.employee.departmentID,
     }
+    
     this.http.put<any>(API_ENDPOINT.updateEmployeeById.replace('{Id}', existingEmployee?.employeeID || ''), employeeUpdate).subscribe({
       next: (response) => {
         if (response) {
