@@ -91,3 +91,51 @@ apx-chart {
   display: flex;
   flex-direction: column;
 }
+
+/* Modal Header */
+.modal-header {
+  background-color: #007bff; /* Blue background */
+  color: white;              /* White text */
+  border-bottom: 2px solid #0056b3;
+}
+
+/* Close Button */
+.modal-header .btn-close {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 1.5rem;
+  font-size: 1rem;
+  background-color: #f8f9fa; /* Light background */
+  border-top: 1px solid #e9ecef;
+}
+
+/* List Group */
+.list-group-item {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon Styling */
+.list-group-item i {
+  font-size: 1.2rem;
+  color: #007bff;
+}
+
+/* Empty Message */
+.text-center {
+  font-style: italic;
+  color: #6c757d;
+}

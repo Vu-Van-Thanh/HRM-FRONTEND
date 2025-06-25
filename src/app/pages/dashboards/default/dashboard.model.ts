@@ -26,16 +26,16 @@ export interface AttendaceFilterDTO
 
 export interface AttendaceResponseDTO
 {
-    AttendanceId : string;
-    EmployeeId : string;
-    AttendanceDate : Date;
-    Starttime: Date;
-    Endtime: Date;
-    Status : string;
-    Position : string;
-    Description : string;
-    ActivityId : string;
-    ProjectId : string;
+    attendanceId : string;
+    employeeId : string;
+    attendanceDate : Date;
+    starttime: Date;
+    endtime: Date;
+    status : string;
+    position : string;
+    description : string;
+    activityId : string;
+    projectId : string;
 }
 
 export interface ProjectTaskInfo {

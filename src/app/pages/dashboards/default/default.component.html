@@ -71,39 +71,43 @@
                     <div class="row">
                         <div class="col-md-2">
                             <div class="text-center">
-                                <div class="avatar-md mx-auto mb-2 rounded-circle bg-light-subtle">
-                                    <span class="avatar-title rounded-circle bg-light font-size-24">
-                                        <i class="bx bx-file text-primary"></i>
-                                    </span>
-                                </div>
-                                <p class="mb-0 font-size-13">Công</p>
+                               <a href="http://localhost:4200/system/activity/attendance" class="text-decoration-none" style="color: inherit;">
+                                    <div class="avatar-md mx-auto mb-2 rounded-circle bg-light-subtle">
+                                        <span class="avatar-title rounded-circle bg-light font-size-24">
+                                            <i class="bx bx-file text-primary"></i>
+                                        </span>
+                                    </div>
+                                    <p class="mb-0 font-size-13">Công</p>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <a href="http://localhost:4200/employee/profile" class="text-decoration-none"  style="color: inherit;">
+                                    <div class="avatar-md mx-auto mb-2 rounded-circle bg-light-subtle">
+                                        <span class="avatar-title rounded-circle bg-light font-size-24">
+                                            <i class="bx bx-id-card text-primary"></i>
+                                        </span>
+                                    </div>
+                                    <p class="mb-0 font-size-13">Hồ sơ cá nhân</p>
+                                </a>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="text-center">
                                 <div class="avatar-md mx-auto mb-2 rounded-circle bg-light-subtle">
                                     <span class="avatar-title rounded-circle bg-light font-size-24">
-                                        <i class="bx bx-id-card text-primary"></i>
+                                        <i class="bx bx-check-square text-primary" style="cursor: pointer;" (click)="openMissedDaysModal()"></i>
                                     </span>
                                 </div>
-                                <p class="mb-0 font-size-13">Hồ sơ cá nhân</p>
+                                <p class="mb-0 font-size-13" >DS quên chấm công</p>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="text-center">
                                 <div class="avatar-md mx-auto mb-2 rounded-circle bg-light-subtle">
                                     <span class="avatar-title rounded-circle bg-light font-size-24">
-                                        <i class="bx bx-check-square text-primary"></i>
-                                    </span>
-                                </div>
-                                <p class="mb-0 font-size-13">DS quên chấm công</p>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="text-center">
-                                <div class="avatar-md mx-auto mb-2 rounded-circle bg-light-subtle">
-                                    <span class="avatar-title rounded-circle bg-light font-size-24">
-                                        <i class="bx bx-calendar-check text-primary"></i>
+                                        <i class="bx bx-calendar-check text-primary" style="cursor: pointer;" (click)="openHolidayList()"></i>
                                     </span>
                                 </div>
                                 <p class="mb-0 font-size-13">DS ngày nghỉ</p>
@@ -113,7 +117,7 @@
                             <div class="text-center">
                                 <div class="avatar-md mx-auto mb-2 rounded-circle bg-light-subtle">
                                     <span class="avatar-title rounded-circle bg-light font-size-24">
-                                        <i class="bx bx-time-five text-primary"></i>
+                                        <i class="bx bx-time-five text-primary" style="cursor: pointer;" (click)="openOTDaysModal()"></i>
                                     </span>
                                 </div>
                                 <p class="mb-0 font-size-13">DS tăng ca</p>
@@ -534,3 +538,65 @@
         </div>
     </div>
 </div> <!-- container-fluid -->
+<ng-template #missedDaysModalTemplate>
+  <div class="modal-header bg-primary text-white">
+    <h5 class="modal-title">Danh sách quên chấm công</h5>
+    <button type="button" class="btn-close text-white" (click)="modalRef?.hide()"></button>
+  </div>
+  <div class="modal-body">
+    <div *ngIf="missedDaysList.length > 0; else noMissedDays">
+      <ul class="list-group">
+        <li *ngFor="let missedDay of missedDaysList" class="list-group-item">
+          <i class="bx bx-calendar text-primary me-2"></i>{{ missedDay }}
+        </li>
+      </ul>
+    </div>
+    <ng-template #noMissedDays>
+      <p class="text-center text-muted">Không có ngày nào bị bỏ qua trong tháng này.</p>
+    </ng-template>
+  </div>
+</ng-template>
+
+<ng-template #holidaysTemplate>
+  <div class="card h-100">
+    <div class="card-body">
+      <h4 class="card-title mb-3">Danh Sách Ngày Nghỉ</h4>
+      
+      <!-- Display Holidays if they exist -->
+      <div *ngIf="holidays.length > 0; else noHolidays">
+        <ul class="list-group">
+          <li *ngFor="let holiday of holidays" class="list-group-item">
+            <i class="bx bx-calendar text-success me-2"></i>{{ holiday.name }} - {{ holiday.date | date:'dd/MM/yyyy' }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Template for No Holidays -->
+      <ng-template #noHolidays>
+        <p class="text-center text-muted">Không có ngày nghỉ trong năm này.</p>
+      </ng-template>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #otDaysTemplate>
+  <div class="card h-100">
+    <div class="card-body">
+      <h4 class="card-title mb-3">Danh Sách Tăng Ca</h4>
+
+      <!-- Display Overtime Days if they exist -->
+      <div *ngIf="otDaysList.length > 0; else noOTDays">
+        <ul class="list-group">
+          <li *ngFor="let otDay of otDaysList" class="list-group-item">
+            <i class="bx bx-time-five text-success me-2"></i>{{ otDay}} hours
+          </li>
+        </ul>
+      </div>
+
+      <!-- Template for No Overtime Days -->
+      <ng-template #noOTDays>
+        <p class="text-center text-muted">Không có ngày tăng ca trong tháng này.</p>
+      </ng-template>
+    </div>
+  </div>
+</ng-template>

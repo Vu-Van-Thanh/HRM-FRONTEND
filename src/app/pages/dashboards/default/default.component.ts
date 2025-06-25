@@ -55,6 +55,7 @@ export class DefaultComponent implements OnInit {
   modalRef?: BsModalRef;
   isVisible: string;
 
+
   emailSentBarChart: ChartType;
   monthlyEarningChart: ChartType;
   transactions: any;
@@ -63,9 +64,14 @@ export class DefaultComponent implements OnInit {
     backdrop: true,
     ignoreBackdropClick: true
   };
-
+  urlGetHoliday = 'https://calendarific.com/api/v2/holidays?&api_key=sN070bo2wMtGoDK7mIRDFqLQgvHKReQj&country=VN&year=2025';
+  holidays: any[] = [];
   isActive: string;
-
+  missedDaysList: string[] = [];
+  otDaysList: string[] = [];
+  @ViewChild('missedDaysModalTemplate') missedDaysModalTemplate: TemplateRef<any>;
+  @ViewChild('otDaysTemplate') otDaysTemplate: TemplateRef<any>;
+   @ViewChild('holidaysTemplate') holidaysTemplate: TemplateRef<any>;  // Reference to the ng-template
   // Calendar properties
   selectedMonth: number = new Date().getMonth(); // Current month (0-11)
   selectedYear: number = new Date().getFullYear(); // Current year
@@ -103,6 +109,7 @@ export class DefaultComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getHolidays();
     this.fetchData();
     this.loadCurrentUserProfile();
     this.setCurrentWeekDates();
@@ -492,9 +499,9 @@ export class DefaultComponent implements OnInit {
 
     // Calculate total hours worked
     attendanceRecords.forEach(record => {
-      if (record.Starttime && record.Endtime) {
-        const start = new Date(record.Starttime);
-        const end = new Date(record.Endtime);
+      if (record.starttime && record.endtime) {
+        const start = new Date(record.starttime);
+        const end = new Date(record.endtime);
         const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
         totalHours += duration;
       }
@@ -789,6 +796,7 @@ export class DefaultComponent implements OnInit {
     console.log('Filtered activities:', this.filteredActivities.length, 'Selected weekday:', this.selectedWeekday);
   }
 
+
   /**
    * Fetch attendance records for the current employee
    */
@@ -828,8 +836,9 @@ export class DefaultComponent implements OnInit {
       .subscribe({
         next: (data) => {
           console.log('Attendance records:', data);
-          
-          // Update calendar with attendance data
+          this.otDaysList = this.getOTDaysList(data);
+          this.missedDaysList = this.getMissedDaysList(data);
+          console.log('Missed days:', this.missedDaysList);
           this.updateCalendarWithAttendance(data);
         },
         error: (error) => {
@@ -837,6 +846,68 @@ export class DefaultComponent implements OnInit {
         }
       });
   }
+
+  
+getMissedDaysList(attendanceRecords: AttendaceResponseDTO[]): string[] {
+  const today = new Date();
+  const currentMonth = today.getMonth() + 1;
+  const currentYear = today.getFullYear();
+  const missedDays: string[] = [];
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const lastDay = today.getDate();
+  console.log('Current month:', currentMonth, 'Current year:', currentYear, 'Last day of month:', lastDay);
+  const attendedDays = new Set<string>();
+  attendanceRecords.forEach(record => {
+    // Lấy ngày từ Starttime nếu có và nằm trong tháng và năm hiện tại
+    if (record.starttime) {
+      const startDate = new Date(record.starttime);
+      if (startDate.getMonth() + 1 === currentMonth && startDate.getFullYear() === currentYear) {
+        attendedDays.add(startDate.toISOString().split('T')[0]);
+      }
+    }
+
+    // Lấy ngày từ Endtime nếu có và nằm trong tháng và năm hiện tại
+    if (record.endtime) {
+      const endDate = new Date(record.endtime);
+      if (endDate.getMonth() + 1 === currentMonth && endDate.getFullYear() === currentYear) {
+        console.log('Adding end date:', endDate);
+        attendedDays.add(endDate.toISOString().split('T')[0]);
+      }
+    }
+  });
+  // Duyệt qua tất cả các ngày trong tháng để tìm các ngày chưa tham gia
+  for (let day = 1; day <= lastDay; day++) {
+    // Format ngày dưới dạng yyyy-MM-dd để so sánh với attendedDays
+    const dayStr = `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    if (!attendedDays.has(dayStr)) {
+      // Format để hiển thị: dd/MM/yyyy
+      missedDays.push(`${day.toString().padStart(2, '0')}/${(currentMonth).toString().padStart(2, '0')}/${currentYear}`);
+    }
+  }
+
+  return missedDays;
+}
+
+  getOTDaysList(attendanceRecords: AttendaceResponseDTO[]): string[] {
+  const otDays: string[] = [];
+
+  attendanceRecords.forEach(record => {
+    if (record.starttime && record.endtime) {
+      const startTime = new Date(record.starttime);
+      const endTime = new Date(record.endtime);
+      const diffInMs = endTime.getTime() - startTime.getTime();
+      const diffInHours = diffInMs / (1000 * 60 * 60);
+      if (diffInHours > 8) {
+        otDays.push(`${startTime.toISOString().split('T')[0]} - ${diffInHours.toFixed(2)} hours`);
+      }
+    }
+  });
+  console.log('OT Days:', otDays);
+
+  return otDays;
+}
+
+
 
   /**
    * Update calendar with attendance data
@@ -852,7 +923,7 @@ export class DefaultComponent implements OnInit {
         
         // Find attendance records for this day
         const dayAttendance = attendanceRecords.filter(record => {
-          const recordDate = new Date(record.AttendanceDate);
+          const recordDate = new Date(record.attendanceDate);
           return recordDate.getDate() === dayDate.getDate() && 
                  recordDate.getMonth() === dayDate.getMonth() && 
                  recordDate.getFullYear() === dayDate.getFullYear();
@@ -946,6 +1017,32 @@ export class DefaultComponent implements OnInit {
     });
   }
 
+   openMissedDaysModal(): void {
+    console.log('Opening missed days modal with list:', this.missedDaysList);
+    this.modalRef = this.modalService.show(this.missedDaysModalTemplate);
+  }
+
+  getHolidays(): void {
+    this.http.get<any>(this.urlGetHoliday).subscribe((response) => {
+      this.processHolidayData(response);
+    });
+  }
+ processHolidayData(response: any): void {
+  if (response && response.response && response.response.holidays) {
+    const currentMonth = new Date().getMonth(); // Get the current month (0-11)
+    const currentYear = new Date().getFullYear(); // Get the current year
+
+    this.holidays = response.response.holidays.filter((holiday) => {
+      // Parse the holiday date
+      const holidayDate = new Date(holiday.date.iso);
+      return holidayDate.getMonth() === currentMonth && holidayDate.getFullYear() === currentYear;
+    }).map((holiday) => ({
+      name: holiday.name,
+      date: holiday.date.iso
+    }));
+  }
+}
+
   /**
    * Update work progress chart with task data
    */
@@ -978,5 +1075,12 @@ export class DefaultComponent implements OnInit {
         show: true
       }
     };
+  }
+
+  openHolidayList(): void {
+    this.modalRef = this.modalService.show(this.holidaysTemplate);
+  }
+  openOTDaysModal(): void {
+    this.modalRef = this.modalService.show(this.otDaysTemplate);  // Display OT Days Template
   }
 }
