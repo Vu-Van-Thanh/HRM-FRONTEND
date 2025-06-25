@@ -76,7 +76,7 @@
         </mat-form-field>
         
         <!-- ComboBox input -->
-        <mat-form-field appearance="outline" class="full-width" *ngIf="field.fieldType === 'ComboBox'">
+        <mat-form-field appearance="outline" class="full-width" *ngIf="field.fieldType.startsWith('ComboBox')">
           <mat-label>{{ field.fieldName }}</mat-label>
           <mat-select [formControlName]="field.fieldId">
             <mat-option *ngFor="let option of getFieldOptions(field)" [value]="option.value">
@@ -87,7 +87,7 @@
       </div>
 
       <div class="dialog-actions">
-        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting">
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
           Gửi đăng ký
         </button>
         <button mat-button type="button" (click)="onBack()">Quay lại</button>

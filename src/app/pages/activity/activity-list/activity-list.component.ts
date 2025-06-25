@@ -19,6 +19,7 @@ import { Department } from '../../../system/department/department.model';
 import { EmployeeDepartmentDTO } from 'src/app/system/salary/salary.model';
 import { tap, forkJoin, catchError, of, map, Observable } from 'rxjs';
 import { ActivityRegistrationComponent } from '../activity-registration/activity-registration.component';
+import { ToastService } from 'angular-toastify';
 
 @Component({
   selector: 'app-activity-list',
@@ -95,7 +96,8 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private departmentService: DepartmentService,
-    private router: Router
+    private router: Router,
+    private toastService : ToastService
   ) {
     this.isAdmin = this.authService.isAdmin();
     this.currentUserId = this.authService.getCurrentUserId();
@@ -194,7 +196,6 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
 
   loadActivities(): void {
     const formValues = this.advancedFilterForm.value;
-    console.log('📁 FORM VALUES:', formValues);
     const employeeFilter = {
       department: this.selectedDepartment || formValues.departmentID || '',
       managerId: formValues.managerID || ''
@@ -252,9 +253,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
           .subscribe({
             next: (employees) => {
               const employeeIds = employees.map(emp => emp.employeeID).join(',');
-              console.log('📁 DEBUG: Employee IDs:', employeeIds);
               const params: any = {};
-              
               // Only add parameters that have values
               if (employeeIds) params.EmployeeIdList = employeeIds;
               if (formValues.activityType) params.ActivityId = formValues.activityType;
@@ -266,9 +265,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
               // Gọi API để lấy danh sách hoạt động với danh sách nhân viên đã lọc
               this.activityService.getActivities(params).subscribe({
                 next: (activities) => {
-
-                  
-                  console.log('🔍 ZZZZZZZZZZZZZZZZZZDanh sách hoạt động đã nhận được:', activities);
+                  console.log('🔍Danh sách hoạt động đã nhận được:', activities);
                   // Map dữ liệu nhận được để hiển thị lên giao diện
                   const mappedActivities = activities.map(activity => {
                     // Tìm thông tin nhân viên từ employeeId
@@ -312,7 +309,6 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
                         console.error('Lỗi khi parse requestFlds:', e);
                       }
                     }
-                    
                     return {
                       ...activity,
                       employeeName: employee ? employee.employeeName : 'N/A',
@@ -323,9 +319,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
                       activityType: activity.activityId || activity.activityType
                     };
                   });
-                  
                   this.dataSource.data = mappedActivities;
-                  console.log('🔍 Danh sách hoạt động đã map:', this.dataSource.data);
                   this.departments = [...new Set(mappedActivities.map(activity => activity.departmentName))];
                 },
                 error: (error) => {
@@ -492,6 +486,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
       if (result) {
         this.activityService.rejectActivity(activity, result.reason).subscribe({
           next: () => {
+            this.toastService.success('Yêu cầu đã bị từ chối');
             this.loadActivities();
             this.loadPersonalActivities();
           },

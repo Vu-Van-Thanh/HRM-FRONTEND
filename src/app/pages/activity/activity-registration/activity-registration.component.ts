@@ -138,66 +138,91 @@ export class ActivityRegistrationComponent implements OnInit {
   }
 
   onActivityTypeChange(): void {
-    if (!this.selectedActivityId) {
-      return;
-    }
-
-    this.isLoading = true;
-    
-    // Find the selected activity
-    this.selectedActivity = this.activityTypes.find(a => a.activityId === this.selectedActivityId) || null;
-    
-    // Load activity fields with query parameter
-    const params = new HttpParams().set('activityId', this.selectedActivityId);
-    this.http.get<ActivityField[]>(API_ENDPOINT.getAllActivityFld, { params }).subscribe({
-      next: (fields) => {
-        // Process fields and add default options for ComboBox if needed
-        this.formFields = fields.map(field => {
-          // Process any field-specific options or transformations here
-          if (field.fieldType === 'ComboBox' && !field.options) {
-            field.options = [
-              { value: 'option1', label: 'Option 1' },
-              { value: 'option2', label: 'Option 2' }
-            ];
-          }
-          return field;
-        });
-        
-        // Create form controls based on fields
-        const currentDate = new Date();
-        const formControls: any = {
-          startTime: [currentDate, Validators.required],
-          endTime: [currentDate, Validators.required]
-        };
-        
-        fields.forEach(field => {
-          let defaultValue = '';
-          
-          // Set appropriate default values based on field type
-          if (field.fieldType === 'DateTime') {
-            defaultValue = new Date().toISOString();
-          } else if (field.fieldType === 'ComboBox' && field.options && field.options.length > 0) {
-            defaultValue = field.options[0].value;
-          }
-          
-          formControls[field.fieldId] = [defaultValue, Validators.required];
-        });
-        
-        this.form = this.fb.group(formControls);
-        
-        // Initialize time inputs
-        this.startTimeInput = this.formatTimeForInput(currentDate);
-        this.endTimeInput = this.formatTimeForInput(currentDate);
-        
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading activity fields:', error);
-        this.snackBar.open('Không thể tải form đăng ký', 'Đóng', { duration: 3000 });
-        this.isLoading = false;
-      }
-    });
+  if (!this.selectedActivityId) {
+    return;
   }
+
+  this.isLoading = true;
+
+  // Find the selected activity
+  this.selectedActivity = this.activityTypes.find(a => a.activityId === this.selectedActivityId) || null;
+
+  // Load activity fields with query parameter
+  const params = new HttpParams().set('activityId', this.selectedActivityId);
+  this.http.get<ActivityField[]>(API_ENDPOINT.getAllActivityFld, { params }).subscribe({
+    next: (fields) => {
+      console.log('Loaded activity fields:', fields);
+      // Process fields
+      this.formFields = fields.map(field => {
+        // Check if ComboBox field and load options directly from the fieldType
+        if (field.fieldType.startsWith('ComboBox')) {
+          // Extract options from the fieldType string like "ComboBox{'ops1','ops2'}"
+          const optionsMatch = field.fieldType.match(/{(.*?)}/);
+          console.log('Options match:', optionsMatch[0]); // Debugging line to check the match
+
+          if (optionsMatch && optionsMatch[1]) {
+            // Clean up the options string and split it by commas
+            field.options = optionsMatch[1]
+              .split(',')
+              .map(option => ({
+                value: option.trim().replace(/['"]+/g, ''),  // Remove any quotes around options
+                label: option.trim().replace(/['"]+/g, '')  // Remove any quotes around options
+              }));
+          } else {
+            // Handle the case where options are just a quoted comma-separated string like '"ops1","ops2"'
+            const simpleOptionsMatch = field.fieldType.match(/"([^"]+)"/g);
+            if (simpleOptionsMatch) {
+              field.options = simpleOptionsMatch.map(option => ({
+                value: option.replace(/['"]+/g, ''),  // Remove quotes from options
+                label: option.replace(/['"]+/g, '')   // Remove quotes from options
+              }));
+            }
+          }
+          console.log('Parsed options:', field.fieldName, field.options); // Debugging line to check parsed options
+        }
+
+        return field;
+      });
+
+      // Create form controls based on fields
+      const currentDate = new Date();
+      const formControls: any = {
+        startTime: [currentDate, Validators.required],
+        endTime: [currentDate, Validators.required]
+      };
+
+      fields.forEach(field => {
+        let defaultValue = '';
+
+        // Set default values based on field type
+        if (field.fieldType === 'DateTime') {
+          defaultValue = new Date().toISOString();
+        } else if (field.fieldType === 'ComboBox' && field.options && field.options.length > 0) {
+          defaultValue = field.options[0].value;
+        } else if (field.fieldType === 'Text') {
+          defaultValue = ''; 
+        }
+
+        formControls[field.fieldId] = [defaultValue, Validators.required];
+      });
+
+      // Initialize form
+      this.form = this.fb.group(formControls);
+
+      // Initialize time inputs
+      this.startTimeInput = this.formatTimeForInput(currentDate);
+      this.endTimeInput = this.formatTimeForInput(currentDate);
+
+      this.isLoading = false;
+    },
+    error: (error) => {
+      console.error('Error loading activity fields:', error);
+      this.snackBar.open('Không thể tải form đăng ký', 'Đóng', { duration: 3000 });
+      this.isLoading = false;
+    }
+  });
+}
+
 
   // Get options for ComboBox fields
   getFieldOptions(field: ActivityField): { value: string; label: string }[] {
@@ -205,27 +230,21 @@ export class ActivityRegistrationComponent implements OnInit {
   }
 
   onSubmit(): void {
+    console.log('Submitting form with values:', this.form.value);
     if (this.form.invalid || !this.selectedActivity || !this.employeeId) {
       if (!this.employeeId) {
         this.snackBar.open('Không tìm thấy thông tin nhân viên, vui lòng đăng nhập lại', 'Đóng', { duration: 3000 });
       }
       return;
     }
-
     // Make sure the datetime values are updated with the latest time inputs
     this.updateDateTime('start');
     this.updateDateTime('end');
-
     this.isSubmitting = true;
-    
     const formValue = this.form.value;
-    
     // Get the date values with proper time components
     const startDate = formValue.startTime as Date;
     const endDate = formValue.endTime as Date;
-    
-    console.log('Thời gian bắt đầu (giờ VN):', this.formatVietnamDateTime(startDate));
-    console.log('Thời gian kết thúc (giờ VN):', this.formatVietnamDateTime(endDate));
     
     // Explicitly set the time components again to ensure they're applied
     if (startDate && this.startTimeInput) {
@@ -237,9 +256,6 @@ export class ActivityRegistrationComponent implements OnInit {
       const [endHours, endMinutes] = this.endTimeInput.split(':').map(Number);
       endDate.setHours(endHours, endMinutes, 0, 0);
     }
-    
-    console.log('Đã chọn thời gian bắt đầu (giờ VN):', this.formatVietnamDateTime(startDate));
-    console.log('Đã chọn thời gian kết thúc (giờ VN):', this.formatVietnamDateTime(endDate));
     
     // Tính toán estimatedHours - số giờ giữa endTime và startTime
     const diffMs = endDate.getTime() - startDate.getTime();
@@ -288,9 +304,6 @@ export class ActivityRegistrationComponent implements OnInit {
     startDateToSend.setHours(startDateToSend.getHours() + 7);
     endDateToSend.setHours(endDateToSend.getHours() + 7);
     
-    console.log('Thời gian bắt đầu ĐIỀU CHỈNH (giờ VN):', this.formatVietnamDateTime(startDateToSend));
-    console.log('Thời gian kết thúc ĐIỀU CHỈNH (giờ VN):', this.formatVietnamDateTime(endDateToSend));
-    
     // Create activity request according to ActivityRequestDTO
     const activityData = {
       employeeId: this.employeeId,
@@ -302,11 +315,6 @@ export class ActivityRegistrationComponent implements OnInit {
       requestFlds: JSON.stringify(requestFlds),
       estimatedHours: estimatedHours 
     };
-    
-    // Log ISO string & giờ địa phương để kiểm tra
-    console.log('Gửi lên server (ISO):', activityData.startTime, activityData.endTime);
-    console.log('RequestFlds:', requestFlds);
-    console.log('EstimatedHours:', activityData.estimatedHours);
     
     this.activityService.createActivity(activityData).subscribe({
       next: () => {
