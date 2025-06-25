@@ -119,16 +119,21 @@ applyFilterBatch() : void {
     const formValues = this.filterFormBatch.value;
     
     const employeeFilter = {
-      department: formValues.departmentID || '',
-      employeeId: formValues.employeeIdBatch || ''
+      Department: formValues.departmentID || '',
     };
     console.log('employeeFilter:', employeeFilter);
     this.http.get<EmployeeDepartmentDTO[]>(API_ENDPOINT.getEmployeeID, { params: employeeFilter })
       .pipe(
         tap(employees => {
           this.employeeList = employees;
-          console.log('Filtered employees:', this.employeeList);
-           const batchEmployee = this.employeeList.map(emp => emp.employeeID);
+          const batchEmployeeFromList = this.employeeList.map(emp => emp.employeeID);
+          // Lấy danh sách nhân viên theo ID
+          const inputValue = this.filterFormBatch.get('employeeIdBatch')?.value;
+          const batchEmployeeFromInput = inputValue
+            ? inputValue.split(',').map(id => id.trim()).filter(id => id !== '')
+            : [];
+          const batchEmployee = Array.from(new Set([...batchEmployeeFromList, ...batchEmployeeFromInput]));
+          console.log('batchEmployee:', batchEmployee);
           let params = new HttpParams();
             batchEmployee.forEach(id => {
               params = params.append('employeeIds', id);
@@ -159,6 +164,7 @@ applyFilterBatch() : void {
       .map(b => b.salaryBase.salaryId);
 
     const employeeEmails: string[] = [];
+    console.log('URL', API_ENDPOINT.getMailBoxIDList.replace('{employeeIds}', this.batchEmployees.map(emp => emp.employeeId).join(',')));
     this.http.get<string[]>(API_ENDPOINT.getMailBoxIDList.replace('{employeeIds}', this.batchEmployees.map(emp => emp.employeeId).join(',')) )
       .subscribe(emails => {
         employeeEmails.push(...emails);
