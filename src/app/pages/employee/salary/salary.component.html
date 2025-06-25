@@ -354,6 +354,7 @@
                       <th>Lương thực lãnh</th>
                       <th>Số tiền đã thanh toán</th>
                       <th>Trạng thái</th>
+                      <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -369,6 +370,9 @@
                         <span class="badge" [ngClass]="getPaymentStatusClass(payment.status)">
                           {{payment.status}}
                         </span>
+                      </td>
+                      <td>
+                        <button *ngIf="payment.status === 'Pending'" class="btn btn-primary btn-sm" (click)="ConfirmPayment(payment.paymentId)">Confirm</button>
                       </td>
                     </tr>
                   </tbody>

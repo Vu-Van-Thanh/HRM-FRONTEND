@@ -67,5 +67,7 @@ export const API_ENDPOINT = {
    sendMailList : "https://localhost:7062/Email/sendList",
    getBatchSalary : "https://localhost:7090/SalaryPayment/SalaryPaymentList",
    updateUserProfile : "https://localhost:7198/Auth/profile",
-   updateAttendance : 'https://localhost:7030/Attendance'
+   updateAttendance : 'https://localhost:7030/Attendance',
+   pushPayment : 'https://localhost:7090/SalaryPayment/ListPayment',
+   updatePaymentStatus : 'https://localhost:7090/SalaryPayment/UpdateStatus'
 };

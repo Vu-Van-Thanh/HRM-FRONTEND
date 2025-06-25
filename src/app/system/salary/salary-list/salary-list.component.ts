@@ -17,6 +17,15 @@ interface Position {
   label: string;
 }
 
+interface PaymentUpdate {
+  BaseId: string;
+  NetSalary: number;
+  PaymentDate: Date;
+  CreatedAt : Date;
+  Status : string;
+  Amount : number;
+}
+
 interface EmailTemplateSalary{
   templateId : string;
   templateName : string;
@@ -145,6 +154,10 @@ applyFilterBatch() : void {
       return;
     }   
     let MailSalaryList: MailSalary[] = [];
+    const employeeBaseIDs = this.batchEmployees
+      .filter(b => b.salaryBase?.salaryId)
+      .map(b => b.salaryBase.salaryId);
+
     const employeeEmails: string[] = [];
     this.http.get<string[]>(API_ENDPOINT.getMailBoxIDList.replace('{employeeIds}', this.batchEmployees.map(emp => emp.employeeId).join(',')) )
       .subscribe(emails => {
@@ -155,6 +168,11 @@ applyFilterBatch() : void {
       .subscribe(template => {
         for(let i = 0; i < this.batchEmployees.length; i++) {
           const mail = new MailSalary();
+          const email = employeeEmails[i];
+          if (!email) {
+            console.warn(`Email không tồn tại tại index ${i}`);
+            continue; 
+          }
           mail.MailboxId = employeeEmails[i].toUpperCase();
           mail.Subject = template.templateName.replace('[Month]', this.today.getMonth().toString()).replace('[Year]', this.today.getFullYear().toString());
           mail.Body = this.processBody(template.templateBody, this.batchEmployees[i]);
@@ -162,9 +180,24 @@ applyFilterBatch() : void {
           console.log('Processed mail:', mail);
         }
         this.http.post(API_ENDPOINT.sendMailList, MailSalaryList)
-      .subscribe(response => { 
+        .subscribe(response => { 
         if (response) {
           this.toastService.success('✅ Gửi thông báo lương thành công:' + response);
+          const PaymentUpdate :  PaymentUpdate[] = employeeBaseIDs.map(id => ({
+              BaseId: id,
+              Amount: 0,
+              NetSalary :  Number(this.batchEmployees.find(emp => emp.salaryBase?.salaryId === id)?.finalSalary || 0),
+              PaymentDate: this.today,
+              CreatedAt: new Date(),
+              Status: 'Pending'
+          }));
+          console.log('PaymentUpdate:', PaymentUpdate);
+          this.http.post(API_ENDPOINT.pushPayment, PaymentUpdate, { responseType: 'text' })
+          .subscribe(paymentResponse => {
+            this.toastService.success('✅ Cập nhật thông tin thanh toán lương thành công:' + paymentResponse);
+            
+          });
+
         } else {
           this.toastService.error('❌ Lỗi khi gửi thông báo lương:'+ response);
         }

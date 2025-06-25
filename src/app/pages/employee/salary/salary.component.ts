@@ -1,5 +1,7 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
 import { SalaryService } from 'src/app/services/salary.service';
 
 interface SalaryInfo {
@@ -910,6 +912,7 @@ export class SalaryComponent implements OnInit, AfterViewInit {
   };
 
   constructor(
+    private http: HttpClient,
     private salaryService: SalaryService,
     private cdr: ChangeDetectorRef
   ) { }
@@ -1034,15 +1037,12 @@ export class SalaryComponent implements OnInit, AfterViewInit {
     
     this.salaryService.getSalaryPayments(this.baseId).subscribe({
       next: (data) => {
-        console.log('Salary payments response:', data);
         
         if (data && Array.isArray(data)) {
-          // Process payment data to ensure all required fields are available
           this.salaryPayments = data.map(payment => {
-            // If the API doesn't provide these fields, calculate them based on available data
             const baseSalary = payment.baseSalary || (this.salaryInfo?.salaryBase?.baseSalary || 0);
             const bonusAmount = payment.bonusAmount || this.totalBonuses;
-            const deductionAmount = payment.deductionAmount ;//|| this.totalDeductions;
+            const deductionAmount = payment.deductionAmount ;
             const adjustmentAmount = payment.adjustmentAmount || 0;
             
             return {
@@ -1053,7 +1053,7 @@ export class SalaryComponent implements OnInit, AfterViewInit {
               adjustmentAmount
             };
           });
-          
+          console.log('Processed salary payments:', this.salaryPayments);
           this.updatePaymentsChart();
           this.updateCharts();
         } else {
@@ -1476,5 +1476,32 @@ export class SalaryComponent implements OnInit, AfterViewInit {
     
     const baseSalary = this.salaryInfo.salaryBase.baseSalary || 0;
     return (baseSalary * percentage) / 100;
+  }
+
+  ConfirmPayment(paymentId : string): void {
+    if (!paymentId) {
+      console.error('Invalid payment ID');
+      return;
+    }
+    const  param = new HttpParams()
+    .set('BaseId', paymentId)
+    .set('status', 'Confirmed');
+    this.isLoading = true;
+
+    this.http.post(API_ENDPOINT.updatePaymentStatus, null, {
+      params: param,
+      responseType: 'text'
+    }).subscribe({
+      next: (response) => {
+        console.log('Payment confirmed:', response);
+        this.loadSalaryPayments(); // Reload payments after confirmation
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error confirming payment:', error);
+        this.error = 'Không thể xác nhận thanh toán';
+        this.isLoading = false;
+      }
+    });
   }
 } 
