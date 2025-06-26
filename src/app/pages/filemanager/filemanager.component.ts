@@ -88,12 +88,14 @@ export class FilemanagerComponent implements OnInit {
     this.loadDepartmentFiles();
   }
 
-  searchFiles() {
-    const keyword = this.searchTerm.toLowerCase();
-    this.filteredFiles = this.files.filter(f =>
-      (f.MediaUrl || '').toLowerCase().includes(keyword)
-    );
-  }
+searchFiles() {
+  const keyword = this.searchTerm.toLowerCase();
+  console.log('>>>>>>>>> keyword', keyword);
+  this.filteredFiles = this.files.filter(f =>
+    (f.name?.toLowerCase().includes(keyword) || f.MediaUrl?.toLowerCase().includes(keyword))
+  );
+}
+
 
   loadFiles(folder: { key: string; label: string }) {
     this.selectedKey = folder.key;
@@ -156,7 +158,7 @@ loadEmployeeMedia() {
   const folderMap = {
     employeeavatarprofile: 'EmployeeAvatarProfile',
     employeecontracts: 'EmployeeContracts',
-    identitycard: 'IdentityCard',
+    identitycard: 'EmployeeMedia/IdentityCard',
     employeeprofile: 'EmployeeProfile'
   };
 
@@ -165,6 +167,7 @@ loadEmployeeMedia() {
 
   const requests = Object.entries(folderMap).map(([key, path]) =>
     this.http.get<any[]>(`${baseUrl}/${path}`).toPromise().then(files => {
+      console.log('>>>>>>>>> file', files);
       this.groupedFiles[key] = (files || []).map(file => ({
         ...file,
         folder: key,
@@ -217,10 +220,12 @@ private recalculateUsedStorage() {
   for (const files of Object.values(this.groupedFiles)) {
     for (const file of files) {
       if (file.size && typeof file.size === 'number') {
+        console.log('>>>>>>>>> file size', file.size);
         totalBytes += file.size;
       }
     }
   }
+  console.log('>>>>>>>>> totalBytes', totalBytes);
 
   this.usedStorage = +(totalBytes / (1024 ** 3)).toFixed(2);
   const percent = (this.usedStorage / this.totalStorage) * 100;
