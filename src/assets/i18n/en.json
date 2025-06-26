@@ -116,6 +116,10 @@
     "CALENDAR": {
       "TEXT": "Lịch làm việc"
     },
+    
+    "PERFORMANCE" : {
+      "TEXT" : "Hiệu suất nhân viên"
+    },
     "CHAT": {
       "TEXT": "Chat",
       "BADGE": "New"

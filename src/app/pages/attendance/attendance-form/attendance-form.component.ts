@@ -197,7 +197,7 @@ export class AttendanceFormComponent implements OnInit {
       });
     }
   }
- formatTime(timeStr: string, dateStr: string): string {
+ /*formatTime(timeStr: string, dateStr: string): string {
     const [time, modifier] = timeStr.split(' ');
     let [hours, minutes] = time.split(':').map(Number);
   
@@ -216,7 +216,24 @@ export class AttendanceFormComponent implements OnInit {
     const ss = '00';
   
     return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
-  }
+  }*/
+ formatTime(timeStr: string, date: Date): string {
+  const [hoursStr, minutesStr] = timeStr.split(':');
+  const hours = Number(hoursStr);
+  const minutes = Number(minutesStr);
+
+  const resultDate = new Date(date);
+  resultDate.setHours(hours, minutes, 0, 0);
+
+  const yyyy = resultDate.getFullYear();
+  const mm = (resultDate.getMonth() + 1).toString().padStart(2, '0');
+  const dd = resultDate.getDate().toString().padStart(2, '0');
+  const hh = resultDate.getHours().toString().padStart(2, '0');
+  const min = resultDate.getMinutes().toString().padStart(2, '0');
+  const ss = '00';
+
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+}
   
   onCancel(): void {
     this.dialogRef.close();

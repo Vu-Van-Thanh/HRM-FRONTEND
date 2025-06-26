@@ -17,6 +17,11 @@
                 "CONTRACT": "Hợp đồng lao động"
             }
         },
+         "PERFORMANCE" : {
+            "TEXT" : "Hiệu suất nhân viên",
+            "EMPLOYEE" : "Đánh giá nhân viên",
+            "CREATE" : "Tạo đánh giá"
+        },
         "STATISTIC": {
             "TEXT": "Thống kê",
             "DASHBOARD": "Thống kê nhân sự"

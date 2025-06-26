@@ -5,6 +5,7 @@ import { PersonalInfoComponent } from './personal-info/personal-info.component';
 import { SalaryComponent } from './salary/salary.component';
 import { ContractComponent } from './contract/contract.component';
 import { NewsComponent } from './news/news.component';
+import { CreateCriteriaComponent } from './create-criteria/createcriteria.component';
 
 const routes: Routes = [
   {
@@ -30,6 +31,10 @@ const routes: Routes = [
   {
     path: 'news',
     component: NewsComponent
+  },
+  {
+    path: 'performance/create-criteria',
+    component: CreateCriteriaComponent
   }
 ];
 

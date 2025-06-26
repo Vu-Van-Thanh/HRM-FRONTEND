@@ -307,6 +307,25 @@ export const MENU: MenuItem[] = [
         ]
     },
     {
+        id : 46,
+        label : 'MENUITEMS.PERFORMANCE.TEXT',
+        icon:'bx-pulse',
+        subItems: [
+            {
+                id: 200,
+                label: 'MENUITEMS.PERFORMANCE.EMPLOYEE',
+                link: 'employee/performance/employee',
+                parentId: 46
+            },
+            {
+                id: 201,
+                label: 'MENUITEMS.PERFORMANCE.CREATE',
+                link: 'employee/performance/create-criteria',
+                parentId: 46
+            }
+        ]
+    },
+    {
         id: 47,
         label: 'MENUITEMS.TASKS.TEXT',
         icon: 'bx-task',
