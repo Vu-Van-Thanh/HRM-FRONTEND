@@ -212,7 +212,9 @@ editEvaluation(evaluation: EvaluationEmployee): void {
     data: { 
       criterias: mappedCriterias,
       evaluatorName: evaluation.evaluatorName,
-      evaluation : evaluation }
+      evaluation : evaluation,
+      tab: this.selectedTabIndex
+     }
   });
 }
 

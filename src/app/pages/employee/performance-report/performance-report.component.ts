@@ -19,7 +19,7 @@ export class PerformanceReportComponent {
     private toastService: ToastService,
     private http: HttpClient,
     public dialogRef: MatDialogRef<PerformanceReportComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { criterias: EvaluationCriteria[], evaluatorName: string, evaluation? :EvaluationEmployee  }
+    @Inject(MAT_DIALOG_DATA) public data: { criterias: EvaluationCriteria[], evaluatorName: string, evaluation? :EvaluationEmployee, tab? : number }
   ) {
     this.groupCriteriasByCategory();
   }
