@@ -14,12 +14,13 @@ export class PerformanceReportComponent {
 
   constructor(
     public dialogRef: MatDialogRef<PerformanceReportComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { criterias: EvaluationCriteria[] }
+    @Inject(MAT_DIALOG_DATA) public data: { criterias: EvaluationCriteria[], evaluatorName: string  }
   ) {
     this.groupCriteriasByCategory();
   }
 
   groupCriteriasByCategory(): void {
+    console.log('Criterias:', this.data.criterias);
     for (let c of this.data.criterias) {
       if (!this.groupedCriterias[c.category]) {
         this.groupedCriterias[c.category] = [];
@@ -27,6 +28,29 @@ export class PerformanceReportComponent {
       this.groupedCriterias[c.category].push(c);
     }
   }
+confirm(): void {
+  const allCriterias = Object.values(this.groupedCriterias).flat();
+
+  console.log('Criteria trước khi chuyển đổi : ', allCriterias);
+  const detailJson: Record<string, number> = {};
+  const detailJsonManager: Record<string, number> = {};
+
+  for (const criterion of allCriterias) {
+    if (criterion.criterionID) {
+      if (criterion.selfScore != null) {
+        detailJson[criterion.criterionID] = +criterion.selfScore;
+      }
+      if (criterion.managerScore != null) {
+        detailJsonManager[criterion.criterionID] = +criterion.managerScore;
+      }
+    }
+  }
+
+  console.log('Detail JSON:', detailJson);
+  console.log('Detail JSON Manager:', detailJsonManager);
+
+}
+
 
   close(): void {
     this.dialogRef.close();

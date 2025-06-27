@@ -74,4 +74,6 @@ export const API_ENDPOINT = {
    loadAllCriterias : 'https://localhost:7214/EvaluationCriterion',
    addCriterias : 'https://localhost:7214/EvaluationCriterion',
    addEvaluationEmployee : 'https://localhost:7214/EmployeeEvaluation',
+   getAllEvaluationByEmployee : 'https://localhost:7214/EmployeeEvaluation/personal/{employeeId}',
+   getAllEvaluationByManager : 'https://localhost:7214/EmployeeEvaluation/criterior/{employeeId}'
 };

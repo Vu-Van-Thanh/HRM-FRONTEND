@@ -21,6 +21,45 @@
     </div>
 
     <p>Hiển thị tất cả đánh giá theo kỳ: {{ selectedPeriodAll }}</p>
+    <!-- Dưới phần p trong tab "Tất cả đánh giá" -->
+<mat-table [dataSource]="employeesEvaluations" class="mat-elevation-z2" *ngIf="employeesEvaluations?.length > 0">
+  <ng-container matColumnDef="employeeID">
+    <mat-header-cell *matHeaderCellDef> Mã nhân viên </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.employeeID }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="evaluationDate">
+    <mat-header-cell *matHeaderCellDef> Ngày đánh giá </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.evaluationDate | date:'shortDate' }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="totalScore">
+    <mat-header-cell *matHeaderCellDef> Tổng điểm </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.totalScore }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="periodName">
+    <mat-header-cell *matHeaderCellDef> Kỳ đánh giá </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.periodName }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="evaluatorId">
+    <mat-header-cell *matHeaderCellDef> Người đánh giá </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.evaluatorId }} </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  <ng-container matColumnDef="actions">
+  <mat-header-cell *matHeaderCellDef> Điều chỉnh </mat-header-cell>
+  <mat-cell *matCellDef="let element">
+    <button mat-icon-button color="primary" (click)="editEvaluation(element)">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </mat-cell>
+</ng-container>
+</mat-table>
+
   </mat-tab>
 
   <mat-tab label="Đánh giá của tôi">
@@ -35,6 +74,45 @@
     </div>
 
     <p>Hiển thị đánh giá của bạn trong kỳ: {{ selectedPeriodMine }}</p>
+    <!-- Dưới phần p trong tab "Đánh giá của tôi" -->
+<mat-table [dataSource]="myEvaluations" class="mat-elevation-z2" *ngIf="myEvaluations?.length > 0">
+  <ng-container matColumnDef="employeeID">
+    <mat-header-cell *matHeaderCellDef> Mã nhân viên </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.employeeID }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="evaluationDate">
+    <mat-header-cell *matHeaderCellDef> Ngày đánh giá </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.evaluationDate | date:'shortDate' }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="totalScore">
+    <mat-header-cell *matHeaderCellDef> Tổng điểm </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.totalScore }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="periodName">
+    <mat-header-cell *matHeaderCellDef> Kỳ đánh giá </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.periodName }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="evaluatorId">
+    <mat-header-cell *matHeaderCellDef> Người đánh giá </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{ element.evaluatorId }} </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  <ng-container matColumnDef="actions">
+  <mat-header-cell *matHeaderCellDef> Điều chỉnh </mat-header-cell>
+  <mat-cell *matCellDef="let element">
+    <button mat-icon-button color="primary" (click)="editEvaluation(element)">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </mat-cell>
+</ng-container>
+</mat-table>
+
   </mat-tab>
 </mat-tab-group>
 

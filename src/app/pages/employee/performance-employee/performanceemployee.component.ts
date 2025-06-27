@@ -9,6 +9,19 @@ export interface EvaluationPeriod {
   startDate: Date;
   endDate: Date;
 }
+export interface EvaluationEmployee {
+  id : string;
+  evaluatorId : string;
+  employeeID : string;
+  evaluationDate : Date;
+  periodId : string;
+  totalScore : number;
+  detailJson: string; 
+  detailJsonManager: string; 
+  periodName : string;
+  employeeName: string;
+  evaluatorName: string;
+}
 
 export interface EvaluationCriteria {
   criterionID: string;
@@ -28,7 +41,12 @@ export interface EvaluationCriteria {
 export class PerformanceEmployee implements OnInit {
   @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<any>;
   employees: any[] = []; 
+  user : any = null;
   selectedEmployee: any = null;
+  employeesEvaluations: EvaluationEmployee[] = [];
+  myEvaluations: EvaluationEmployee[] = [];
+  displayedColumns: string[] = ['employeeID', 'evaluationDate', 'totalScore', 'periodName', 'evaluatorId', 'actions'];
+
   selectedTabIndex = 0;
   managerId : string | null = null;
   evaluationPeriods: EvaluationPeriod[] = [];
@@ -46,8 +64,10 @@ export class PerformanceEmployee implements OnInit {
     this.loadPeriod();
     this.loadCriterias();
     this.loadEmployees();
-    const user = JSON.parse(localStorage.getItem('currentUserProfile'));
-    this.managerId = user ? user.employeeID : null;
+    this.user = JSON.parse(localStorage.getItem('currentUserProfile'));
+    this.managerId = this.user ? this.user.employeeID : null;
+    this.loadPersonalEvaluation();
+    this.loadManagerEvaluation();
   }
 
   loadEmployees(): void {
@@ -86,6 +106,25 @@ export class PerformanceEmployee implements OnInit {
   loadCriterias(): void {
     this.http.get<EvaluationCriteria[]>(API_ENDPOINT.loadAllCriterias).subscribe({
       next: (data) => (this.allCriterias = data)
+    });
+  }
+  loadPersonalEvaluation(): void {
+    this.http.get<any>(API_ENDPOINT.getAllEvaluationByEmployee.replace('{employeeId}', this.managerId || '')).subscribe({
+      next: (data) => { 
+        console.log('Đánh giá cá nhân:', data);
+        this.myEvaluations = data;
+        
+      }
+    });
+  }
+
+   loadManagerEvaluation(): void {
+    this.http.get<any>(API_ENDPOINT.getAllEvaluationByManager.replace('{employeeId}', this.managerId || '')).subscribe({
+      next: (data) => { 
+        console.log('Đánh giá của quản lý:', data);
+        this.employeesEvaluations = data;
+        
+      }
     });
   }
 
@@ -135,7 +174,8 @@ export class PerformanceEmployee implements OnInit {
   this.dialog.open(PerformanceReportComponent, {
     width: '700px',
     data: {
-      criterias: this.selectedCriterias
+      criterias: this.selectedCriterias,
+      evaluatorName: this.user.firstName + ' ' + this.user.lastName 
     }
   });
 }
@@ -143,4 +183,40 @@ export class PerformanceEmployee implements OnInit {
     console.log('Đã chọn tiêu chí:', this.selectedCriterias);
     this.closeModal();
   }
+
+editEvaluation(evaluation: EvaluationEmployee): void {
+  if (!evaluation || !evaluation.detailJson) return;
+
+  console.log('Chỉnh sửa đánh giá:', evaluation);
+
+  const detailMapRaw: Record<string, number> = JSON.parse(evaluation.detailJson);
+
+  // Convert keys to lowercase để tránh mismatch
+  const detailMap: Record<string, number> = {};
+  Object.keys(detailMapRaw).forEach(k => {
+    detailMap[k.toLowerCase()] = detailMapRaw[k];
+  });
+
+  const mappedCriterias: EvaluationCriteria[] = this.allCriterias
+    .filter(c => detailMap.hasOwnProperty(c.criterionID.toLowerCase()))
+    .map(c => ({
+      ...c,
+      selfScore: detailMap[c.criterionID.toLowerCase()],
+      managerScore: detailMap[c.criterionID.toLowerCase()]
+    }));
+
+  console.log('Mapped Criterias:', mappedCriterias);
+
+  this.dialog.open(PerformanceReportComponent, {
+    width: '700px',
+    data: { criterias: mappedCriterias,evaluatorName: evaluation.evaluatorName }
+  });
+}
+
+
+deleteEvaluation(evaluation: EvaluationEmployee): void {
+  console.log('Xóa đánh giá:', evaluation);
+  // TODO: xác nhận rồi gọi API xóa nếu cần
+}
+
 }
