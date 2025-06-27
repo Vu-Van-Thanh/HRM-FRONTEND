@@ -209,7 +209,10 @@ editEvaluation(evaluation: EvaluationEmployee): void {
 
   this.dialog.open(PerformanceReportComponent, {
     width: '700px',
-    data: { criterias: mappedCriterias,evaluatorName: evaluation.evaluatorName }
+    data: { 
+      criterias: mappedCriterias,
+      evaluatorName: evaluation.evaluatorName,
+      evaluation : evaluation }
   });
 }
 
