@@ -53,6 +53,7 @@ import { SalaryComponent } from './salary/salary.component';
 import { ContractComponent } from './contract/contract.component';
 import { NewsComponent } from './news/news.component';
 import { CreateCriteriaComponent } from './create-criteria/createcriteria.component';
+import { PerformanceEmployee } from './performance-employee/performanceemployee.component';
 @NgModule({
   declarations: [
     EmployeeListComponent,
@@ -63,7 +64,8 @@ import { CreateCriteriaComponent } from './create-criteria/createcriteria.compon
     SalaryComponent,
     ContractComponent,
     NewsComponent,
-    CreateCriteriaComponent 
+    CreateCriteriaComponent,
+    PerformanceEmployee
   ],
   imports: [
     CommonModule,

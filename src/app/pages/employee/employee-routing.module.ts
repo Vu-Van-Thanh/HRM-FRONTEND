@@ -6,6 +6,7 @@ import { SalaryComponent } from './salary/salary.component';
 import { ContractComponent } from './contract/contract.component';
 import { NewsComponent } from './news/news.component';
 import { CreateCriteriaComponent } from './create-criteria/createcriteria.component';
+import { PerformanceEmployee } from './performance-employee/performanceemployee.component';
 
 const routes: Routes = [
   {
@@ -35,7 +36,12 @@ const routes: Routes = [
   {
     path: 'performance/create-criteria',
     component: CreateCriteriaComponent
+  },
+  {
+    path: 'performance/employee',
+    component:PerformanceEmployee,
   }
+
 ];
 
 @NgModule({
