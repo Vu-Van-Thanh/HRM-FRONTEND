@@ -69,5 +69,9 @@ export const API_ENDPOINT = {
    updateUserProfile : "https://localhost:7198/Auth/profile",
    updateAttendance : 'https://localhost:7030/Attendance',
    pushPayment : 'https://localhost:7090/SalaryPayment/ListPayment',
-   updatePaymentStatus : 'https://localhost:7090/SalaryPayment/UpdateStatus'
+   updatePaymentStatus : 'https://localhost:7090/SalaryPayment/UpdateStatus',
+   loadAllPeriod : 'https://localhost:7214/EvaluationPeriod',
+   loadAllCriterias : 'https://localhost:7214/EvaluationCriterion',
+   addCriterias : 'https://localhost:7214/EvaluationCriterion',
+   addEvaluationEmployee : 'https://localhost:7214/EmployeeEvaluation',
 };

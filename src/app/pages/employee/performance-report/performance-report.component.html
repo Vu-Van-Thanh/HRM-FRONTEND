@@ -1,0 +1,36 @@
+<div class="p-4">
+  <h2 class="text-center">CÔNG TY HRM-THANHVU</h2>
+  <h3 class="text-center mb-4">BÁO CÁO ĐÁNH GIÁ HIỆU SUẤT</h3>
+
+  <p><strong>Ngày lập báo cáo:</strong> {{ today | date:'dd/MM/yyyy' }}</p>
+  <p><strong>Người đánh giá:</strong> (Chưa nhập)</p>
+
+  <div *ngFor="let category of objectKeys(groupedCriterias)" class="mt-4">
+    <h4>{{ category }}</h4>
+
+    <table mat-table [dataSource]="groupedCriterias[category]" class="mat-elevation-z2" style="width: 100%;">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Tiêu chí</th>
+        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="selfScore">
+        <th mat-header-cell *matHeaderCellDef>Điểm tự chấm</th>
+        <td mat-cell *matCellDef="let element">{{ element.selfScore ?? '-' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="managerScore">
+        <th mat-header-cell *matHeaderCellDef>Điểm QL chấm</th>
+        <td mat-cell *matCellDef="let element">{{ element.managerScore ?? '-' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['name', 'selfScore', 'managerScore']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['name', 'selfScore', 'managerScore']"></tr>
+    </table>
+  </div>
+
+  <div class="text-end mt-4">
+    <button mat-button (click)="close()">Đóng</button>
+  </div>
+</div>
