@@ -34,7 +34,7 @@ export class PerformanceReportComponent {
       this.groupedCriterias[c.category].push(c);
     }
   }
-confirm(): void {
+confirm(IsConfirm : boolean = false): void {
   const allCriterias = Object.values(this.groupedCriterias).flat();
   console.log('Criteria trước khi chuyển đổi : ', allCriterias);
   const detailJson: Record<string, number> = {};
@@ -58,7 +58,8 @@ confirm(): void {
     EvaluationDate : this.data.evaluation?.evaluationDate || new Date(),
     TotalScore : this.CalculateTotalScore(),
     DetailJson : JSON.stringify(detailJson),
-    DetailJsonManager : JSON.stringify(detailJsonManager)
+    DetailJsonManager : JSON.stringify(detailJsonManager),
+    Status : IsConfirm ? 'CONFIRMED' : 'DRAFT',
   }
   console.log('Score', this.CalculateTotalScore());
   this.http.put<string>(API_ENDPOINT.updateEvaluation, body).subscribe({
@@ -93,8 +94,6 @@ CalculateTotalScore(): number {
   const totalScore = totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
   return +totalScore.toFixed(2); 
 }
-
-
 
 
   close(): void {
