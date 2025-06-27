@@ -61,6 +61,7 @@ confirm(IsConfirm : boolean = false): void {
     DetailJsonManager : JSON.stringify(detailJsonManager),
     Status : IsConfirm ? 'CONFIRMED' : 'DRAFT',
   }
+  console.log('Body gửi lên:', body);
   console.log('Score', this.CalculateTotalScore());
   this.http.put<string>(API_ENDPOINT.updateEvaluation, body).subscribe({
     next: (response) => { 
