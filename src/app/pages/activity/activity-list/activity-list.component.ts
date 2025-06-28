@@ -316,7 +316,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
                       taskName: taskName,
                       reason: reason,
                       estimatedHours: estimatedHours,
-                      activityType: activity.activityId || activity.activityType
+                      activityType: this.activityTypes.find(type => type.activityId === activity.activityId)?.activityType || activity.activityId
                     };
                   });
                   this.dataSource.data = mappedActivities;
@@ -351,9 +351,10 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
         if (this.currentUserId) params.EmployeeIdList = this.currentUserId;
         if (formValues.activityType) params.ActivityId = formValues.activityType;
         if (formValues.activityStatus) params.Status = formValues.activityStatus;
-        if (formValues.startTime) params.StartDate = new Date(formValues.startTime).toISOString();
-        if (formValues.endTime) params.EndDate = new Date(formValues.endTime).toISOString();
-
+        if (formValues.selectedStartDate) params.StartDate = new Date(formValues.selectedStartDate).toISOString();
+        if (formValues.selectedEndDate) params.EndDate = new Date(formValues.selectedEndDate).toISOString();
+        
+        console.log('📁 PARAMS BEING SENT (personal):', params);
         this.activityService.getActivities(params).subscribe({
           next: (activities) => {
             // Map dữ liệu nhận được để hiển thị lên giao diện
@@ -403,7 +404,7 @@ export class ActivityListComponent implements OnInit, AfterViewInit {
                 taskName: taskName,
                 reason: reason,
                 estimatedHours: estimatedHours,
-                activityType: activity.activityId || activity.activityType
+                activityType: this.activityTypes.find(type => type.activityId === activity.activityId)?.activityType || activity.activityId
               };
             });
             

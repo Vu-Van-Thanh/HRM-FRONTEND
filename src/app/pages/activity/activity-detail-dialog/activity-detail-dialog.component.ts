@@ -18,6 +18,7 @@ export class ActivityDetailDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { activity: Activity, isReject?: boolean },
     private fb: FormBuilder
   ) {
+    console.log('Activity Detail Dialog Data:', data);
     this.activity = data.activity;
     this.isReject = data.isReject || false;
 

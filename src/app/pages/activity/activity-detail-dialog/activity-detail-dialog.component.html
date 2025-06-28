@@ -25,9 +25,9 @@
           <div class="info-item">
             <label>Loại hoạt động:</label>
             <span>
-              {{activity.activityType === 'LEAVE' ? 'Nghỉ phép' :
-                activity.activityType === 'REMOTE' ? 'Làm việc từ xa' :
-                activity.activityType === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
+              {{activity.activityType?.toUpperCase() === 'LEAVE' ? 'Nghỉ phép' :
+                activity.activityType?.toUpperCase() === 'REMOTE' ? 'Làm việc từ xa' :
+                activity.activityType?.toUpperCase() === 'OVERTIME' ? 'Tăng ca' : 'Công tác'}}
             </span>
           </div>
           <div class="info-item">
