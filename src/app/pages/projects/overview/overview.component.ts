@@ -22,7 +22,7 @@ export class OverviewComponent implements OnInit {
   // bread crumb items
   breadCrumbItems: Array<{}>;
   overviewBarChart: ChartType;
-  
+  selectedTab: string = 'all';
   // Project data
   projectId: string;
   project: Project;
@@ -69,6 +69,7 @@ export class OverviewComponent implements OnInit {
     
     this.projectService.getProjectById(projectId).pipe(
       switchMap(project => {
+        console.log('Project data:', project);
         this.project = project;
         this.calculateTaskStatistics();
         this.updateChartData();
@@ -168,6 +169,15 @@ export class OverviewComponent implements OnInit {
     return this.project.tasks.filter(
       task => task.priority?.toLowerCase() === priority.toLowerCase()
     );
+  }
+
+  getTasksByStatus(status: string): Task[] {
+    if (!this.project || !this.project.tasks) return [];
+    
+    return this.project.tasks.filter(
+      task => task.status?.toLowerCase() === status.toLowerCase()
+    );
+    
   }
   
   /**

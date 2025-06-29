@@ -279,6 +279,7 @@ export class CalendarComponent implements OnInit {
    */
   openModal(event?: any) {
     this.newEventDate = event;
+    console.log('Open Event Date', this.newEventDate);
     this.modalRef = this.modalService.show(this.modalShow);
   }
 

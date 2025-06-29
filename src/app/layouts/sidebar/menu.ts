@@ -219,7 +219,7 @@ export const MENU: MenuItem[] = [
                 link: '/email/read/1',
                 parentId: 31
             },
-            {
+            /*{
                 id: 34,
                 label: 'MENUITEMS.EMAIL.LIST.TEMPLATE.TEXT',
                 badge: {
@@ -247,7 +247,7 @@ export const MENU: MenuItem[] = [
                         parentId:31
                     }
                 ]
-            },
+            },*/
             {
                 id: 38,
                 label: 'MENUITEMS.EMAIL.LIST.GENERATE',

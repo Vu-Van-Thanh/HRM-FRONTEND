@@ -15,6 +15,7 @@ export class ProjectlistComponent implements OnInit {
   // bread crumb items
   breadCrumbItems: Array<{}>;
   projects: Project[] = [];
+  searchTerm: string = '';    
   page: any = 1;
   isLoading = false;
   
@@ -78,5 +79,23 @@ export class ProjectlistComponent implements OnInit {
     ).length;
     
     return Math.round((completedTasks / project.tasks.length) * 100);
+  }
+
+   get filteredProjects(): Project[] {
+    if (!this.searchTerm.trim()) {
+      return this.projects;
+    }
+    const term = this.searchTerm.toLowerCase();
+    return this.projects.filter(p =>
+      p.name.toLowerCase().includes(term)
+      || (p.description?.toLowerCase().includes(term))
+      || (p.departmentName?.toLowerCase().includes(term))
+    );
+  }
+
+  /** Gọi khi input thay đổi */
+  onSearch(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.searchTerm = input.value;
   }
 }

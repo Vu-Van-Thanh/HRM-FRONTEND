@@ -183,7 +183,7 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
   
   updateEmployeeCountChart(){
     this.http.get<EmployeeCounter>(API_ENDPOINT.getEmployeeTotal).subscribe(data => {
-      console.log(data);
+      console.log("Statistic Employee Data : ",data);
         let employeeByGender = data.employeeGender;
         let employeeByDepartment = data.employeeDepartment;
         let employeeByDepartmentGender = data.employeeByDepartmentAndGender;
@@ -255,6 +255,7 @@ export class HrStatisticsComponent implements OnInit, AfterViewInit {
 
     this.updateworkforceGrowthChart();
     this.UpdatePerformanceChart();
+    this.updateEmployeeSkillChart();
   }
 
   /**

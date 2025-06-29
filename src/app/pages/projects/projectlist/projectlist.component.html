@@ -9,7 +9,7 @@
             <div class="col-sm">
               <div class="search-box me-2 d-inline-block">
                 <div class="position-relative">
-                  <input type="text" class="form-control" autocomplete="off" id="searchTableList" placeholder="Search...">
+                  <input type="text" class="form-control" autocomplete="off" (input)="onSearch($event)"  [value]="searchTerm" id="searchTableList" placeholder="Search...">
                   <i class="bx bx-search-alt search-icon"></i>
                 </div>
               </div>
@@ -54,7 +54,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let project of projects; let i = index">
+                  <tr *ngFor="let project of filteredProjects; let i = index">
                     <td>
                       <div class="avatar-sm">
                         <span class="avatar-title rounded-circle bg-primary text-white font-size-16">

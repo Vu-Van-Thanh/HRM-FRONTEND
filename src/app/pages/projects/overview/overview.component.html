@@ -111,22 +111,26 @@
           <!-- Task tabs -->
           <ul class="nav nav-tabs nav-tabs-custom mb-4">
             <li class="nav-item">
-              <a class="nav-link active" data-bs-toggle="tab" href="#all-tasks">All ({{ totalTasks }})</a>
+              <a class="nav-link" [ngClass]="{'active': selectedTab === 'all'}"
+                (click)="selectedTab = 'all'">All ({{ totalTasks }})</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="tab" href="#completed">Completed ({{ completedTasks }})</a>
+              <a class="nav-link" [ngClass]="{'active': selectedTab === 'completed'}"
+                (click)="selectedTab = 'completed'">Completed ({{ completedTasks }})</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="tab" href="#in-progress">In Progress ({{ inProgressTasks }})</a>
+              <a class="nav-link" [ngClass]="{'active': selectedTab === 'in progress'}"
+                (click)="selectedTab = 'in progress'">In Progress ({{ inProgressTasks }})</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="tab" href="#pending">Pending ({{ pendingTasks }})</a>
+              <a class="nav-link" [ngClass]="{'active': selectedTab === 'pending'}"
+                (click)="selectedTab = 'pending'">Pending ({{ pendingTasks }})</a>
             </li>
           </ul>
           
           <div class="tab-content">
             <!-- All tasks -->
-            <div class="tab-pane active" id="all-tasks">
+            <div id="all-tasks" *ngIf="selectedTab === 'all'">
               <div class="table-responsive">
                 <table class="table table-nowrap align-middle table-hover mb-0">
                   <thead>
@@ -168,7 +172,7 @@
             </div>
             
             <!-- Completed tasks -->
-            <div class="tab-pane" id="completed">
+            <div id="completed" *ngIf="selectedTab === 'completed'">
               <div class="table-responsive">
                 <table class="table table-nowrap align-middle table-hover mb-0">
                   <thead>
@@ -180,7 +184,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let task of getTasksByPriority('completed')">
+                    <tr *ngFor="let task of getTasksByStatus('completed')">
                       <td>
                         <h5 class="text-truncate font-size-14 mb-1">
                           {{ task.title }}
@@ -199,14 +203,14 @@
                 </table>
                 
                 <!-- No completed tasks message -->
-                <div *ngIf="getTasksByPriority('completed').length === 0" class="text-center py-4">
+                <div *ngIf="getTasksByStatus('completed').length === 0" class="text-center py-4">
                   <p class="text-muted">No completed tasks found</p>
                 </div>
               </div>
             </div>
             
             <!-- In-progress tasks -->
-            <div class="tab-pane" id="in-progress">
+            <div id="in progress" *ngIf="selectedTab === 'in progress'">
               <div class="table-responsive">
                 <table class="table table-nowrap align-middle table-hover mb-0">
                   <thead>
@@ -218,7 +222,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let task of getTasksByPriority('in progress')">
+                    <tr *ngFor="let task of getTasksByStatus('in progress')">
                       <td>
                         <h5 class="text-truncate font-size-14 mb-1">
                           {{ task.title }}
@@ -237,14 +241,14 @@
                 </table>
                 
                 <!-- No in-progress tasks message -->
-                <div *ngIf="getTasksByPriority('in progress').length === 0" class="text-center py-4">
+                <div *ngIf="getTasksByStatus('in progress').length === 0" class="text-center py-4">
                   <p class="text-muted">No in-progress tasks found</p>
                 </div>
               </div>
             </div>
             
             <!-- Pending tasks -->
-            <div class="tab-pane" id="pending">
+            <div id="pending" *ngIf="selectedTab === 'pending'">
               <div class="table-responsive">
                 <table class="table table-nowrap align-middle table-hover mb-0">
                   <thead>
@@ -256,7 +260,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let task of getTasksByPriority('pending')">
+                    <tr *ngFor="let task of getTasksByStatus('pending')">
                       <td>
                         <h5 class="text-truncate font-size-14 mb-1">
                           {{ task.title }}
@@ -275,7 +279,7 @@
                 </table>
                 
                 <!-- No pending tasks message -->
-                <div *ngIf="getTasksByPriority('pending').length === 0" class="text-center py-4">
+                <div *ngIf="getTasksByStatus('pending').length === 0" class="text-center py-4">
                   <p class="text-muted">No pending tasks found</p>
                 </div>
               </div>
