@@ -65,7 +65,7 @@ export class AttendanceFormComponent implements OnInit {
       this.isEditMode = true;
       // Populate form with existing data
       this.attendanceForm.patchValue({
-        project: data.projects || data.projectName,
+        project: data.projectId,
         activity: data.activity,
         description: data.description,
         date: data.date ? new Date(data.date) : new Date(),

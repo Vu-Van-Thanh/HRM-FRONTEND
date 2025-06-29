@@ -776,6 +776,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
         })
       )
       .subscribe(timesheets => {
+        console.log('@@@@@Mapped approval timesheets:', timesheets);
         this.approvalDataSource.data = timesheets;
       });
   }
@@ -821,6 +822,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
         total: parseFloat(hours.toFixed(2)),
         customer: 'N/A',
         project: attendance.projectId,
+        projectId: attendance.projectId,
         projectName: projectName,
         activity: attendance.position || attendance.activityId || 'N/A',
         description: attendance.description,
