@@ -61,8 +61,8 @@
               <mat-label>Status</mat-label>
               <mat-select formControlName="status">
                 <mat-option [value]="">All Statuses</mat-option>
-                <mat-option *ngFor="let status of statusOptions" [value]="status">
-                  {{status}}
+                <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                  {{status.label}}
                 </mat-option>
               </mat-select>
             </mat-form-field>

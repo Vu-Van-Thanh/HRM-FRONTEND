@@ -218,7 +218,11 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
 
   // Add this property for the personal tab status filter
   selectedPersonalStatus: string | null = null;
-  statusOptions: string[] = ['Chờ duyệt', 'Đã duyệt', 'Từ chối'];
+  statusOptions: { value: string, label: string }[] = [
+  { value: 'PENDING', label: 'Chờ duyệt' },
+  { value: 'APPROVED', label: 'Đã duyệt' },
+  { value: 'REJECTED', label: 'Từ chối' }
+];
 
   // Add property for manager's employees
   managerEmployeeIds: string[] = [];
@@ -554,6 +558,8 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
     } else if (this.selectedPersonalStatus) {
       filterParams.Status = this.selectedPersonalStatus;
     }
+
+    console.log('Attendance filter params:', filterParams);
     
     this.http.get<AttendanceResponse[]>(API_ENDPOINT.getAllAttendace, { params: filterParams as any })
       .pipe(
@@ -754,7 +760,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       attendanceParams.Status = formValues.status.toUpperCase();
     }
     
-    console.log('attendanceParams', attendanceParams);
+    console.log('attendanceParams for approve', attendanceParams);
     
     // Fetch attendance data
     this.http.get<AttendanceResponse[]>(API_ENDPOINT.getAllAttendace, { params: attendanceParams as any })
