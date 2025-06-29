@@ -47,6 +47,7 @@ export class AttendanceFormComponent implements OnInit {
     private http: HttpClient,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
+    console.log('Dialog data:', data);
     this.attendanceForm = this.fb.group({
       project: ['', Validators.required],
       activity: ['', Validators.required],
@@ -64,7 +65,7 @@ export class AttendanceFormComponent implements OnInit {
       this.isEditMode = true;
       // Populate form with existing data
       this.attendanceForm.patchValue({
-        project: data.project || data.projectName,
+        project: data.projects || data.projectName,
         activity: data.activity,
         description: data.description,
         date: data.date ? new Date(data.date) : new Date(),
@@ -154,6 +155,7 @@ export class AttendanceFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+
     if (this.attendanceForm.valid) {
       // Find the project by name to get the projectId
      
@@ -176,10 +178,11 @@ export class AttendanceFormComponent implements OnInit {
       console.log('Project Name:', this.attendanceForm.get('project')?.value);
       console.log('Project ID:', selectedProject?.projectId);
       const attendance = {
+        AttendanceId : this.isEditMode ? this.data.code : '',
         EmployeeId: currentUserId,
-        projectId: selectedProject?.projectId || '',
-        position: formValue.activity,
-        description: formValue.description,
+        ProjectId: this.attendanceForm.get('project')?.value|| '',
+        Position: formValue.activity,
+        Description: formValue.description,
         AttendanceDate: formValue.date,
         Starttime: this.formatTime(formValue.checkIn, formValue.date),
         Endtime: this.formatTime(formValue.checkOut, formValue.date),

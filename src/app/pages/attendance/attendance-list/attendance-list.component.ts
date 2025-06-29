@@ -857,6 +857,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       width: '800px',
       data: row
     });
+    console.log('Opening timesheet form with data:', row);
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -938,10 +939,19 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
   }
 
   rejectTimesheet(row: ApprovalTimesheet): void {
-    // TODO: Call API to reject timesheet
-    row.status = 'rejected';
-    row.approved = 0;
-    this.toastService.success('Đã từ chối khai công');
+     const body =  {
+      AttendanceId : row.code,
+      EmployeeId : row.employeeId,
+      Status : 'REJECTED'
+    }
+    // TODO: Call API to approve timesheet
+    console.log('Attendance : ' ,body);
+    this.http.post(API_ENDPOINT.updateAttendance,body)
+    .subscribe(timesheets => {
+        row.status = 'rejected';
+        row.approved = 0;
+        this.toastService.success('Đã từ chối khai công');
+      });
   }
 
   viewTimesheetDetail(row: ApprovalTimesheet): void {
@@ -950,7 +960,7 @@ export class AttendanceListComponent implements OnInit, AfterViewInit {
       data: row,
       disableClose: true
     });
-
+    console.log('Opening timesheet form with data:', row);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.toastService.success('Đã cập nhật khai công thành công');
