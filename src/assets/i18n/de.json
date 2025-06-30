@@ -7,13 +7,13 @@
       "VIEW_ALL": "Alle anzeigen",
       "LOAD_MORE": "Mehr sehen..",
       "FIRST": {
-        "TITLE": "Ihre Bestellung wird aufgegeben",
-        "TEXT": "Wenn mehrere Sprachen die Grammatik verschmelzen",
+        "TITLE": "Thông báo demo",
+        "TEXT": "Test thông báo",
         "TIME": "Vor 3 Minuten"
       },
       "SECOND": {
         "TITLE": "James Lemire",
-        "TEXT": "Es wird wie vereinfachtes Englisch erscheinen.",
+        "TEXT": "Test thông báo 2",
         "TIME": "Vor 1 Stunde"
       },
       "THIRD": {

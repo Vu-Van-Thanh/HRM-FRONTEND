@@ -6,7 +6,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Task } from './list.model';
 import { TaskService } from '../task.service';
 import { ProjectService } from '../../projects/project.service';
+import { API_ENDPOINT } from 'src/app/core/constants/endpoint';
+import { HttpClient } from '@angular/common/http';
 
+export interface EmployeeName {
+  name : string;
+  employeeId : string;
+}
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
@@ -22,7 +28,7 @@ export class ListComponent implements OnInit {
   modalRef?: BsModalRef;
   submitted = false;
   formData: UntypedFormGroup;
-  
+  employeeNames: EmployeeName[] = [];
   // Chart data
   taskStatusChart: any;
   taskPriorityChart: any;
@@ -54,12 +60,13 @@ export class ListComponent implements OnInit {
     private taskService: TaskService,
     private projectService: ProjectService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
     this.breadCrumbItems = [{ label: 'Tasks' }, { label: 'All Tasks', active: true }];
-
+    this.loadEmployeeName();
     this.formData = this.formBuilder.group({
       name: ['', [Validators.required]],
       file: new UntypedFormControl('', [Validators.required]),
@@ -76,6 +83,24 @@ export class ListComponent implements OnInit {
       console.log('Project ID from query params:', this.projectId);
       this.loadTasks();
     });
+  }
+
+  loadEmployeeName() {
+    this.http.get<EmployeeName[]>(API_ENDPOINT.getAllName).subscribe({
+      next: (data) => {
+        console.log('Employee names loaded:', data);
+        this.employeeNames = data;
+        // Process employee names if needed
+      },
+      error: (error) => {
+        console.error('Error loading employee names:', error);
+      }
+    });
+  }
+
+  getEmployeeNameById(employeeId: string): string {
+    const employee = this.employeeNames.find(emp => emp.employeeId === employeeId);
+    return employee ? employee.name : '';
   }
 
   /**
@@ -245,13 +270,13 @@ export class ListComponent implements OnInit {
     }
     
     // Filter tasks by status - case insensitive
-    this.inprogressTasks = this.tasks.filter(task => 
-      task.status && task.status.toLowerCase() === 'in progress'
+    this.inprogressTasks = this.tasks.filter(task =>
+      task.status && ['in progress', 'inprogress'].includes(task.status.toLowerCase())
     );
     
     this.upcomingTasks = this.tasks.filter(task => 
       task.status && (task.status.toLowerCase() === 'pending' || 
-                    task.status.toLowerCase() === 'new')
+                    task.status.toLowerCase() === 'to do')
     );
     
     this.completedTasks = this.tasks.filter(task => 
@@ -272,6 +297,7 @@ export class ListComponent implements OnInit {
     
     // Count overdue tasks
     const today = new Date();
+    console.log('calculateTaskStatistics : ', this.tasks);
     this.overdueTasksCount = this.tasks.filter(task => 
       task.status && 
       task.status.toLowerCase() !== 'completed' && 

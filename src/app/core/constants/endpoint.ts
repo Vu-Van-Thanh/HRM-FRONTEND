@@ -77,4 +77,5 @@ export const API_ENDPOINT = {
    getAllEvaluationByEmployee : 'https://localhost:7214/EmployeeEvaluation/personal/{employeeId}',
    getAllEvaluationByManager : 'https://localhost:7214/EmployeeEvaluation/criterior/{employeeId}',
    updateEvaluation : 'https://localhost:7214/EmployeeEvaluation',
+   getAllName : 'https://localhost:7214/Employee/employeeName'
 };

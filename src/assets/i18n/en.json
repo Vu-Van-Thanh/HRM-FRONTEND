@@ -7,13 +7,13 @@
       "VIEW_ALL": "View All",
       "LOAD_MORE": "View More..",
       "FIRST": {
-        "TITLE": "Your order is placed",
-        "TEXT": "If several languages coalesce the grammar",
+        "TITLE": "Thông báo 1",
+        "TEXT": "Test thông báo 1",
         "TIME": "3 min ago"
       },
       "SECOND": {
-        "TITLE": "James Lemire",
-        "TEXT": "It will seem like simplified English.",
+        "TITLE": "Thông báo 2",
+        "TEXT": "Test thông báo 2",
         "TIME": "1 hours ago"
       },
       "THIRD": {

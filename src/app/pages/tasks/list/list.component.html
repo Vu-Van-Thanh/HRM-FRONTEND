@@ -269,10 +269,10 @@
                     <div class="d-flex align-items-center">
                       <div class="avatar-xs me-2">
                         <span class="avatar-title rounded-circle bg-primary text-white font-size-16">
-                          {{ task.assignedToName?.charAt(0) || 'U' }}
+                          {{ getEmployeeNameById(task.assignedTo).charAt(0) || 'U' }}
                         </span>
                       </div>
-                      <span>{{ task.assignedToName || 'Unassigned' }}</span>
+                      <span>{{ getEmployeeNameById(task.assignedTo) || 'Unassigned' }}</span>
                     </div>
                   </td>
                   <td>
