@@ -41,9 +41,9 @@ export class BloglistComponent implements OnInit {
     switch(condition) {
       case 0: return 'Mới';
       case 1: return 'Tốt';
-      case 2: return 'Trung bình';
-      case 3: return 'Cần bảo trì';
-      case 4: return 'Hỏng';
+      case 2: return 'Cần bảo trì';
+      case 3: return 'Hỏng';
+      case 4: return 'Cũ';
       default: return 'Không xác định';
     }
   }
